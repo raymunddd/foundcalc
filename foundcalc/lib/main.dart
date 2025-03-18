@@ -7,6 +7,8 @@ void main() {
 
 
 class MyApp extends StatelessWidget {
+  const MyApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -22,6 +24,8 @@ class MyApp extends StatelessWidget {
 }
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({super.key});
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -225,7 +229,7 @@ class _HomeScreenState extends State<HomeScreen> {
 class AnalysisPage extends StatelessWidget {
   final String title;
 
-  AnalysisPage({required this.title});
+  const AnalysisPage({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -251,7 +255,7 @@ class AnalysisPage extends StatelessWidget {
 class DesignPage extends StatelessWidget {
   final String title;
 
-  DesignPage({required this.title});
+  const DesignPage({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
