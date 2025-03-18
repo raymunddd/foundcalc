@@ -230,7 +230,19 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
-  // You can add state variables and methods here
+  // Controllers for the input fields
+  final TextEditingController _input1Controller = TextEditingController();
+  final TextEditingController _input2Controller = TextEditingController();
+  final TextEditingController _input3Controller = TextEditingController();
+
+  @override
+  void dispose() {
+    // Dispose the controllers when the widget is disposed
+    _input1Controller.dispose();
+    _input2Controller.dispose();
+    _input3Controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -239,16 +251,121 @@ class _AnalysisPageState extends State<AnalysisPage> {
       appBar: AppBar(
         title: Text(
           widget.title,
-          style: TextStyle(color: Colors.white)
+          style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Colors.black,
       ),
-      body: Center(
-        child: Text(
-          'Details for ${widget.title}',
-          style: TextStyle(color: Colors.white, fontSize: 24),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            // Display the form row
+            _buildFormRow(),
+            SizedBox(height: 20), // Add some spacing
+            ElevatedButton(
+              onPressed: () {
+                // Handle form submission
+                String input1 = _input1Controller.text;
+                String input2 = _input2Controller.text;
+                String input3 = _input3Controller.text;
+
+                // You can process the inputs here
+                print('Input 1: $input1');
+                print('Input 2: $input2');
+                print('Input 3: $input3');
+              },
+              child: Text('Submit'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFF1F538D),
+                foregroundColor: Colors.white,
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildFormRow() {
+    return Column(
+      children: [
+        // Row 1
+        Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Text(
+                'Label 1:',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: TextField(
+                controller: _input1Controller,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.grey[800],
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10), // Spacing between rows
+
+        // Row 2
+        Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Text(
+                'Label 2:',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: TextField(
+                controller: _input2Controller,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.grey[800],
+                ),
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 10), // Spacing between rows
+
+        // Row 3
+        Row(
+          children: [
+            Expanded(
+              flex: 1,
+              child: Text(
+                'Label 3:',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+            Expanded(
+              flex: 2,
+              child: TextField(
+                controller: _input3Controller,
+                style: TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.grey[800],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
