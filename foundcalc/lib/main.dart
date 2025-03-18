@@ -182,14 +182,15 @@ class _HomeScreenState extends State<HomeScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   color: Colors.white,
+                  fontWeight: FontWeight.bold, // Add this line to make the text bold
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 10), // Adds spacing between the texts
+              SizedBox(height: 45), // Adds spacing between the texts
               Text(
                 "What would you like to calculate?",
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 20,
                   color: Colors.white,
                 ),
                 textAlign: TextAlign.center,
