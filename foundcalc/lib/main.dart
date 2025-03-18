@@ -4,8 +4,6 @@ void main() {
   runApp(MyApp());
 }
 
-
-
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -222,10 +220,17 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
-class AnalysisPage extends StatelessWidget {
+class AnalysisPage extends StatefulWidget {
   final String title;
 
   AnalysisPage({required this.title});
+
+  @override
+  _AnalysisPageState createState() => _AnalysisPageState();
+}
+
+class _AnalysisPageState extends State<AnalysisPage> {
+  // You can add state variables and methods here
 
   @override
   Widget build(BuildContext context) {
@@ -233,14 +238,14 @@ class AnalysisPage extends StatelessWidget {
       backgroundColor: Color(0xFF212121),
       appBar: AppBar(
         title: Text(
-          title,
+          widget.title,
           style: TextStyle(color: Colors.white)
         ),
         backgroundColor: Colors.black,
       ),
       body: Center(
         child: Text(
-          'Details for $title',
+          'Details for ${widget.title}',
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
       ),
@@ -248,10 +253,17 @@ class AnalysisPage extends StatelessWidget {
   }
 }
 
-class DesignPage extends StatelessWidget {
+class DesignPage extends StatefulWidget {
   final String title;
 
   DesignPage({required this.title});
+
+  @override
+  _DesignPageState createState() => _DesignPageState();
+}
+
+class _DesignPageState extends State<DesignPage> {
+  // You can add state variables and methods here
 
   @override
   Widget build(BuildContext context) {
@@ -259,14 +271,14 @@ class DesignPage extends StatelessWidget {
       backgroundColor: Color(0xFF212121),
       appBar: AppBar(
         title: Text(
-          title,
+          widget.title,
           style: TextStyle(color: Colors.white)
         ),
         backgroundColor: Colors.black,
       ),
       body: Center(
         child: Text(
-          'Details for $title',
+          'Details for ${widget.title}',
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
       ),
