@@ -1,43 +1,70 @@
 import 'package:flutter/material.dart';
+import '../settings/analysis_state.dart';
 
 class AnalysisPage extends StatefulWidget {
   final String title;
+  final AnalysisState state;
+  final Function(AnalysisState) onStateChanged;
 
-  AnalysisPage({required this.title});
+  AnalysisPage({
+    required this.title,
+    required this.state,
+    required this.onStateChanged,
+  });
 
   @override
   _AnalysisPageState createState() => _AnalysisPageState();
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
-  // Controllers for the input fields
-  final TextEditingController _input1Controller = TextEditingController();
-  final TextEditingController _input2Controller = TextEditingController();
-  final TextEditingController _input3Controller = TextEditingController();
+  late TextEditingController _input1Controller;
+  late TextEditingController _input2Controller;
+  late TextEditingController _input3Controller;
 
-  // Dropdown value and options
-  String? _selectedSoilType; // Holds the selected value from the dropdown
-  final List<String> _soilTypes = [
-    'General shear failure',
-    'Local shear failure',
-  ]; // Options for the dropdown
+  @override
+  void initState() {
+    super.initState();
+    // Initialize controllers with saved state
+    _input1Controller = TextEditingController(text: widget.state.depthOfFoundation);
+    _input2Controller = TextEditingController(text: widget.state.waterTableDistance);
+    _input3Controller = TextEditingController(text: widget.state.baseOfFoundation);
+    
+    // Add listeners to update state when text changes
+    _input1Controller.addListener(_updateState);
+    _input2Controller.addListener(_updateState);
+    _input3Controller.addListener(_updateState);
+  }
 
-  // Second dropdown value and options
-  String? _selectedAnotherDropdown; // Holds the selected value from the second dropdown
-  final List<String> _anotherDropdownOptions = [
-    'Strip or continuous',
-    'Square',
-    'Circular',
-  ]; // Options for the second dropdown
+  void _updateState() {
+    setState(() {
+      widget.state.depthOfFoundation = _input1Controller.text;
+      widget.state.waterTableDistance = _input2Controller.text;
+      widget.state.baseOfFoundation = _input3Controller.text;
+      widget.onStateChanged(widget.state);
+    });
+  }
 
   @override
   void dispose() {
-    // Dispose the controllers when the widget is disposed
     _input1Controller.dispose();
     _input2Controller.dispose();
     _input3Controller.dispose();
     super.dispose();
   }
+
+  // Dropdown value and options
+  String? get _selectedSoilType => widget.state.selectedSoilType;
+  final List<String> _soilTypes = [
+    'General shear failure',
+    'Local shear failure',
+  ];
+
+  String? get _selectedFootingType => widget.state.selectedFootingType;
+  final List<String> _footingTypes = [
+    'Strip or continuous',
+    'Square',
+    'Circular',
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -54,22 +81,16 @@ class _AnalysisPageState extends State<AnalysisPage> {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
-            // Display the form row
             _buildFormRow(),
-            SizedBox(height: 20), // Add some spacing
+            SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 // Handle form submission
-                String input1 = _input1Controller.text;
-                String input2 = _input2Controller.text;
-                String input3 = _input3Controller.text;
-                String soilType = _selectedSoilType ?? 'Not selected';
-
-                // You can process the inputs here
-                print('Input 1: $input1');
-                print('Input 2: $input2');
-                print('Input 3: $input3');
-                print('Soil Type: $soilType');
+                print('Depth of Foundation: ${widget.state.depthOfFoundation}');
+                print('Water Table Distance: ${widget.state.waterTableDistance}');
+                print('Base of Foundation: ${widget.state.baseOfFoundation}');
+                print('Soil Type: ${widget.state.selectedSoilType ?? 'Not selected'}');
+                print('Footing Type: ${widget.state.selectedFootingType ?? 'Not selected'}');
               },
               child: Text('Submit'),
               style: ElevatedButton.styleFrom(
@@ -96,9 +117,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            SizedBox(width: 10), // Add spacing between label and dropdown
+            SizedBox(width: 10),
             Container(
-              width: 179, // Set the width of the dropdown box
+              width: 179,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(4),
@@ -106,7 +127,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               ),
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: DropdownButton<String>(
-                isExpanded: true, // Ensure the dropdown expands to fill the container
+                isExpanded: true,
                 value: _selectedSoilType,
                 hint: Text(
                   'Select option',
@@ -117,10 +138,11 @@ class _AnalysisPageState extends State<AnalysisPage> {
                 iconSize: 24,
                 elevation: 16,
                 style: TextStyle(color: Colors.white),
-                underline: SizedBox(), // Remove the default underline
+                underline: SizedBox(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _selectedSoilType = newValue;
+                    widget.state.selectedSoilType = newValue;
+                    widget.onStateChanged(widget.state);
                   });
                 },
                 items: _soilTypes.map<DropdownMenuItem<String>>((String value) {
@@ -133,7 +155,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
             ),
           ],
         ),
-        SizedBox(height: 10), // Spacing between rows
+        SizedBox(height: 10),
 
         // Row 2: Type of footing
         Row(
@@ -141,13 +163,13 @@ class _AnalysisPageState extends State<AnalysisPage> {
             Expanded(
               flex: 1,
               child: Text(
-                'Type of footing',
+                'Type of footing:',
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            SizedBox(width: 10), // Add spacing between label and dropdown
+            SizedBox(width: 10),
             Container(
-              width: 179, // Set the width of the dropdown box
+              width: 179,
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(4),
@@ -155,8 +177,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
               ),
               padding: EdgeInsets.symmetric(horizontal: 12),
               child: DropdownButton<String>(
-                isExpanded: true, // Ensure the dropdown expands to fill the container
-                value: _selectedAnotherDropdown, // Add a new state variable for this dropdown
+                isExpanded: true,
+                value: _selectedFootingType,
                 hint: Text(
                   'Select option',
                   style: TextStyle(color: Colors.white),
@@ -166,13 +188,14 @@ class _AnalysisPageState extends State<AnalysisPage> {
                 iconSize: 24,
                 elevation: 16,
                 style: TextStyle(color: Colors.white),
-                underline: SizedBox(), // Remove the default underline
+                underline: SizedBox(),
                 onChanged: (String? newValue) {
                   setState(() {
-                    _selectedAnotherDropdown = newValue;
+                    widget.state.selectedFootingType = newValue;
+                    widget.onStateChanged(widget.state);
                   });
                 },
-                items: _anotherDropdownOptions.map<DropdownMenuItem<String>>((String value) {
+                items: _footingTypes.map<DropdownMenuItem<String>>((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value),
@@ -182,9 +205,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
             ),
           ],
         ),
-        SizedBox(height: 10), // Spacing between rows
+        SizedBox(height: 10),
 
-         // Row 3: Depth of foundation, Df (in m)
+        // Row 3: Depth of foundation
         Row(
           children: [
             Expanded(
@@ -194,21 +217,21 @@ class _AnalysisPageState extends State<AnalysisPage> {
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            SizedBox(width: 10), // Add spacing between label and input box
+            SizedBox(width: 10),
             Container(
-              width: 179, // Set the width of the input box
+              width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
-                  cursorColor: Colors.white, // Change cursor color
-                  selectionColor: Colors.blue, // Change selection highlight color
-                  selectionHandleColor: Colors.blue, // Change selection handle color
+                  cursorColor: Colors.white,
+                  selectionColor: Colors.blue,
+                  selectionHandleColor: Colors.blue,
                 ),
                 child: TextField(
                   controller: _input1Controller,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white, fontSize: 14),
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.grey[800],
@@ -221,33 +244,33 @@ class _AnalysisPageState extends State<AnalysisPage> {
             ),
           ],
         ),
-        SizedBox(height: 10), // Spacing between rows
+        SizedBox(height: 10),
 
-        // Row 4: Distance of the water table from ground level, Dw (in m)
+        // Row 4: Water table distance
         Row(
           children: [
             Expanded(
               flex: 1,
               child: Text(
-                'Distance of the water table from ground level, Dw (in m):',
+                'Distance of water table, Dw (in m):',
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            SizedBox(width: 10), // Add spacing between label and input box
+            SizedBox(width: 10),
             Container(
-              width: 179, // Set the width of the input box
+              width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
-                  cursorColor: Colors.white, // Change cursor color
-                  selectionColor: Colors.blue, // Change selection highlight color
-                  selectionHandleColor: Colors.blue, // Change selection handle color
+                  cursorColor: Colors.white,
+                  selectionColor: Colors.blue,
+                  selectionHandleColor: Colors.blue,
                 ),
                 child: TextField(
                   controller: _input2Controller,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white, fontSize: 14),
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.grey[800],
@@ -260,33 +283,33 @@ class _AnalysisPageState extends State<AnalysisPage> {
             ),
           ],
         ),
-        SizedBox(height: 10), // Spacing between rows
+        SizedBox(height: 10),
 
-        // Row 5: Base of the foundation, B (in m)
+        // Row 5: Base of foundation
         Row(
           children: [
             Expanded(
               flex: 1,
               child: Text(
-                'Base of the foundation, B (in m):',
+                'Base of foundation, B (in m):',
                 style: TextStyle(color: Colors.white, fontSize: 16),
               ),
             ),
-            SizedBox(width: 10), // Add spacing between label and input box
+            SizedBox(width: 10),
             Container(
-              width: 179, // Set the width of the input box
+              width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
-                  cursorColor: Colors.white, // Change cursor color
-                  selectionColor: Colors.blue, // Change selection highlight color
-                  selectionHandleColor: Colors.blue, // Change selection handle color
+                  cursorColor: Colors.white,
+                  selectionColor: Colors.blue,
+                  selectionHandleColor: Colors.blue,
                 ),
                 child: TextField(
                   controller: _input3Controller,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white, fontSize: 14),
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     border: OutlineInputBorder(),
                     filled: true,
                     fillColor: Colors.grey[800],

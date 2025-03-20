@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'pages/analysis_page.dart'; // Import AnalysisPage
 import 'pages/design_page.dart';   // Import DesignPage
 import 'pages/about_page.dart';    // Import AboutPage
+import 'settings/analysis_state.dart'; // Import AnalysisState
 
 class TabbedHomePage extends StatefulWidget {
   @override
@@ -16,6 +17,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   int _tabCounter = 1; // Start counter at 1 (Home is already tab 0)
   List<String> analysisItems = []; // Initialize empty
   List<String> designItems = [];   // Initialize empty
+  Map<String, AnalysisState> analysisStates = {};
 
 
   @override
@@ -33,8 +35,10 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   void _addAnalysisItem() {
     setState(() {
       int nextNumber = _getNextNumber(analysisItems, "Analysis");
-      String newItem = 'Analysis $nextNumber';
-      analysisItems.add(newItem);
+    String newItem = 'Analysis $nextNumber';
+    analysisItems.add(newItem);
+    analysisStates[newItem] = AnalysisState(title: newItem); // Create state
+
       _tabs.add(newItem); // Add to tabs list for display
       _tabController = TabController(length: _tabs.length, vsync: this);
       _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
@@ -115,7 +119,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           tabs: _tabs.map((title) => Tab(text: title)).toList(),
         ),
         ),
-      backgroundColor: Color(0xFF212121),
+      backgroundColor: Color.fromARGB(255, 33, 33, 33),
       endDrawer: Drawer(
         child: Container(
           color: Color(0xFF414141), // Set background color behind ListTiles
@@ -252,7 +256,13 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           // They will be added in the TabBarView based on _tabs list
           //AnalysisPage(title: 'Analysis 1'), // Removed placeholder
           //DesignPage(title: 'Design 1'),   // Removed placeholder
-          ...analysisItems.map((title) => AnalysisPage(title: title)).toList(),
+...analysisItems.map((title) => AnalysisPage(
+      title: title,
+      state: analysisStates[title]!, // Pass the state
+      onStateChanged: (newState) {
+        analysisStates[title] = newState;
+      },
+    )).toList(),
           ...designItems.map((title) => DesignPage(title: title)).toList(),
         ],
       ),
