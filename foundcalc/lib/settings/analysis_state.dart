@@ -8,3 +8,5 @@ class AnalysisState {
 
   AnalysisState({required this.title});
 }
+
+//Copy paste mo yan lahat then iadjust nalang kung magbabagong calc
