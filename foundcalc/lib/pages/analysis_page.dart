@@ -115,7 +115,34 @@ Widget build(BuildContext context) {
           mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
           children: [
             _buildFormRow(),
-            SizedBox(height: 20),
+            SizedBox(height: 10),
+            Padding(
+              padding: EdgeInsetsDirectional.fromSTEB(15.0, 0.0, 15.0, 0.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Align(
+                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    child: Container(
+                      width: 175.0,
+                      child: Text(
+                        'Soil properties',
+                      ),
+                    ),
+                  ),
+                  Align(
+                    alignment: AlignmentDirectional(-1.0, 0.0),
+                    child: Switch(
+                      value: true, // Ensure _model.switchValue is defined
+                      onChanged: (newValue) {
+                      },
+                      activeColor: Color(0xFF1F538D),
+                      inactiveThumbColor: Color(0x80FF5963),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             ElevatedButton(
               onPressed: () {
                 // Handle form submission
