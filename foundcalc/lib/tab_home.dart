@@ -77,33 +77,41 @@ class _TabbedHomePageState extends State<TabbedHomePage>
 
   void _removeAnalysisItem(int index) {
     setState(() {
-      String removedTab = analysisItems.removeAt(index-1); //index -1 because home is index 0
+            String tabToRemove = _tabs[index];
+            int analysisIndex = analysisItems.indexOf(tabToRemove);
+            
+            if (analysisIndex != -1) {
+              // Remove from analysisItems and states
+              String removedTab = analysisItems.removeAt(analysisIndex);
+              analysisStates.remove(removedTab);
 
-      int tabIndexToRemove = _tabs.indexOf(removedTab);
-      if (tabIndexToRemove != -1) {
-        _tabs.removeAt(tabIndexToRemove);
-      }
-
-
+              // Remove from tabs
+              _tabs.removeAt(index);
+              
+              // UPDATE (Wag kalimutan)
               _tabController = TabController(length: _tabs.length, vsync: this);
-      // Prevent exception by going to the last tab if removing current
-      if (_tabController.index >= _tabs.length && _tabs.length > 0) {
+              if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
                 _tabController.animateTo(_tabs.length - 1);
+              }
             }
           });
         }
 
   void _removeDesignItem(int index) {
             setState(() {
-      String removedTab = designItems.removeAt(index-1); //index -1 because home is index 0
-      int tabIndexToRemove = _tabs.indexOf(removedTab);
-      if (tabIndexToRemove != -1) {
-        _tabs.removeAt(tabIndexToRemove);
-      }
+            String tabToRemove = _tabs[index];
+            int designIndex = designItems.indexOf(tabToRemove);
+            
+            if (designIndex != -1) {
+              String removedTab = designItems.removeAt(designIndex);
+              designStates.remove(removedTab);
+
+              _tabs.removeAt(index);
+              
               _tabController = TabController(length: _tabs.length, vsync: this);
-      // Prevent exception by going to the last tab if removing current
-      if (_tabController.index >= _tabs.length && _tabs.length > 0) {
+              if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
                 _tabController.animateTo(_tabs.length - 1);
+              }
             }
           });
         }
@@ -120,7 +128,41 @@ class _TabbedHomePageState extends State<TabbedHomePage>
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true, // Allow scrolling for many tabs
-          tabs: _tabs.map((title) => Tab(text: title)).toList(),
+          //CLOSE TABS
+                tabs: _tabs.map((title) {
+                // Walang X sa Home tab
+                if (title == 'Home') {
+                  return Tab(text: title);
+                }
+                return Tab(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(title),
+                      const SizedBox(width: 8),
+                      InkWell(
+                        onTap: () {
+
+                          // EKIS ang di hometab
+                          setState(() {
+                            int index = _tabs.indexOf(title);
+                            if (title.startsWith('Analysis')) {
+                              _removeAnalysisItem(index);
+                            } else if (title.startsWith('Design')) {
+                              _removeDesignItem(index);
+                            }
+                          });
+                        },
+                        child: Icon(
+                          Icons.close,
+                          size: 16,
+                          color: Colors.white60,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }).toList(),
         ),
         ),
 
