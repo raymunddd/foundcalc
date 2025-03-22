@@ -27,13 +27,13 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   Widget build(BuildContext context) {
     super.build(context); // Call super.build
     return Scaffold(
-      backgroundColor: Color(0xFF212121),
+      backgroundColor: Color(0xFF363434),
       appBar: AppBar(
         title: Text(
           widget.title,
           style: TextStyle(color: Colors.white)
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Color(0xFF363434),
       ),
       body: Center(
         child: Text(

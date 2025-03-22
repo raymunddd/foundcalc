@@ -172,7 +172,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
         title: Text('Foundation Calculator Tabs',
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Color(0xFF292828),
         bottom: TabBar(
           controller: _tabController,
           isScrollable: true, // Allow scrolling for many tabs
@@ -214,16 +214,17 @@ class _TabbedHomePageState extends State<TabbedHomePage>
         ),
         ),
 
-//DRAWER
-      backgroundColor: Color.fromARGB(255, 33, 33, 33),
+  //bg color of scaffold    
+      backgroundColor: Color(0xFF363434),
+  //DRAWER
       endDrawer: Drawer(
         child: Container(
-          color: Color(0xFF414141), // Set background color behind ListTiles
+          color: Color(0xFF424140), // Set background color behind ListTiles
           child: ListView(
             padding: EdgeInsets.zero,
             children: [
               DrawerHeader(
-                decoration: BoxDecoration(color: Color(0xFF212121)), // Header color
+                decoration: BoxDecoration(color: Color(0xFF363434)), // Header color
                 child: Text(
                   'Menu',
                   style: TextStyle(color: Colors.white, fontSize: 24),
@@ -231,7 +232,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
               ),
               if (analysisItems.isNotEmpty) ...[
                 ListTile(
-                  tileColor: Color(0xFF414141),
+                  tileColor: Color(0xFF424140),
                   title: Text(
                     'Analysis Tabs',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),

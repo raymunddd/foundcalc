@@ -81,13 +81,13 @@ class _AnalysisPageState extends State<AnalysisPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFF212121),
+      backgroundColor: Color(0xFF363434),
       appBar: AppBar(
         title: Text(
           widget.title,
           style: TextStyle(color: Colors.white),
         ),
-        backgroundColor: Colors.black,
+        backgroundColor: Color(0xFF363434),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
