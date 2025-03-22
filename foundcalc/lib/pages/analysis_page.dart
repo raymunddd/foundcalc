@@ -36,6 +36,10 @@ class _AnalysisPageState extends State<AnalysisPage> {
   @override
   void initState() {
     super.initState();
+
+    // Set default footing type if not already selected
+    widget.state.selectedFootingType ??= 'Square';
+
     // Initialize controllers with saved state
     _input1Controller = TextEditingController(text: widget.state.depthOfFoundation);
     _input2Controller = TextEditingController(text: widget.state.waterTableDistance);
@@ -64,6 +68,17 @@ class _AnalysisPageState extends State<AnalysisPage> {
     super.dispose();
   }
 
+  String get _footingLabel {
+    switch (widget.state.selectedFootingType) {
+      case 'Strip or continuous':
+        return 'Width of footing, W (in m):';
+      case 'Circular':
+        return 'Diameter of footing, D (in m):';
+      default:
+        return 'Base of footing, B (in m):';
+    }
+  }
+
   // Dropdown value and options
   String? get _selectedSoilType => widget.state.selectedSoilType;
   final List<String> _soilTypes = [
@@ -77,6 +92,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
     'Square',
     'Circular',
   ];
+
+  // Getter for dropdown value (ensures non-null default)
 
   @override
 Widget build(BuildContext context) {
@@ -104,7 +121,7 @@ Widget build(BuildContext context) {
                 // Handle form submission
                 print('Depth of Foundation: ${widget.state.depthOfFoundation}');
                 print('Water Table Distance: ${widget.state.waterTableDistance}');
-                print('Base of Foundation: ${widget.state.baseOfFoundation}');
+                print('Base of Footing: ${widget.state.baseOfFoundation}');
                 print('Soil Type: ${widget.state.selectedSoilType ?? 'Not selected'}');
                 print('Footing Type: ${widget.state.selectedFootingType ?? 'Not selected'}');
               },
@@ -303,13 +320,13 @@ Widget build(BuildContext context) {
           ),
           SizedBox(height: 10),
 
-          // Row 5: Base of foundation
+          // Row 5: Base of footing
           Row(
             children: [
               Expanded(
                 flex: 1,
                 child: Text(
-                  'Base of foundation, B (in m):',
+                  _footingLabel,
                   style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
@@ -327,6 +344,120 @@ Widget build(BuildContext context) {
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)
+                      )
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          // Row 6: Cohesion
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "Cohesion, c",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+              SizedBox(width: 10),
+              Container(
+                width: 179,
+                child: TextSelectionTheme(
+                  data: TextSelectionThemeData(
+                    cursorColor: Colors.white,
+                    selectionColor: Colors.blue,
+                    selectionHandleColor: Colors.blue,
+                  ),
+                  child: TextField(
+                    controller: _input3Controller,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)
+                      )
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          // Row 7: Footing thickness
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "Footing thickness, t",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+              SizedBox(width: 10),
+              Container(
+                width: 179,
+                child: TextSelectionTheme(
+                  data: TextSelectionThemeData(
+                    cursorColor: Colors.white,
+                    selectionColor: Colors.blue,
+                    selectionHandleColor: Colors.blue,
+                  ),
+                  child: TextField(
+                    controller: _input3Controller,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)
+                      )
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
+          // Row 8: Factor of safety
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  "Factor of safety",
+                  style: TextStyle(color: Colors.white, fontSize: 16),
+                ),
+              ),
+              SizedBox(width: 10),
+              Container(
+                width: 179,
+                child: TextSelectionTheme(
+                  data: TextSelectionThemeData(
+                    cursorColor: Colors.white,
+                    selectionColor: Colors.blue,
+                    selectionHandleColor: Colors.blue,
+                  ),
+                  child: TextField(
+                    controller: _input3Controller,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
                       hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                       border: OutlineInputBorder(),
                       filled: true,
