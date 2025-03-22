@@ -3,6 +3,7 @@ import 'pages/analysis_page.dart'; // Import AnalysisPage
 import 'pages/design_page.dart';   // Import DesignPage
 import 'pages/about_page.dart';    // Import AboutPage
 import 'settings/analysis_state.dart'; // Import AnalysisState
+import 'settings/design_state.dart';   // Import DesignState
 
 class TabbedHomePage extends StatefulWidget {
   @override
@@ -18,6 +19,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   List<String> analysisItems = []; // Initialize empty
   List<String> designItems = [];   // Initialize empty
   Map<String, AnalysisState> analysisStates = {};
+  Map<String, DesignState> designStates = {};
 
 
   @override
@@ -51,6 +53,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       int nextNumber = _getNextNumber(designItems, "Design");
       String newItem = 'Design $nextNumber';
       designItems.add(newItem);
+      designStates[newItem] = DesignState(title: newItem); // Create state
+
       _tabs.add(newItem); // Add to tabs list for display
       _tabController = TabController(length: _tabs.length, vsync: this);
       _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
@@ -81,28 +85,28 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       }
 
 
-      _tabController = TabController(length: _tabs.length, vsync: this);
+              _tabController = TabController(length: _tabs.length, vsync: this);
       // Prevent exception by going to the last tab if removing current
       if (_tabController.index >= _tabs.length && _tabs.length > 0) {
-        _tabController.animateTo(_tabs.length - 1);
-      }
-    });
-  }
+                _tabController.animateTo(_tabs.length - 1);
+            }
+          });
+        }
 
   void _removeDesignItem(int index) {
-    setState(() {
+            setState(() {
       String removedTab = designItems.removeAt(index-1); //index -1 because home is index 0
       int tabIndexToRemove = _tabs.indexOf(removedTab);
       if (tabIndexToRemove != -1) {
         _tabs.removeAt(tabIndexToRemove);
       }
-      _tabController = TabController(length: _tabs.length, vsync: this);
+              _tabController = TabController(length: _tabs.length, vsync: this);
       // Prevent exception by going to the last tab if removing current
       if (_tabController.index >= _tabs.length && _tabs.length > 0) {
-        _tabController.animateTo(_tabs.length - 1);
-      }
-    });
-  }
+                _tabController.animateTo(_tabs.length - 1);
+            }
+          });
+        }
 
 
   @override
@@ -119,6 +123,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           tabs: _tabs.map((title) => Tab(text: title)).toList(),
         ),
         ),
+
+//DRAWER
       backgroundColor: Color.fromARGB(255, 33, 33, 33),
       endDrawer: Drawer(
         child: Container(
@@ -202,68 +208,84 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           ),
         ),
       ),
+
+//BODY
       body: TabBarView(
         controller: _tabController,
         children: [
-          Center(
-            child: Padding(
-              padding: EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    "Welcome to Block B’s Footing Calculator!",
-                    style: TextStyle(
-                      fontSize: 24,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
+        //Home Tab
+            Center(
+              child: Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      "Welcome to Block B’s Footing Calculator!",
+                      style: TextStyle(
+                        fontSize: 24,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 45),
-                  Text(
-                    "What would you like to calculate?",
-                    style: TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
+                    SizedBox(height: 45),
+                    Text(
+                      "What would you like to calculate?",
+                      style: TextStyle(
+                        fontSize: 20,
+                        color: Colors.white,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF1F538D),
-                      foregroundColor: Colors.white,
+                    SizedBox(height: 20),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF1F538D),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: _addAnalysisItem,
+                      child: Text("Analysis"),
                     ),
-                    onPressed: _addAnalysisItem,
-                    child: Text("Analysis"),
-                  ),
-                  SizedBox(height: 10),
-                  ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFF1F538D),
-                      foregroundColor: Colors.white,
+                    SizedBox(height: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF1F538D),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: _addDesignItem,
+                      child: Text("Design"),
                     ),
-                    onPressed: _addDesignItem,
-                    child: Text("Design"),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-          // Analysis and Design pages will be added dynamically
-          // No need to put placeholder AnalysisPage() and DesignPage() here.
-          // They will be added in the TabBarView based on _tabs list
-          //AnalysisPage(title: 'Analysis 1'), // Removed placeholder
-          //DesignPage(title: 'Design 1'),   // Removed placeholder
-...analysisItems.map((title) => AnalysisPage(
-      title: title,
-      state: analysisStates[title]!, // Pass the state
-      onStateChanged: (newState) {
-        analysisStates[title] = newState;
-      },
-    )).toList(),
-          ...designItems.map((title) => DesignPage(title: title)).toList(),
+            // Analysis and Design pages will be added dynamically
+            // No need to put placeholder AnalysisPage() and DesignPage() here.
+            // They will be added in the TabBarView based on _tabs list
+            //AnalysisPage(title: 'Analysis 1'), // Removed placeholder
+            //DesignPage(title: 'Design 1'),   // Removed placeholder
+
+  //View Tabs
+          ..._tabs.where((title) => title != 'Home').map((title) {
+            if (title.startsWith('Analysis')) {
+              return AnalysisPage(
+                title: title,
+                state: analysisStates[title]!,
+                onStateChanged: (newState) {
+                  analysisStates[title] = newState;
+                },
+              );
+            } else {
+              return DesignPage(
+                title: title,
+                state: designStates[title]!,
+                onStateChanged: (newState) {
+                  designStates[title] = newState;
+                },
+              );
+            }
+          }).toList(),
         ],
       ),
     );
