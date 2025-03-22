@@ -1,3 +1,15 @@
+/*Copy paste mo nalang yan if need mo template hahaha
+Basta need ng 
+    1) "_state.dart" file
+    2) _page.dart file
+    3) Yun mga need sa tab_home
+        A) List<String> analysisItems = []; // Initialize empty
+          Map<String, AnalysisState> analysisStates = {};
+        B) void addItem() at removeItem() chuchu
+        C) Yun sa pagname ng tabs (Nakacomment naman yun template sa tab_home hahaha)
+  
+*/
+
 import 'package:flutter/material.dart';
 import '../settings/analysis_state.dart';
 

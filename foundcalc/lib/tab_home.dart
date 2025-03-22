@@ -34,6 +34,9 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     super.dispose();
   }
 
+
+
+//ANALYSIS
   void _addAnalysisItem() {
     setState(() {
       int nextNumber = _getNextNumber(analysisItems, "Analysis");
@@ -47,33 +50,6 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       _tabCounter++;
     });
   }
-
-  void _addDesignItem() {
-    setState(() {
-      int nextNumber = _getNextNumber(designItems, "Design");
-      String newItem = 'Design $nextNumber';
-      designItems.add(newItem);
-      designStates[newItem] = DesignState(title: newItem); // Create state
-
-      _tabs.add(newItem); // Add to tabs list for display
-      _tabController = TabController(length: _tabs.length, vsync: this);
-      _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
-      _tabCounter++;
-    });
-  }
-
-
-  int _getNextNumber(List<String> items, String type) {
-    if (items.isEmpty) return 1;
-
-    List<int> existingNumbers = items.map((item) {
-      return int.tryParse(item.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-    }).toList();
-
-    int maxNumber = existingNumbers.isEmpty ? 0 : existingNumbers.reduce((a, b) => a > b ? a : b);
-    return maxNumber + 1;
-  }
-
 
   void _removeAnalysisItem(int index) {
     setState(() {
@@ -97,6 +73,21 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           });
         }
 
+//DESIGN
+  void _addDesignItem() {
+    setState(() {
+      int nextNumber = _getNextNumber(designItems, "Design");
+      String newItem = 'Design $nextNumber';
+      designItems.add(newItem);
+      designStates[newItem] = DesignState(title: newItem); // Create state
+
+      _tabs.add(newItem); // Add to tabs list for display
+      _tabController = TabController(length: _tabs.length, vsync: this);
+      _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
+      _tabCounter++;
+    });
+  }
+
   void _removeDesignItem(int index) {
             setState(() {
             String tabToRemove = _tabs[index];
@@ -115,6 +106,63 @@ class _TabbedHomePageState extends State<TabbedHomePage>
             }
           });
         }
+
+
+
+
+  /*TEMPLATE KUNG LALAGAY NG IBA PANG CALC
+        
+        void _addAnalysisItem() {
+    setState(() {
+      int nextNumber = _getNextNumber(analysisItems, "Analysis");
+    String newItem = 'Analysis $nextNumber';
+    analysisItems.add(newItem);
+    analysisStates[newItem] = AnalysisState(title: newItem); // Create state
+
+      _tabs.add(newItem); // Add to tabs list for display
+      _tabController = TabController(length: _tabs.length, vsync: this);
+      _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
+      _tabCounter++;
+    });
+  }
+
+  void _removeAnalysisItem(int index) {
+    setState(() {
+            String tabToRemove = _tabs[index];
+            int analysisIndex = analysisItems.indexOf(tabToRemove);
+            
+            if (analysisIndex != -1) {
+              // Remove from analysisItems and states
+              String removedTab = analysisItems.removeAt(analysisIndex);
+              analysisStates.remove(removedTab);
+
+              // Remove from tabs
+              _tabs.removeAt(index);
+              
+              // UPDATE (Wag kalimutan)
+              _tabController = TabController(length: _tabs.length, vsync: this);
+              if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
+                _tabController.animateTo(_tabs.length - 1);
+              }
+            }
+          });
+        } */
+
+
+  int _getNextNumber(List<String> items, String type) {
+    if (items.isEmpty) return 1;
+
+    List<int> existingNumbers = items.map((item) {
+      return int.tryParse(item.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    }).toList();
+
+    int maxNumber = existingNumbers.isEmpty ? 0 : existingNumbers.reduce((a, b) => a > b ? a : b);
+    return maxNumber + 1;
+  }
+
+
+  
+
 
 
   @override
@@ -303,22 +351,32 @@ class _TabbedHomePageState extends State<TabbedHomePage>
               ),
             ),
             // Analysis and Design pages will be added dynamically
-            // No need to put placeholder AnalysisPage() and DesignPage() here.
             // They will be added in the TabBarView based on _tabs list
-            //AnalysisPage(title: 'Analysis 1'), // Removed placeholder
-            //DesignPage(title: 'Design 1'),   // Removed placeholder
 
   //View Tabs
           ..._tabs.where((title) => title != 'Home').map((title) {
+            //Copy paste nalang natin to if need gumawa bagong calc
             if (title.startsWith('Analysis')) {
-              return AnalysisPage(
+              return AnalysisPage( 
                 title: title,
                 state: analysisStates[title]!,
                 onStateChanged: (newState) {
                   analysisStates[title] = newState;
                 },
               );
-            } else {
+            } 
+            //Lagay ng else din if dito kung anong title ng calc na yun
+                /* Ito template:
+                            if (title.startsWith('Analysis')) {
+                              return AnalysisPage( 
+                                title: title,
+                                state: analysisStates[title]!,
+                                onStateChanged: (newState) {
+                                  analysisStates[title] = newState;
+                                },
+                              );
+                            }  */
+            else {
               return DesignPage(
                 title: title,
                 state: designStates[title]!,
