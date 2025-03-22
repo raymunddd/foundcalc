@@ -168,6 +168,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //bg color of scaffold    
+      backgroundColor: Color(0xFF363434),
       appBar: AppBar(
         title: Text('Foundation Calculator Tabs',
           style: TextStyle(color: Colors.white),
@@ -175,6 +177,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
         backgroundColor: Color(0xFF292828),
         bottom: TabBar(
           controller: _tabController,
+          indicatorColor: Color(0xFF1F538D),
+          labelColor: Color(0xFF1F538D),
           isScrollable: true, // Allow scrolling for many tabs
           //CLOSE TABS
                 tabs: _tabs.map((title) {
@@ -211,11 +215,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                   ),
                 );
               }).toList(),
+          ),
         ),
-        ),
-
-  //bg color of scaffold    
-      backgroundColor: Color(0xFF363434),
   //DRAWER
       endDrawer: Drawer(
         child: Container(

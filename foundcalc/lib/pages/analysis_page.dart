@@ -79,19 +79,23 @@ class _AnalysisPageState extends State<AnalysisPage> {
   ];
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xFF363434),
-      appBar: AppBar(
-        title: Text(
-          widget.title,
-          style: TextStyle(color: Colors.white),
-        ),
-        backgroundColor: Color(0xFF363434),
+Widget build(BuildContext context) {
+  return Scaffold(
+    backgroundColor: Color(0xFF363434),
+    appBar: AppBar(
+      title: Text(
+        widget.title,
+        style: TextStyle(color: Colors.white),
       ),
-      body: Padding(
+      backgroundColor: Color(0xFF363434),
+      elevation: 0,
+      surfaceTintColor: Colors.transparent,
+    ),
+    body: SingleChildScrollView(
+      child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
+          mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
           children: [
             _buildFormRow(),
             SizedBox(height: 20),
@@ -113,228 +117,231 @@ class _AnalysisPageState extends State<AnalysisPage> {
           ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget _buildFormRow() {
-    return Column(
-      children: [
-        // Row 1: Dropdown for Soil Type
-        Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Text(
-                'Type of shear failure:',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            SizedBox(width: 10),
-            Container(
-              width: 179,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(4),
-                color: Colors.grey[800],
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: _selectedSoilType,
-                hint: Text(
-                  'Select option',
-                  style: TextStyle(color: Colors.white),
+    return SingleChildScrollView(
+      child: Column(
+        children: [
+          // Row 1: Dropdown for Soil Type
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'Type of shear failure:',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
-                dropdownColor: Colors.grey[800],
-                icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                iconSize: 24,
-                elevation: 16,
-                style: TextStyle(color: Colors.white),
-                underline: SizedBox(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    widget.state.selectedSoilType = newValue;
-                    widget.onStateChanged(widget.state);
-                  });
-                },
-                items: _soilTypes.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: 10),
+              SizedBox(width: 10),
+              Container(
+                width: 179,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.grey[800],
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: _selectedSoilType,
+                  hint: Text(
+                    'Select option',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  dropdownColor: Colors.grey[800],
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                  iconSize: 24,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.white),
+                  underline: SizedBox(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      widget.state.selectedSoilType = newValue;
+                      widget.onStateChanged(widget.state);
+                    });
+                  },
+                  items: _soilTypes.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
 
-        // Row 2: Type of footing
-        Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Text(
-                'Type of footing:',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            SizedBox(width: 10),
-            Container(
-              width: 179,
-              decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
-                borderRadius: BorderRadius.circular(4),
-                color: Colors.grey[800],
-              ),
-              padding: EdgeInsets.symmetric(horizontal: 12),
-              child: DropdownButton<String>(
-                isExpanded: true,
-                value: _selectedFootingType,
-                hint: Text(
-                  'Select option',
-                  style: TextStyle(color: Colors.white),
+          // Row 2: Type of footing
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'Type of footing:',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
-                dropdownColor: Colors.grey[800],
-                icon: Icon(Icons.arrow_drop_down, color: Colors.white),
-                iconSize: 24,
-                elevation: 16,
-                style: TextStyle(color: Colors.white),
-                underline: SizedBox(),
-                onChanged: (String? newValue) {
-                  setState(() {
-                    widget.state.selectedFootingType = newValue;
-                    widget.onStateChanged(widget.state);
-                  });
-                },
-                items: _footingTypes.map<DropdownMenuItem<String>>((String value) {
-                  return DropdownMenuItem<String>(
-                    value: value,
-                    child: Text(value),
-                  );
-                }).toList(),
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: 10),
+              SizedBox(width: 10),
+              Container(
+                width: 179,
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey),
+                  borderRadius: BorderRadius.circular(4),
+                  color: Colors.grey[800],
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 12),
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  value: _selectedFootingType,
+                  hint: Text(
+                    'Select option',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  dropdownColor: Colors.grey[800],
+                  icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                  iconSize: 24,
+                  elevation: 16,
+                  style: TextStyle(color: Colors.white),
+                  underline: SizedBox(),
+                  onChanged: (String? newValue) {
+                    setState(() {
+                      widget.state.selectedFootingType = newValue;
+                      widget.onStateChanged(widget.state);
+                    });
+                  },
+                  items: _footingTypes.map<DropdownMenuItem<String>>((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 10),
 
-        // Row 3: Depth of foundation
-        Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Text(
-                'Depth of foundation, Df (in m):',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            SizedBox(width: 10),
-            Container(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
-                  selectionColor: Colors.blue,
-                  selectionHandleColor: Colors.blue,
+          // Row 3: Depth of foundation
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'Depth of foundation, Df (in m):',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
-                child: TextField(
-                  controller: _input1Controller,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white)
-                    )
+              ),
+              SizedBox(width: 10),
+              Container(
+                width: 179,
+                child: TextSelectionTheme(
+                  data: TextSelectionThemeData(
+                    cursorColor: Colors.white,
+                    selectionColor: Colors.blue,
+                    selectionHandleColor: Colors.blue,
+                  ),
+                  child: TextField(
+                    controller: _input1Controller,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)
+                      )
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: 10),
+            ],
+          ),
+          SizedBox(height: 10),
 
-        // Row 4: Water table distance
-        Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Text(
-                'Distance of water table, Dw (in m):',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            SizedBox(width: 10),
-            Container(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
-                  selectionColor: Colors.blue,
-                  selectionHandleColor: Colors.blue,
+          // Row 4: Water table distance
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'Distance of water table, Dw (in m):',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
-                child: TextField(
-                  controller: _input2Controller,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white)
-                    )
+              ),
+              SizedBox(width: 10),
+              Container(
+                width: 179,
+                child: TextSelectionTheme(
+                  data: TextSelectionThemeData(
+                    cursorColor: Colors.white,
+                    selectionColor: Colors.blue,
+                    selectionHandleColor: Colors.blue,
+                  ),
+                  child: TextField(
+                    controller: _input2Controller,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)
+                      )
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-        SizedBox(height: 10),
+            ],
+          ),
+          SizedBox(height: 10),
 
-        // Row 5: Base of foundation
-        Row(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Text(
-                'Base of foundation, B (in m):',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-            SizedBox(width: 10),
-            Container(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
-                  selectionColor: Colors.blue,
-                  selectionHandleColor: Colors.blue,
+          // Row 5: Base of foundation
+          Row(
+            children: [
+              Expanded(
+                flex: 1,
+                child: Text(
+                  'Base of foundation, B (in m):',
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
-                child: TextField(
-                  controller: _input3Controller,
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderSide: BorderSide(color: Colors.white)
-                    )
+              ),
+              SizedBox(width: 10),
+              Container(
+                width: 179,
+                child: TextSelectionTheme(
+                  data: TextSelectionThemeData(
+                    cursorColor: Colors.white,
+                    selectionColor: Colors.blue,
+                    selectionHandleColor: Colors.blue,
+                  ),
+                  child: TextField(
+                    controller: _input3Controller,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderSide: BorderSide(color: Colors.white)
+                      )
+                    ),
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
-      ],
+            ],
+          ),
+        ],
+      )
     );
   }
 }
