@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutterflow_ui: ^0.3.1
 
 dev_dependencies:
   flutter_test:
