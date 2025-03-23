@@ -10,6 +10,7 @@ Basta need ng
   
 */
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../settings/analysis_state.dart';
 
@@ -126,6 +127,7 @@ Widget build(BuildContext context) {
           children: [
             row1ShearFailure(),
             row2FootingType(),
+            row3Df(),
             SizedBox(height: 10),
             submitButton(),
           ],
@@ -162,9 +164,9 @@ Widget build(BuildContext context) {
               ),
             ),
             Container(
+              height: 40,
               width: 179,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(25),
                 color: Colors.grey[800],
               ),
@@ -172,9 +174,9 @@ Widget build(BuildContext context) {
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: selectedShearFailure,
-                hint: Text('Select option', style: TextStyle(color: Colors.white)),
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
                 dropdownColor: Colors.grey[800],
-                icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
                 iconSize: 24,
                 elevation: 16,
                 style: TextStyle(color: Colors.white),
@@ -209,9 +211,9 @@ Widget build(BuildContext context) {
               ),
             ),
             Container(
+              height: 40,
               width: 179,
               decoration: BoxDecoration(
-                border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(25),
                 color: Colors.grey[800],
               ),
@@ -219,9 +221,9 @@ Widget build(BuildContext context) {
               child: DropdownButton<String>(
                 isExpanded: true,
                 value: selectedFootingType,
-                hint: Text('Select option', style: TextStyle(color: Colors.white)),
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
                 dropdownColor: Colors.grey[800],
-                icon: Icon(Icons.arrow_drop_down, color: Colors.white),
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
                 iconSize: 24,
                 elevation: 16,
                 style: TextStyle(color: Colors.white),
@@ -238,6 +240,50 @@ Widget build(BuildContext context) {
                     );
                 }).toList(),
               ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget row3Df() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Expanded(
+            child: Text(
+              'Depth of foundation:',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Field required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+              )
+            )
           ),
         ],
       ),
