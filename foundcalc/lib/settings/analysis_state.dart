@@ -1,5 +1,5 @@
 class AnalysisState {
-  String? selectedSoilType;
+  String? selectedShearFailure;
   String? selectedFootingType;
   String depthOfFoundation = '';
   String waterTableDistance = '';
