@@ -123,11 +123,16 @@ Widget build(BuildContext context) {
         padding: const EdgeInsets.all(16.0),
         child: Column(
           mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
-          // form rows
+          // row managerrrr
           children: [
             row1ShearFailure(),
             row2FootingType(),
             row3Df(),
+            row4Dw(),
+            row5footingDim(),
+            row6Cohesion(),
+            row7Thickness(),
+            row8FactorOfSafety(),
             SizedBox(height: 10),
             submitButton(),
           ],
@@ -245,7 +250,6 @@ Widget build(BuildContext context) {
       ),
     );
   }
-
   Widget row3Df() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -254,7 +258,7 @@ Widget build(BuildContext context) {
         children: [
           Expanded(
             child: Text(
-              'Depth of foundation:',
+              'Depth of foundation, Df (in m):',
               style: TextStyle(color: Colors.white),
             ),
           ),
@@ -289,4 +293,219 @@ Widget build(BuildContext context) {
       ),
     );
   }
-}
+  Widget row4Dw() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Expanded(
+            child: Text(
+              'Depth of the water table from ground level, Dw (in m):',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Field required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  }
+  Widget row5footingDim() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Expanded(
+            child: Text(
+              'Base of footing, B (in m)',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Field required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  }
+  Widget row6Cohesion() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Expanded(
+            child: Text(
+              'Cohesion, c',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Field required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  }
+  Widget row7Thickness() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Expanded(
+            child: Text(
+              'Footing thickness, t (in m)',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Optional",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  }
+  Widget row8FactorOfSafety() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Expanded(
+            child: Text(
+              'Base of footing, B (in m)',
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Optional",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                    ),
+                    filled: true,
+                    fillColor: Colors.grey[800],
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  }
+} // AnalysisPageState
