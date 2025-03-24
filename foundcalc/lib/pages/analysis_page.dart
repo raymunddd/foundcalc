@@ -12,6 +12,7 @@ Basta need ng
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../settings/analysis_state.dart';
 
 class AnalysisPage extends StatefulWidget {
@@ -30,47 +31,137 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
-  /*
-  late TextEditingController _input1Controller;
-  late TextEditingController _input2Controller;
-  late TextEditingController _input3Controller;
 
+// Always used controllers (non-nullable)
+  late final TextEditingController df;
+  late final TextEditingController dw;
+  late final TextEditingController fDim;
+  late final TextEditingController c;
+  late final TextEditingController t;
+  late final TextEditingController fs;
+  late final TextEditingController nc;
+  late final TextEditingController nq;
+  late final TextEditingController ny;
+  late final TextEditingController yw;
+  late final TextEditingController yc;
+
+  // Optional controllers (nullable)
+  TextEditingController? theta;
+  TextEditingController? gs;
+  TextEditingController? w;
+  TextEditingController? e;
+  TextEditingController? s;
+  TextEditingController? yDry;
+  TextEditingController? y;
+  TextEditingController? ySat;
+  
   @override
   void initState() {
     super.initState();
 
-    // Set default footing type if not already selected
-    widget.state.selectedFootingType ??= 'Square';
+  // Initialize controllers with values from the state (convert double to string)
+  df = TextEditingController(text: widget.state.df.toString());
+  dw = TextEditingController(text: widget.state.dw.toString());
+  fDim = TextEditingController(text: widget.state.fDim.toString());
+  c = TextEditingController(text: widget.state.c.toString());
+  t = TextEditingController(text: widget.state.t.toString());
+  fs = TextEditingController(text: widget.state.fs.toString());
+  nc = TextEditingController(text: widget.state.nc.toString());
+  nq = TextEditingController(text: widget.state.nq.toString());
+  ny = TextEditingController(text: widget.state.ny.toString());
+  yw = TextEditingController(text: widget.state.yw.toString());
+  yc = TextEditingController(text: widget.state.yc.toString());
 
-    // Initialize controllers with saved state
-    _input1Controller = TextEditingController(text: widget.state.depthOfFoundation);
-    _input2Controller = TextEditingController(text: widget.state.waterTableDistance);
-    _input3Controller = TextEditingController(text: widget.state.baseOfFoundation);
-    
-    // Add listeners to update state when text changes
-    _input1Controller.addListener(_updateState);
-    _input2Controller.addListener(_updateState);
-    _input3Controller.addListener(_updateState);
+  // Initialize nullable controllers only if they have values
+  gs = widget.state.gs != null ? TextEditingController(text: widget.state.gs.toString()) : null;
+  w = widget.state.w != null ? TextEditingController(text: widget.state.w.toString()) : null;
+  e = widget.state.e != null ? TextEditingController(text: widget.state.e.toString()) : null;
+  s = widget.state.s != null ? TextEditingController(text: widget.state.s.toString()) : null;
+  yDry = widget.state.yDry != null ? TextEditingController(text: widget.state.yDry.toString()) : null;
+  y = widget.state.y != null ? TextEditingController(text: widget.state.y.toString()) : null;
+  ySat = widget.state.ySat != null ? TextEditingController(text: widget.state.ySat.toString()) : null;
+  theta = widget.state.theta != null ? TextEditingController(text: widget.state.ySat.toString()) : null;
+
+    // Add listeners for non-nullable controllers
+    df.addListener(_updateState);
+    dw.addListener(_updateState);
+    fDim.addListener(_updateState);
+    c.addListener(_updateState);
+    t.addListener(_updateState);
+    fs.addListener(_updateState);
+    nc.addListener(_updateState);
+    nq.addListener(_updateState);
+    ny.addListener(_updateState);
+    yw.addListener(_updateState);
+    yc.addListener(_updateState);
+
+    // Add listeners for nullable controllers (only if they exist)
+    gs?.addListener(_updateState);
+    w?.addListener(_updateState);
+    e?.addListener(_updateState);
+    s?.addListener(_updateState);
+    yDry?.addListener(_updateState);
+    y?.addListener(_updateState);
+    ySat?.addListener(_updateState);
+    theta?.addListener(_updateState);
   }
 
   void _updateState() {
     setState(() {
-      widget.state.depthOfFoundation = _input1Controller.text;
-      widget.state.waterTableDistance = _input2Controller.text;
-      widget.state.baseOfFoundation = _input3Controller.text;
-      widget.onStateChanged(widget.state);
+      widget.onStateChanged(
+        widget.state.copyWith(
+          df: double.tryParse(df.text) ?? 0.0,
+          dw: double.tryParse(dw.text) ?? 0.0,
+          fDim: double.tryParse(fDim.text) ?? 0.0,
+          c: double.tryParse(c.text) ?? 0.0,
+          t: double.tryParse(t.text) ?? 0.0,
+          fs: double.tryParse(fs.text) ?? 0.0,
+          nc: double.tryParse(nc.text) ?? 0.0,
+          nq: double.tryParse(nq.text) ?? 0.0,
+          ny: double.tryParse(ny.text) ?? 0.0,
+          yw: double.tryParse(yw.text) ?? 0.0,
+          yc: double.tryParse(yc.text) ?? 0.0,
+          gs: double.tryParse(gs?.text ?? ""),
+          w: double.tryParse(w?.text ?? ""),
+          e: double.tryParse(e?.text ?? ""),
+          s: double.tryParse(s?.text ?? ""),
+          yDry: double.tryParse(yDry?.text ?? ""),
+          y: double.tryParse(y?.text ?? ""),
+          ySat: double.tryParse(ySat?.text ?? ""),
+        ),
+      );
     });
   }
 
+
   @override
   void dispose() {
-    _input1Controller.dispose();
-    _input2Controller.dispose();
-    _input3Controller.dispose();
+    // Dispose non-nullable controllers
+    df.dispose();
+    dw.dispose();
+    fDim.dispose();
+    c.dispose();
+    t.dispose();
+    fs.dispose();
+    nc.dispose();
+    nq.dispose();
+    ny.dispose();
+    yw.dispose();
+    yc.dispose();
+
+    // Dispose nullable controllers (only if they exist)
+    gs?.dispose();
+    w?.dispose();
+    e?.dispose();
+    s?.dispose();
+    yDry?.dispose();
+    y?.dispose();
+    ySat?.dispose();
+    theta?.dispose();
+
     super.dispose();
   }
 
-*/
   String get footingDetLabel {
     switch (selectedFootingType) {
       case 'Strip or continuous':
@@ -106,6 +197,8 @@ String? selectedFootingType = 'Square';
     'Circular',
   ];
 
+
+
 @override
 Widget build(BuildContext context) {
   return Scaffold(
@@ -124,39 +217,41 @@ Widget build(BuildContext context) {
     body: SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
-          // row managerrrr
-          children: [
-            row1ShearFailure(),
-            row2FootingType(),
-            row3Df(),
-            row4Dw(),
-            row5footingDim(),
-            row6Cohesion(),
-            row7Thickness(),
-            row8FactorOfSafety(),
-            row9SoilProp(),
-            Stack(
-              children: [
-                row10aSoilPropOn(),
-                row10bSoilPropOff(),
-              ]
-            ),
-            row11AngleDet(),
-            Stack(
-              children: [
-                row12aAngleDetOn(),
-                row12bAngleDetOff(),
-              ]
-            ),
-            row13yWaterDet(),
-            row14yWaterDetOn(),
-            row15yConcreteDet(),
-            row16yConcreteDetOn(),
-            SizedBox(height: 10),
-            submitButton(),
-          ],
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
+            // row managerrrr
+            children: [
+              row1ShearFailure(),
+              row2FootingType(),
+              row3Df(),
+              row4Dw(),
+              row5footingDim(),
+              row6Cohesion(),
+              row7Thickness(),
+              row8FactorOfSafety(),
+              row9SoilProp(),
+              Stack(
+                children: [
+                  row10aSoilPropOn(),
+                  row10bSoilPropOff(),
+                ]
+              ),
+              row11AngleDet(),
+              Stack(
+                children: [
+                  row12aAngleDetOn(),
+                  row12bAngleDetOff(),
+                ]
+              ),
+              row13yWaterDet(),
+              row14yWaterDetOn(),
+              row15yConcreteDet(),
+              row16yConcreteDetOn(),
+              SizedBox(height: 10),
+              submitButton(),
+            ],
+          ),
         ),
       ),
     ),
@@ -167,7 +262,7 @@ Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         // Handle form submission
-        print('Depth of Foundation: ${widget.state.depthOfFoundation}');
+        print('Depth of Foundation: ${widget.state.ny}');
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -179,6 +274,10 @@ Widget build(BuildContext context) {
   Widget row1ShearFailure() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
@@ -218,14 +317,19 @@ Widget build(BuildContext context) {
                     );
                 }).toList(),
               ),
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
   Widget row2FootingType() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
@@ -268,263 +372,324 @@ Widget build(BuildContext context) {
           ),
         ],
       ),
+      ),
     );
   }
   Widget row3Df() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Depth of foundation, Df (in m):',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Depth of foundation, Df (in m):',
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: df,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
+                )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
   Widget row4Dw() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Depth of the water table from ground level, Dw (in m):',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Depth of the water table from ground level, Dw (in m):',
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: dw,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
+                )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
   Widget row5footingDim() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              footingDetLabel,
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                footingDetLabel,
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: fDim,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
+                )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
   Widget row6Cohesion() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Cohesion, c:',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Cohesion, c:',
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Field required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: c,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Field required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
+                )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
   Widget row7Thickness() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Footing thickness, t (in m):',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
-              ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+            children: [
+              Expanded(
+                child: Text(
+                  'Footing thickness, t (in m):',
                   style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Optional",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                  ),
                 ),
-              )
-            )
+              ),
+              Container(
+                width: 179,
+                child: TextSelectionTheme(
+                  data: TextSelectionThemeData(
+                    cursorColor: Colors.white,
+                  ),
+                  child: SizedBox(
+                    height: 40, // Adjust height as needed
+                    child: TextField(
+                      controller: t,
+                      keyboardType: TextInputType.numberWithOptions(decimal: true),
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                      ],
+                      style: TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: "Optional",
+                        hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                        ),
+                        filled: true,
+                        fillColor: Colors.grey[800],
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(25),
+                          borderSide: BorderSide(color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
     );
   }
   Widget row8FactorOfSafety() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Factor of safety:',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Factor of safety:',
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Optional",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey[800],
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: fs,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
                     ),
                   ),
-                ),
+                )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -534,38 +699,43 @@ Widget build(BuildContext context) {
   Widget row9SoilProp() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Soil properties',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Soil properties',
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: Switch(
-                  value: soilProp,
-                  onChanged: (bool newValue) {
-                    setState(() {
-                      soilProp = newValue;
-                    });
-                  },
-                  activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
-                  inactiveThumbColor: Colors.white,
-                  inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: soilProp,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        soilProp = newValue;
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
                 )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -576,6 +746,8 @@ Widget build(BuildContext context) {
       child: Visibility(
         visible: soilProp,
         child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
             color: const Color.fromARGB(255, 10, 131, 14),
@@ -643,6 +815,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: gs,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -694,6 +871,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: w,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -745,6 +927,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: e,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -796,6 +983,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: s,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -830,6 +1022,8 @@ Widget build(BuildContext context) {
       child: Visibility(
         visible: !soilProp,
         child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
             color: const Color.fromARGB(255, 201, 40, 29),
@@ -897,6 +1091,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: yDry,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -948,6 +1147,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: y,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -999,6 +1203,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: ySat,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1032,38 +1241,43 @@ Widget build(BuildContext context) {
   Widget row11AngleDet() {
     return Padding(
       padding: EdgeInsets.only(top: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Angle of internal friction',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Angle of internal friction',
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: Switch(
-                  value: angleDet,
-                  onChanged: (bool newValue) {
-                    setState(() {
-                      angleDet = newValue;
-                    });
-                  },
-                  activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
-                  inactiveThumbColor: Colors.white,
-                  inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: angleDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        angleDet = newValue;
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
                 )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1074,6 +1288,8 @@ Widget build(BuildContext context) {
       child: Visibility(
         visible: angleDet,
         child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
             color: const Color.fromARGB(255, 10, 131, 14),
@@ -1117,6 +1333,10 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1151,6 +1371,8 @@ Widget build(BuildContext context) {
       child: Visibility(
         visible: !angleDet,
         child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
             color: const Color.fromARGB(255, 201, 40, 29),
@@ -1198,6 +1420,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: nc,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1249,6 +1476,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: nq,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1300,6 +1532,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: ny,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1333,38 +1570,43 @@ Widget build(BuildContext context) {
   Widget row13yWaterDet() {
     return Padding(
       padding: EdgeInsets.only(top: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: Switch(
-                  value: waterDet,
-                  onChanged: (bool newValue) {
-                    setState(() {
-                      waterDet = newValue;
-                    });
-                  },
-                  activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
-                  inactiveThumbColor: Colors.white,
-                  inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: waterDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        waterDet = newValue;
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
                 )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1374,6 +1616,8 @@ Widget build(BuildContext context) {
       child: Visibility(
         visible: waterDet,
         child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
             color: const Color.fromARGB(255, 10, 131, 14),
@@ -1416,6 +1660,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: yw,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1449,38 +1698,43 @@ Widget build(BuildContext context) {
   Widget row15yConcreteDet() {
     return Padding(
       padding: EdgeInsets.only(top: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Expanded(
-            child: Text(
-              'Unit weight of concrete (assumed as 24 kN/m³ if not given)',
-              style: TextStyle(color: Colors.white),
-            ),
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Unit weight of concrete (assumed as 24 kN/m³ if not given)',
+                style: TextStyle(color: Colors.white),
               ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: Switch(
-                  value: concreteDet,
-                  onChanged: (bool newValue) {
-                    setState(() {
-                      concreteDet = newValue;
-                    });
-                  },
-                  activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
-                  inactiveThumbColor: Colors.white,
-                  inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: concreteDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        concreteDet = newValue;
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
                 )
               )
-            )
-          ),
-        ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -1490,6 +1744,8 @@ Widget build(BuildContext context) {
       child: Visibility(
         visible: concreteDet,
         child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
             color: const Color.fromARGB(255, 10, 131, 14),
@@ -1532,6 +1788,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: yc,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true),
+                  inputFormatters: [
+                    FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
+                  ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1560,3 +1821,4 @@ Widget build(BuildContext context) {
     );
   }
 } // AnalysisPageState
+
