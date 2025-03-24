@@ -30,47 +30,141 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
-  /*
-  late TextEditingController _input1Controller;
-  late TextEditingController _input2Controller;
-  late TextEditingController _input3Controller;
+  late TextEditingController inputDepthFoundation;
+  late TextEditingController inputDepthWater;
+  late TextEditingController inputFootingBase;
+  late TextEditingController inputCohesion;
+  late TextEditingController inputFootingThickness;
+  late TextEditingController inputFactorSafety;
+
+//Soil Properties
+  late TextEditingController inputSpecificGravity;
+  late TextEditingController inputWaterContent;
+  late TextEditingController inputVoidRatio;
+  late TextEditingController inputDegreeSat;
+//Unit Weights
+  late TextEditingController inputGammaDry;
+  late TextEditingController inputGammaMoist;
+  late TextEditingController inputGammaSat;
+  
+//Angle of Internal Friction
+  late TextEditingController inputAngleFriction;
+  late TextEditingController inputFactCohesion;
+  late TextEditingController inputFactOverburden;
+  late TextEditingController inputFactUnitWeight;
+
+  late TextEditingController inputUnitWeightWater;
+  late TextEditingController inputUnitWeightConcrete;
+
 
   @override
   void initState() {
     super.initState();
 
-    // Set default footing type if not already selected
-    widget.state.selectedFootingType ??= 'Square';
-
     // Initialize controllers with saved state
-    _input1Controller = TextEditingController(text: widget.state.depthOfFoundation);
-    _input2Controller = TextEditingController(text: widget.state.waterTableDistance);
-    _input3Controller = TextEditingController(text: widget.state.baseOfFoundation);
+    inputDepthFoundation = TextEditingController(text: widget.state.inputDepthFoundation);
+    inputDepthWater = TextEditingController(text: widget.state.inputDepthWater);
+    inputFootingBase = TextEditingController(text: widget.state.inputFootingBase);
+    inputCohesion = TextEditingController(text: widget.state.inputCohesion);
+    inputFootingThickness = TextEditingController(text: widget.state.inputFootingThickness);
+    inputFactorSafety = TextEditingController(text: widget.state.inputFactorSafety);
+      inputSpecificGravity = TextEditingController(text: widget.state.inputSpecificGravity);
+      inputWaterContent = TextEditingController(text: widget.state.inputWaterContent);
+      inputVoidRatio = TextEditingController(text: widget.state.inputVoidRatio);
+      inputDegreeSat = TextEditingController(text: widget.state.inputDegreeSat);
+      inputGammaDry = TextEditingController(text: widget.state.inputGammaDry);
+      inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
+      inputGammaSat = TextEditingController(text: widget.state.inputGammaSat);
+        inputAngleFriction = TextEditingController(text: widget.state.inputAngleFriction);
+        inputFactCohesion = TextEditingController(text: widget.state.inputFactCohesion);
+        inputFactOverburden = TextEditingController(text: widget.state.inputFactOverburden);
+        inputFactUnitWeight = TextEditingController(text: widget.state.inputFactUnitWeight);
+          inputUnitWeightWater = TextEditingController(text: widget.state.inputUnitWeightWater);
+          inputUnitWeightConcrete = TextEditingController(text: widget.state.inputUnitWeightConcrete);
     
+    selectedShearFailure = widget.state.selectedShearFailure;
+    selectedFootingType = widget.state.selectedFootingType;
+
+
     // Add listeners to update state when text changes
-    _input1Controller.addListener(_updateState);
-    _input2Controller.addListener(_updateState);
-    _input3Controller.addListener(_updateState);
+    inputDepthFoundation.addListener(_updateState);
+    inputDepthWater.addListener(_updateState);
+    inputFootingBase.addListener(_updateState);
+    inputCohesion.addListener(_updateState);
+    inputFootingThickness.addListener(_updateState);
+    inputFactorSafety.addListener(_updateState);
+      inputSpecificGravity.addListener(_updateState);
+      inputWaterContent.addListener(_updateState);
+      inputVoidRatio.addListener(_updateState);
+      inputDegreeSat.addListener(_updateState);
+      inputGammaDry.addListener(_updateState);
+      inputGammaMoist.addListener(_updateState);
+      inputGammaSat.addListener(_updateState);
+        inputAngleFriction.addListener(_updateState);
+        inputFactCohesion.addListener(_updateState);
+        inputFactOverburden.addListener(_updateState);
+        inputFactUnitWeight.addListener(_updateState);
+          inputUnitWeightWater.addListener(_updateState);
+          inputUnitWeightConcrete.addListener(_updateState);
+    
   }
 
+
+//Update function
   void _updateState() {
     setState(() {
-      widget.state.depthOfFoundation = _input1Controller.text;
-      widget.state.waterTableDistance = _input2Controller.text;
-      widget.state.baseOfFoundation = _input3Controller.text;
-      widget.onStateChanged(widget.state);
+      widget.state.inputDepthFoundation = inputDepthFoundation.text;
+      widget.state.inputDepthWater = inputDepthWater.text;
+      widget.state.inputFootingBase = inputFootingBase.text;
+      widget.state.inputCohesion = inputCohesion.text;
+      widget.state.inputFootingThickness = inputFootingThickness.text;
+      widget.state.inputFactorSafety = inputFactorSafety.text;
+        widget.state.inputSpecificGravity = inputSpecificGravity.text;
+        widget.state.inputWaterContent = inputWaterContent.text;
+        widget.state.inputVoidRatio = inputVoidRatio.text;
+        widget.state.inputDegreeSat = inputDegreeSat.text;
+        widget.state.inputGammaDry = inputGammaDry.text;
+        widget.state.inputGammaMoist = inputGammaMoist.text;
+        widget.state.inputGammaSat = inputGammaSat.text;
+          widget.state.inputAngleFriction = inputAngleFriction.text;
+          widget.state.inputFactCohesion = inputFactCohesion.text;
+          widget.state.inputFactOverburden = inputFactOverburden.text;
+          widget.state.inputFactUnitWeight = inputFactUnitWeight.text;
+            widget.state.inputUnitWeightWater = inputUnitWeightWater.text;
+            widget.state.inputUnitWeightConcrete = inputUnitWeightConcrete.text;
+
+      widget.state.selectedShearFailure = selectedShearFailure;
+      widget.state.selectedFootingType = selectedFootingType;      
+
+        widget.onStateChanged(widget.state);
     });
   }
 
   @override
   void dispose() {
-    _input1Controller.dispose();
-    _input2Controller.dispose();
-    _input3Controller.dispose();
+    inputDepthFoundation.dispose();
+    inputDepthWater.dispose();
+    inputFootingBase.dispose();
+    inputCohesion.dispose();
+    inputFootingThickness.dispose();
+    inputFactorSafety.dispose();
+      inputSpecificGravity.dispose();
+      inputWaterContent.dispose();
+      inputVoidRatio.dispose();
+      inputDegreeSat.dispose();
+      inputGammaDry.dispose();
+      inputGammaMoist.dispose();
+      inputGammaSat.dispose();
+        inputAngleFriction.dispose();
+        inputFactCohesion.dispose();
+        inputFactOverburden.dispose();
+        inputFactUnitWeight.dispose();
+          inputUnitWeightWater.dispose();
+          inputUnitWeightConcrete.dispose();
     super.dispose();
   }
 
-*/
+
   String get footingDetLabel {
     switch (selectedFootingType) {
       case 'Strip or continuous':
@@ -167,7 +261,7 @@ Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         // Handle form submission
-        print('Depth of Foundation: ${widget.state.depthOfFoundation}');
+        print('Depth of Foundation: ${widget.state.inputDepthFoundation}');
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -176,6 +270,7 @@ Widget build(BuildContext context) {
       child: Text(buttonLabel),
     );
   }
+
   Widget row1ShearFailure() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -291,6 +386,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputDepthFoundation, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -334,6 +430,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputDepthWater,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -377,6 +474,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputFootingBase,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -420,6 +518,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputCohesion,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -463,6 +562,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputFootingThickness,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Optional",
@@ -506,6 +606,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputFactorSafety,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Optional",
@@ -529,7 +630,6 @@ Widget build(BuildContext context) {
     );
   }
 
-  bool soilProp = true;
 
   Widget row9SoilProp() {
     return Padding(
@@ -552,10 +652,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: Switch(
-                  value: soilProp,
+                  value: widget.state.soilProp,
                   onChanged: (bool newValue) {
                     setState(() {
-                      soilProp = newValue;
+                      widget.state.soilProp = newValue;
+                      widget.onStateChanged(widget.state);
                     });
                   },
                   activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
@@ -574,7 +675,7 @@ Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Visibility(
-        visible: soilProp,
+        visible: widget.state.soilProp,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
@@ -643,6 +744,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputSpecificGravity,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -694,6 +796,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputWaterContent,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -745,6 +848,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputVoidRatio,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -796,6 +900,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputDegreeSat,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -828,7 +933,7 @@ Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Visibility(
-        visible: !soilProp,
+        visible: !widget.state.soilProp,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
@@ -897,6 +1002,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputGammaDry,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -948,6 +1054,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputGammaMoist,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -999,6 +1106,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputGammaSat,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1027,7 +1135,6 @@ Widget build(BuildContext context) {
     );
   }
 
-  bool angleDet = true;
 
   Widget row11AngleDet() {
     return Padding(
@@ -1050,10 +1157,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: Switch(
-                  value: angleDet,
+                  value: widget.state.angleDet,
                   onChanged: (bool newValue) {
                     setState(() {
-                      angleDet = newValue;
+                      widget.state.angleDet = newValue;
+                      widget.onStateChanged(widget.state);
                     });
                   },
                   activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
@@ -1072,7 +1180,7 @@ Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Visibility(
-        visible: angleDet,
+        visible: widget.state.angleDet,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
@@ -1117,6 +1225,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputAngleFriction,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1149,7 +1258,7 @@ Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Visibility(
-        visible: !angleDet,
+        visible: !widget.state.angleDet,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
@@ -1198,6 +1307,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputFactCohesion,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1249,6 +1359,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputFactOverburden,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1300,6 +1411,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputFactUnitWeight,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1328,7 +1440,6 @@ Widget build(BuildContext context) {
     );
   }
 
-  bool waterDet = false;
 
   Widget row13yWaterDet() {
     return Padding(
@@ -1351,10 +1462,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: Switch(
-                  value: waterDet,
+                  value: widget.state.waterDet,
                   onChanged: (bool newValue) {
                     setState(() {
-                      waterDet = newValue;
+                      widget.state.waterDet = newValue;
+                      widget.onStateChanged(widget.state);
                     });
                   },
                   activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
@@ -1372,7 +1484,7 @@ Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Visibility(
-        visible: waterDet,
+        visible: widget.state.waterDet,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
@@ -1416,6 +1528,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputUnitWeightWater,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1444,7 +1557,6 @@ Widget build(BuildContext context) {
     );
   }
   
-  bool concreteDet = false;
 
   Widget row15yConcreteDet() {
     return Padding(
@@ -1467,10 +1579,11 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: Switch(
-                  value: concreteDet,
+                  value: widget.state.concreteDet,
                   onChanged: (bool newValue) {
                     setState(() {
-                      concreteDet = newValue;
+                      widget.state.concreteDet = newValue;
+                      widget.onStateChanged(widget.state);
                     });
                   },
                   activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
@@ -1488,7 +1601,7 @@ Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Visibility(
-        visible: concreteDet,
+        visible: widget.state.concreteDet,
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(25),
@@ -1532,6 +1645,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
+                  controller: inputUnitWeightConcrete,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
