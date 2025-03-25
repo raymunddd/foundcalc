@@ -386,11 +386,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Depth of foundation, Df (in m):',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Depth of foundation, Df (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -445,11 +448,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Depth of the water table from ground level, Dw (in m):',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Depth of the water table from ground level, Dw (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -504,11 +510,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                footingDetLabel,
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  footingDetLabel,
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -563,11 +572,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Cohesion, c:',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Cohesion, c:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -622,11 +634,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Footing thickness, t (in m):',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Footing thickness, t (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -681,11 +696,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Factor of safety:',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Factor of safety:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -741,11 +759,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Soil properties',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Soil properties',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -795,7 +816,6 @@ Widget build(BuildContext context) {
               mainAxisSize: MainAxisSize.min,
               children: [
 // Soil Prop On Manager
-                row10aHeader(),
                 row10aaGs(),
                 row10abWaterContent(),
                 row10acVoidRatio(),
@@ -804,26 +824,6 @@ Widget build(BuildContext context) {
             ),
           ),
         ),
-      ),
-    );
-  }
-  Widget row10aHeader() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center, // Centers the text
-        children: [
-          Flexible(
-            child: Text(
-              'Input at least three (3)',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold, // Makes text bold
-              ),
-              textAlign: TextAlign.center, // Centers the text inside the widget
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -854,6 +854,8 @@ Widget build(BuildContext context) {
                   controller: inputSpecificGravity,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
@@ -915,6 +917,8 @@ Widget build(BuildContext context) {
                   controller: inputWaterContent,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
+                    hintText: "Optional",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
@@ -976,6 +980,8 @@ Widget build(BuildContext context) {
                   controller: inputVoidRatio,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
@@ -1037,6 +1043,8 @@ Widget build(BuildContext context) {
                   controller: inputDegreeSat,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
+                    hintText: "Optional",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
@@ -1317,11 +1325,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Angle of internal friction',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Angle of internal friction',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -1673,11 +1684,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
@@ -1806,11 +1820,14 @@ Widget build(BuildContext context) {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Expanded(
-              child: Text(
-                'Unit weight of concrete (assumed as 24 kN/m³ if not given)',
-                style: TextStyle(color: Colors.white),
-              ),
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Unit weight of concrete (assumed as 24 kN/m³ if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
             Container(
               width: 179,
