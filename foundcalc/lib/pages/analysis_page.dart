@@ -30,6 +30,7 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
+  
   late TextEditingController inputDepthFoundation;
   late TextEditingController inputDepthWater;
   late TextEditingController inputFootingBase;
@@ -488,7 +489,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          inputDepthWater.clear();
                         },
                       ),
                     ),
@@ -550,7 +551,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          inputFootingBase.clear();
                         },
                       ),
                     ),
@@ -612,7 +613,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          inputCohesion.clear();
                         },
                       ),
                     ),
@@ -674,7 +675,7 @@ Widget build(BuildContext context) {
                           iconSize: 17,
                           onPressed: () {
                             // Clear the text field
-                            inputDepthFoundation.clear();
+                            inputFootingThickness.clear();
                           },
                         ),
                     ),
@@ -736,7 +737,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          inputFactorSafety.clear();
                         },
                       ),
                     ),
@@ -878,7 +879,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputSpecificGravity.clear();
                       },
                     ),
                   ),
@@ -941,7 +942,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputWaterContent.clear();
                       },
                     ),
                   ),
@@ -1004,7 +1005,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputVoidRatio.clear();
                       },
                     ),
                   ),
@@ -1067,7 +1068,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputDegreeSat.clear();
                       },
                     ),
                   ),
@@ -1180,7 +1181,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputGammaDry.clear();
                       },
                     ),
                   ),
@@ -1241,7 +1242,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputGammaMoist.clear();
                       },
                     ),
                   ),
@@ -1280,6 +1281,8 @@ Widget build(BuildContext context) {
                   controller: inputGammaSat,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
+                    hintText: "",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
@@ -1302,7 +1305,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputGammaSat.clear();
                       },
                     ),
                   ),
@@ -1441,7 +1444,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputAngleFriction.clear();
                       },
                     ),
                   ),
@@ -1536,7 +1539,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputFactCohesion.clear();
                       },
                     ),
                   ),
@@ -1599,7 +1602,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputFactOverburden.clear();
                       },
                     ),
                   ),
@@ -1662,7 +1665,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputFactUnitWeight.clear();
                       },
                     ),
                   ),
@@ -1798,7 +1801,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputUnitWeightWater.clear();
                       },
                     ),
                   ),
@@ -1934,7 +1937,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        inputUnitWeightConcrete.clear();
                       },
                     ),
                   ),
