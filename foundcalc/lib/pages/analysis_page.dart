@@ -30,31 +30,31 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
-  late TextEditingController inputDepthFoundation;
-  late TextEditingController inputDepthWater;
-  late TextEditingController inputFootingBase;
-  late TextEditingController inputCohesion;
-  late TextEditingController inputFootingThickness;
-  late TextEditingController inputFactorSafety;
+  late TextEditingController df;
+  late TextEditingController dw;
+  late TextEditingController fDim;
+  late TextEditingController c;
+  late TextEditingController t;
+  late TextEditingController fs;
 
 //Soil Properties
-  late TextEditingController inputSpecificGravity;
-  late TextEditingController inputWaterContent;
-  late TextEditingController inputVoidRatio;
-  late TextEditingController inputDegreeSat;
+  late TextEditingController gs;
+  late TextEditingController w;
+  late TextEditingController e;
+  late TextEditingController s;
 //Unit Weights
-  late TextEditingController inputGammaDry;
-  late TextEditingController inputGammaMoist;
-  late TextEditingController inputGammaSat;
+  late TextEditingController yDry;
+  late TextEditingController y;
+  late TextEditingController ySat;
   
 //Angle of Internal Friction
-  late TextEditingController inputAngleFriction;
-  late TextEditingController inputFactCohesion;
-  late TextEditingController inputFactOverburden;
-  late TextEditingController inputFactUnitWeight;
+  late TextEditingController theta;
+  late TextEditingController nc;
+  late TextEditingController nq;
+  late TextEditingController ny;
 
-  late TextEditingController inputUnitWeightWater;
-  late TextEditingController inputUnitWeightConcrete;
+  late TextEditingController yw;
+  late TextEditingController yc;
 
 
   @override
@@ -62,50 +62,50 @@ class _AnalysisPageState extends State<AnalysisPage> {
     super.initState();
 
     // Initialize controllers with saved state
-    inputDepthFoundation = TextEditingController(text: widget.state.inputDepthFoundation);
-    inputDepthWater = TextEditingController(text: widget.state.inputDepthWater);
-    inputFootingBase = TextEditingController(text: widget.state.inputFootingBase);
-    inputCohesion = TextEditingController(text: widget.state.inputCohesion);
-    inputFootingThickness = TextEditingController(text: widget.state.inputFootingThickness);
-    inputFactorSafety = TextEditingController(text: widget.state.inputFactorSafety);
-      inputSpecificGravity = TextEditingController(text: widget.state.inputSpecificGravity);
-      inputWaterContent = TextEditingController(text: widget.state.inputWaterContent);
-      inputVoidRatio = TextEditingController(text: widget.state.inputVoidRatio);
-      inputDegreeSat = TextEditingController(text: widget.state.inputDegreeSat);
-      inputGammaDry = TextEditingController(text: widget.state.inputGammaDry);
-      inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
-      inputGammaSat = TextEditingController(text: widget.state.inputGammaSat);
-        inputAngleFriction = TextEditingController(text: widget.state.inputAngleFriction);
-        inputFactCohesion = TextEditingController(text: widget.state.inputFactCohesion);
-        inputFactOverburden = TextEditingController(text: widget.state.inputFactOverburden);
-        inputFactUnitWeight = TextEditingController(text: widget.state.inputFactUnitWeight);
-          inputUnitWeightWater = TextEditingController(text: widget.state.inputUnitWeightWater);
-          inputUnitWeightConcrete = TextEditingController(text: widget.state.inputUnitWeightConcrete);
+    df = TextEditingController(text: widget.state.df);
+    dw = TextEditingController(text: widget.state.dw);
+    fDim = TextEditingController(text: widget.state.fDim);
+    c = TextEditingController(text: widget.state.c);
+    t = TextEditingController(text: widget.state.t);
+    fs = TextEditingController(text: widget.state.fs);
+      gs = TextEditingController(text: widget.state.gs);
+      w = TextEditingController(text: widget.state.w);
+      e = TextEditingController(text: widget.state.e);
+      s = TextEditingController(text: widget.state.s);
+      yDry = TextEditingController(text: widget.state.yDry);
+      y = TextEditingController(text: widget.state.y);
+      ySat = TextEditingController(text: widget.state.ySat);
+        theta = TextEditingController(text: widget.state.theta);
+        nc = TextEditingController(text: widget.state.nc);
+        nq = TextEditingController(text: widget.state.nq);
+        ny = TextEditingController(text: widget.state.ny);
+          yw = TextEditingController(text: widget.state.yw);
+          yc = TextEditingController(text: widget.state.yc);
     
     selectedShearFailure = widget.state.selectedShearFailure;
     selectedFootingType = widget.state.selectedFootingType;
 
 
     // Add listeners to update state when text changes
-    inputDepthFoundation.addListener(_updateState);
-    inputDepthWater.addListener(_updateState);
-    inputFootingBase.addListener(_updateState);
-    inputCohesion.addListener(_updateState);
-    inputFootingThickness.addListener(_updateState);
-    inputFactorSafety.addListener(_updateState);
-      inputSpecificGravity.addListener(_updateState);
-      inputWaterContent.addListener(_updateState);
-      inputVoidRatio.addListener(_updateState);
-      inputDegreeSat.addListener(_updateState);
-      inputGammaDry.addListener(_updateState);
-      inputGammaMoist.addListener(_updateState);
-      inputGammaSat.addListener(_updateState);
-        inputAngleFriction.addListener(_updateState);
-        inputFactCohesion.addListener(_updateState);
-        inputFactOverburden.addListener(_updateState);
-        inputFactUnitWeight.addListener(_updateState);
-          inputUnitWeightWater.addListener(_updateState);
-          inputUnitWeightConcrete.addListener(_updateState);
+    df.addListener(_updateState);
+    dw.addListener(_updateState);
+    fDim.addListener(_updateState);
+    c.addListener(_updateState);
+    t.addListener(_updateState);
+    fs.addListener(_updateState);
+      gs.addListener(_updateState);
+      w.addListener(_updateState);
+      e.addListener(_updateState);
+      s.addListener(_updateState);
+      yDry.addListener(_updateState);
+      y.addListener(_updateState);
+      ySat.addListener(_updateState);
+        theta.addListener(_updateState);
+        nc.addListener(_updateState);
+        nq.addListener(_updateState);
+        ny.addListener(_updateState);
+          yw.addListener(_updateState);
+          yc.addListener(_updateState);
     
   }
 
@@ -113,25 +113,25 @@ class _AnalysisPageState extends State<AnalysisPage> {
 //Update function
   void _updateState() {
     setState(() {
-      widget.state.inputDepthFoundation = inputDepthFoundation.text;
-      widget.state.inputDepthWater = inputDepthWater.text;
-      widget.state.inputFootingBase = inputFootingBase.text;
-      widget.state.inputCohesion = inputCohesion.text;
-      widget.state.inputFootingThickness = inputFootingThickness.text;
-      widget.state.inputFactorSafety = inputFactorSafety.text;
-        widget.state.inputSpecificGravity = inputSpecificGravity.text;
-        widget.state.inputWaterContent = inputWaterContent.text;
-        widget.state.inputVoidRatio = inputVoidRatio.text;
-        widget.state.inputDegreeSat = inputDegreeSat.text;
-        widget.state.inputGammaDry = inputGammaDry.text;
-        widget.state.inputGammaMoist = inputGammaMoist.text;
-        widget.state.inputGammaSat = inputGammaSat.text;
-          widget.state.inputAngleFriction = inputAngleFriction.text;
-          widget.state.inputFactCohesion = inputFactCohesion.text;
-          widget.state.inputFactOverburden = inputFactOverburden.text;
-          widget.state.inputFactUnitWeight = inputFactUnitWeight.text;
-            widget.state.inputUnitWeightWater = inputUnitWeightWater.text;
-            widget.state.inputUnitWeightConcrete = inputUnitWeightConcrete.text;
+      widget.state.df = df.text;
+      widget.state.dw = dw.text;
+      widget.state.fDim = fDim.text;
+      widget.state.c = c.text;
+      widget.state.t = t.text;
+      widget.state.fs = fs.text;
+        widget.state.gs = gs.text;
+        widget.state.w = w.text;
+        widget.state.e = e.text;
+        widget.state.s = s.text;
+        widget.state.yDry = yDry.text;
+        widget.state.y = y.text;
+        widget.state.ySat = ySat.text;
+          widget.state.theta = theta.text;
+          widget.state.nc = nc.text;
+          widget.state.nq = nq.text;
+          widget.state.ny = ny.text;
+            widget.state.yw = yw.text;
+            widget.state.yc = yc.text;
 
       widget.state.selectedShearFailure = selectedShearFailure;
       widget.state.selectedFootingType = selectedFootingType;      
@@ -142,25 +142,25 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
   @override
   void dispose() {
-    inputDepthFoundation.dispose();
-    inputDepthWater.dispose();
-    inputFootingBase.dispose();
-    inputCohesion.dispose();
-    inputFootingThickness.dispose();
-    inputFactorSafety.dispose();
-      inputSpecificGravity.dispose();
-      inputWaterContent.dispose();
-      inputVoidRatio.dispose();
-      inputDegreeSat.dispose();
-      inputGammaDry.dispose();
-      inputGammaMoist.dispose();
-      inputGammaSat.dispose();
-        inputAngleFriction.dispose();
-        inputFactCohesion.dispose();
-        inputFactOverburden.dispose();
-        inputFactUnitWeight.dispose();
-          inputUnitWeightWater.dispose();
-          inputUnitWeightConcrete.dispose();
+    df.dispose();
+    dw.dispose();
+    fDim.dispose();
+    c.dispose();
+    t.dispose();
+    fs.dispose();
+      gs.dispose();
+      w.dispose();
+      e.dispose();
+      s.dispose();
+      yDry.dispose();
+      y.dispose();
+      ySat.dispose();
+        theta.dispose();
+        nc.dispose();
+        nq.dispose();
+        ny.dispose();
+          yw.dispose();
+          yc.dispose();
     super.dispose();
   }
 
@@ -265,7 +265,7 @@ Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         // Handle form submission
-        print('Depth of Foundation: ${widget.state.inputDepthFoundation}');
+        print('Depth of Foundation: ${widget.state.df}');
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -401,7 +401,7 @@ Widget build(BuildContext context) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputDepthFoundation, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    controller: df, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Input required",
@@ -423,7 +423,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          df.clear();
                         },
                       ),
                     ),
@@ -460,7 +460,7 @@ Widget build(BuildContext context) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputDepthWater,
+                    controller: dw,
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Input required",
@@ -482,7 +482,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          dw.clear();
                         },
                       ),
                     ),
@@ -519,7 +519,7 @@ Widget build(BuildContext context) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputFootingBase,
+                    controller: fDim,
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Input required",
@@ -541,7 +541,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          fDim.clear();
                         },
                       ),
                     ),
@@ -578,7 +578,7 @@ Widget build(BuildContext context) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputCohesion,
+                    controller: c,
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Input required",
@@ -600,7 +600,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          c.clear();
                         },
                       ),
                     ),
@@ -637,7 +637,7 @@ Widget build(BuildContext context) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputFootingThickness,
+                    controller: t,
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Optional",
@@ -659,7 +659,7 @@ Widget build(BuildContext context) {
                           iconSize: 17,
                           onPressed: () {
                             // Clear the text field
-                            inputDepthFoundation.clear();
+                            t.clear();
                           },
                         ),
                     ),
@@ -696,7 +696,7 @@ Widget build(BuildContext context) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputFactorSafety,
+                    controller: fs,
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Optional",
@@ -718,7 +718,7 @@ Widget build(BuildContext context) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputDepthFoundation.clear();
+                          fs.clear();
                         },
                       ),
                     ),
@@ -851,7 +851,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputSpecificGravity,
+                  controller: gs,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -876,7 +876,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        gs.clear();
                       },
                     ),
                   ),
@@ -912,7 +912,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputWaterContent,
+                  controller: w,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -937,7 +937,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        w.clear();
                       },
                     ),
                   ),
@@ -973,7 +973,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputVoidRatio,
+                  controller: e,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -998,7 +998,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        e.clear();
                       },
                     ),
                   ),
@@ -1034,7 +1034,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputDegreeSat,
+                  controller: s,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -1059,7 +1059,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        s.clear();
                       },
                     ),
                   ),
@@ -1147,7 +1147,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputGammaDry,
+                  controller: yDry,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -1172,7 +1172,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        yDry.clear();
                       },
                     ),
                   ),
@@ -1208,7 +1208,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputGammaMoist,
+                  controller: y,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -1233,7 +1233,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        y.clear();
                       },
                     ),
                   ),
@@ -1269,7 +1269,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputGammaSat,
+                  controller: ySat,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -1294,7 +1294,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        ySat.clear();
                       },
                     ),
                   ),
@@ -1403,7 +1403,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputAngleFriction,
+                  controller: theta,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1430,7 +1430,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        theta.clear();
                       },
                     ),
                   ),
@@ -1498,7 +1498,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputFactCohesion,
+                  controller: nc,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1525,7 +1525,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        nc.clear();
                       },
                     ),
                   ),
@@ -1561,7 +1561,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputFactOverburden,
+                  controller: nq,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1588,7 +1588,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        nq.clear();
                       },
                     ),
                   ),
@@ -1624,7 +1624,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputFactUnitWeight,
+                  controller: ny,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1651,7 +1651,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        ny.clear();
                       },
                     ),
                   ),
@@ -1757,7 +1757,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputUnitWeightWater,
+                  controller: yw,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1784,7 +1784,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        yw.clear();
                       },
                     ),
                   ),
@@ -1890,7 +1890,7 @@ Widget build(BuildContext context) {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputUnitWeightConcrete,
+                  controller: yc,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
@@ -1917,7 +1917,7 @@ Widget build(BuildContext context) {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDepthFoundation.clear();
+                        yc.clear();
                       },
                     ),
                   ),
