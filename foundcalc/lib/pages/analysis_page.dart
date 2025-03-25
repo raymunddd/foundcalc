@@ -269,19 +269,24 @@ void calculateP() {
             yPrime = (gs!*yw!)/(1 + e!);
           } else if (gs != null && e != null && w != null) { // if  Gs, e and w only are given
             yPrime = (gs!*yw!)*((1 + w!)/(1 + e!));
-          } else if (gs != null && s != null && w != null) { // if  Gs, S and w only are given
+          } else if (gs != null && s != null && e != null) { // if  Gs, e and S only are given
             yPrime = (gs!*yw!)*((1 + ((e!*s!)/gs!))/(1 + e!));
+          } else if (gs != null && s != null && e != null) { // if  Gs, w and S only are given
+            yPrime = (gs!*yw!)*((1 + w!)/(1 + ((w!*gs!)/s!)));
           } else if (gs != null && s != null && w != null && e != null) { // if  all are given
             yPrime = (gs!*yw!)*((1 + w!)/(1 + e!));
+          } else {
+            yPrime = 1000;
+          }
+        } else {
+          yPrime = 2000;
         }
-      } 
+      } else {
+        yPrime = 3000;
+      }
   // Print the results for debugging
-  print("yw = $yw, yc = $yc, result_P = $result_P");
+  print("yw = $yw, yc = $yc, yPrime = $yPrime");
   }
-}
-
-
-
 /*
   // Check if soil properties are enabled
   if (widget.state.soilProp) {
@@ -320,46 +325,53 @@ Widget build(BuildContext context) {
       surfaceTintColor: Colors.transparent,
       centerTitle: true,
     ),
-    body: SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
-            // row managerrrr
-            children: [
-              row1ShearFailure(),
-              row2FootingType(),
-              row3Df(),
-              row4Dw(),
-              row5footingDim(),
-              row6Cohesion(),
-              row7Thickness(),
-              row8FactorOfSafety(),
-              row9SoilProp(),
-              Stack(
-                children: [
-                  row10aSoilPropOn(),
-                  row10bSoilPropOff(),
-                ]
+    body: Padding(
+      padding: const EdgeInsets.only(right: 4.0),
+      child: Scrollbar(
+        thickness: 2.2,
+        radius: Radius.circular(10),
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
+                  // row managerrrr
+                  children: [
+                    row1ShearFailure(),
+                    row2FootingType(),
+                    row3Df(),
+                    row4Dw(),
+                    row5footingDim(),
+                    row6Cohesion(),
+                    row7Thickness(),
+                    row8FactorOfSafety(),
+                    row9SoilProp(),
+                    Stack(
+                      children: [
+                        row10aSoilPropOn(),
+                        row10bSoilPropOff(),
+                      ]
+                    ),
+                    row11AngleDet(),
+                    Stack(
+                      children: [
+                        row12aAngleDetOn(),
+                        row12bAngleDetOff(),
+                      ]
+                    ),
+                    row13yWaterDet(),
+                    row14yWaterDetOn(),
+                    row15yConcreteDet(),
+                    row16yConcreteDetOn(),
+                    SizedBox(height: 10),
+                    submitButton(),
+                    resulttt(),
+                  ],
+                ),
               ),
-              row11AngleDet(),
-              Stack(
-                children: [
-                  row12aAngleDetOn(),
-                  row12bAngleDetOff(),
-                ]
-              ),
-              row13yWaterDet(),
-              row14yWaterDetOn(),
-              row15yConcreteDet(),
-              row16yConcreteDetOn(),
-              SizedBox(height: 10),
-              submitButton(),
-              resulttt(),
-            ],
+            ),
           ),
-        ),
       ),
     ),
   );
