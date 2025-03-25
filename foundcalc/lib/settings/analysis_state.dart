@@ -4,31 +4,31 @@ class AnalysisState {
   String? selectedFootingType;
 
 //NUMBER INPUTS
-      String df = '';
-      String dw = '';
-      String fDim = '';
-      String c = '';
-      String t = '';
-      String fs = '';
+      String inputDepthFoundation = '';
+      String inputDepthWater = '';
+      String inputFootingBase = '';
+      String inputCohesion = '';
+      String inputFootingThickness = '';
+      String inputFactorSafety = '';
 
     //Soil Properties
-      String gs = '';
-      String w = '';
-      String e = '';
-      String s = '';
+      String inputSpecificGravity = '';
+      String inputWaterContent = '';
+      String inputVoidRatio = '';
+      String inputDegreeSat = '';
     //Unit Weights
-      String yDry = '';
-      String y = '';
-      String ySat = '';
+      String inputGammaDry = '';
+      String inputGammaMoist = '';
+      String inputGammaSat = '';
       
     //Angle of Internal Friction
-      String theta = '';
-      String nc = '';
-      String nq = '';
-      String ny = '';
+      String inputAngleFriction = '';
+      String inputFactCohesion = '';
+      String inputFactOverburden = '';
+      String inputFactUnitWeight = '';
 
-      String yw = '';
-      String yc = '';
+      String inputUnitWeightWater = '';
+      String inputUnitWeightConcrete = '';
 
 //TOGGLES
     bool soilProp = true;
