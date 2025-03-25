@@ -169,10 +169,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
     switch (selectedFootingType) {
       case 'Strip or continuous':
         return 'Width of footing, W (in m):';
+      case 'Square':
+        return 'Base of footing, B (in m):';
       case 'Circular':
         return 'Diameter of footing, D (in m):';
       default:
-        return 'Base of footing, B (in m):';
+        return 'Dimension of footing (in m):';
     }
   }
 
