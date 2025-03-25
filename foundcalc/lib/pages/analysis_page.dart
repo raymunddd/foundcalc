@@ -84,6 +84,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? nq;
   double? ny;
 
+//solution variables
+  double? yPrime;
+
   double result_P = 0.0;
 
   @override
@@ -260,9 +263,24 @@ void calculateP() {
   yc = double.tryParse(inputUnitWeightConcrete.text) ?? 24; // Default to 24 if null
   fs = double.tryParse(inputFactorSafety.text) ?? 3; // Default to 3 if null
 
+      if (df != null && dw != null && fDim != null && c != null) {
+        if (widget.state.soilProp) { //if soilProp is on
+          if (gs != null && e != null) { //if Gs and e only are given
+            yPrime = (gs!*yw!)/(1 + e!);
+          } else if (gs != null && e != null && w != null) { // if  Gs, e and w only are given
+            yPrime = (gs!*yw!)*((1 + w!)/(1 + e!));
+          } else if (gs != null && s != null && w != null) { // if  Gs, S and w only are given
+            yPrime = (gs!*yw!)*((1 + ((e!*s!)/gs!))/(1 + e!));
+          } else if (gs != null && s != null && w != null && e != null) { // if  all are given
+            yPrime = (gs!*yw!)*((1 + w!)/(1 + e!));
+        }
+      } 
   // Print the results for debugging
   print("yw = $yw, yc = $yc, result_P = $result_P");
+  }
 }
+
+
 
 /*
   // Check if soil properties are enabled
