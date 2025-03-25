@@ -852,8 +852,6 @@ Widget build(BuildContext context) {
                   controller: inputSpecificGravity,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
@@ -915,8 +913,6 @@ Widget build(BuildContext context) {
                   controller: inputWaterContent,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
@@ -978,8 +974,6 @@ Widget build(BuildContext context) {
                   controller: inputVoidRatio,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
@@ -1041,8 +1035,6 @@ Widget build(BuildContext context) {
                   controller: inputDegreeSat,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
@@ -1156,8 +1148,6 @@ Widget build(BuildContext context) {
                   controller: inputGammaDry,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
@@ -1219,8 +1209,6 @@ Widget build(BuildContext context) {
                   controller: inputGammaMoist,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
@@ -1282,8 +1270,6 @@ Widget build(BuildContext context) {
                   controller: inputGammaSat,
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
