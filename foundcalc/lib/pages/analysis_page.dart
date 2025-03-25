@@ -868,6 +868,17 @@ Widget build(BuildContext context) {
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
+                    ),
                   ),
                 ),
               )
@@ -919,6 +930,17 @@ Widget build(BuildContext context) {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
                     ),
                   ),
                 ),
@@ -972,6 +994,17 @@ Widget build(BuildContext context) {
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
+                    ),
                   ),
                 ),
               )
@@ -1023,6 +1056,17 @@ Widget build(BuildContext context) {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
                     ),
                   ),
                 ),
@@ -1128,6 +1172,17 @@ Widget build(BuildContext context) {
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
+                    ),
                   ),
                 ),
               )
@@ -1180,6 +1235,17 @@ Widget build(BuildContext context) {
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
+                    ),
                   ),
                 ),
               )
@@ -1231,6 +1297,17 @@ Widget build(BuildContext context) {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
                     ),
                   ),
                 ),
@@ -1357,6 +1434,17 @@ Widget build(BuildContext context) {
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
+                    ),
                   ),
                 ),
               )
@@ -1441,6 +1529,17 @@ Widget build(BuildContext context) {
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
+                    ),
                   ),
                 ),
               )
@@ -1493,6 +1592,17 @@ Widget build(BuildContext context) {
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
+                    ),
                   ),
                 ),
               )
@@ -1544,6 +1654,17 @@ Widget build(BuildContext context) {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
                     ),
                   ),
                 ),
@@ -1667,6 +1788,17 @@ Widget build(BuildContext context) {
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
                     ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
+                    ),
                   ),
                 ),
               )
@@ -1788,6 +1920,17 @@ Widget build(BuildContext context) {
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputDepthFoundation.clear();
+                      },
                     ),
                   ),
                 ),
