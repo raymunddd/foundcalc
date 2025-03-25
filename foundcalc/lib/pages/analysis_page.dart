@@ -57,7 +57,19 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
   late TextEditingController inputUnitWeightWater;
   late TextEditingController inputUnitWeightConcrete;
+// Result
+  double? yw; // Declare yw
+  double? yc; // Declare yc
 
+  double? df; 
+  double? dw;
+
+  double? gs;
+  double? w;
+  double? e;
+  double? s;
+
+  double result_P = 0.0;
 
   @override
   void initState() {
@@ -138,6 +150,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
       widget.state.selectedShearFailure = selectedShearFailure;
       widget.state.selectedFootingType = selectedFootingType;      
 
+        calculateP();
+
         widget.onStateChanged(widget.state);
     });
   }
@@ -204,6 +218,46 @@ String? selectedFootingType = 'Square';
     'Circular',
   ];
 
+void calculateP() {
+  // Parse the input values
+  df = double.tryParse(inputDepthFoundation.text);
+  dw = double.tryParse(inputDepthWater.text);
+  gs = double.tryParse(inputSpecificGravity.text);
+  w = double.tryParse(inputWaterContent.text);
+  e = double.tryParse(inputVoidRatio.text);
+  s = double.tryParse(inputDegreeSat.text);
+
+  // Default values for unit weights
+  yw = double.tryParse(inputUnitWeightWater.text) ?? 9.81; // Default to 9.81 if null
+  yc = double.tryParse(inputUnitWeightConcrete.text) ?? 24; // Default to 24 if null
+
+  /*
+  // Check if soil properties are enabled
+  if (widget.state.soilProp) {
+    // Use the null check operator to assert that df and dw are not null
+    if (dw != null && df != null) {
+      if (dw! >= df!) { // Use '!' to assert that they are not null
+        setState(() {
+          result_P = gs! + e!; // Example calculation
+        });
+      } else {
+        setState(() {
+          result_P = gs! - e!; // Example calculation
+        });
+      }
+    } else {
+      // Handle the case where df or dw is null
+      setState(() {
+        result_P = 0.0; // Reset result if inputs are invalid
+      });
+    }
+  }
+  */
+
+  // Print the results for debugging
+  print("yw = $yw, yc = $yc, result_P = $result_P");
+}
+
 @override
 Widget build(BuildContext context) {
   return Scaffold(
@@ -255,6 +309,7 @@ Widget build(BuildContext context) {
               row16yConcreteDetOn(),
               SizedBox(height: 10),
               submitButton(),
+              resulttt(),
             ],
           ),
         ),
@@ -267,13 +322,21 @@ Widget build(BuildContext context) {
     return ElevatedButton(
       onPressed: () {
         // Handle form submission
-        print('Depth of Foundation: ${widget.state.inputDepthFoundation}');
+        calculateP();
+        setState(() {});
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
         foregroundColor: Colors.white,
       ),
       child: Text(buttonLabel),
+    );
+  }
+
+  Widget resulttt() {
+    return Text(
+      "yw = $yw, yc = $yc",
+      style: TextStyle(color: Colors.white),
     );
   }
 
