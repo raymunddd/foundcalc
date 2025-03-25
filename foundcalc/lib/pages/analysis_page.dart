@@ -12,6 +12,7 @@ Basta need ng
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../settings/analysis_state.dart';
 
 class AnalysisPage extends StatefulWidget {
@@ -406,6 +407,10 @@ Widget build(BuildContext context) {
                   height: 40, // Adjust height as needed
                   child: TextField(
                     controller: inputDepthFoundation, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Input required",
@@ -468,6 +473,10 @@ Widget build(BuildContext context) {
                   height: 40, // Adjust height as needed
                   child: TextField(
                     controller: inputDepthWater,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Input required",
@@ -530,6 +539,10 @@ Widget build(BuildContext context) {
                   height: 40, // Adjust height as needed
                   child: TextField(
                     controller: inputFootingBase,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Input required",
@@ -592,6 +605,10 @@ Widget build(BuildContext context) {
                   height: 40, // Adjust height as needed
                   child: TextField(
                     controller: inputCohesion,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Input required",
@@ -654,6 +671,10 @@ Widget build(BuildContext context) {
                   height: 40, // Adjust height as needed
                   child: TextField(
                     controller: inputFootingThickness,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Optional",
@@ -716,6 +737,10 @@ Widget build(BuildContext context) {
                   height: 40, // Adjust height as needed
                   child: TextField(
                     controller: inputFactorSafety,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
                       hintText: "Optional",
@@ -853,6 +878,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputSpecificGravity,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -916,6 +945,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputWaterContent,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Optional",
@@ -979,6 +1012,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputVoidRatio,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1042,6 +1079,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputDegreeSat,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Optional",
@@ -1157,6 +1198,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputGammaDry,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -1218,6 +1263,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputGammaMoist,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     enabledBorder: OutlineInputBorder(
@@ -1279,6 +1328,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputGammaSat,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "",
@@ -1418,6 +1471,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputAngleFriction,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1513,6 +1570,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputFactCohesion,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1576,6 +1637,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputFactOverburden,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1639,6 +1704,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputFactUnitWeight,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1775,6 +1844,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputUnitWeightWater,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Input required",
@@ -1911,6 +1984,10 @@ Widget build(BuildContext context) {
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputUnitWeightConcrete,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
                     hintText: "Field required",
