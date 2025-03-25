@@ -31,7 +31,8 @@ class AnalysisPage extends StatefulWidget {
 }
 
 class _AnalysisPageState extends State<AnalysisPage> {
-  
+  late ScrollController _scrollController;
+
   late TextEditingController inputDepthFoundation;
   late TextEditingController inputDepthWater;
   late TextEditingController inputFootingBase;
@@ -84,8 +85,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? nq;
   double? ny;
 
-//solution variables
+//solution variables (shortcut: solvar)
+  double? yFinal;
   double? yPrime;
+  double? hw;
+  double? dfPlusB;
+  double? q;
 
   double result_P = 0.0;
 
@@ -93,6 +98,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
   void initState() {
     super.initState();
 
+    _scrollController = ScrollController();
+    
     // Initialize controllers with saved state
     inputDepthFoundation = TextEditingController(text: widget.state.inputDepthFoundation);
     inputDepthWater = TextEditingController(text: widget.state.inputDepthWater);
@@ -176,6 +183,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
   @override
   void dispose() {
+    _scrollController.dispose();
+
     inputDepthFoundation.dispose();
     inputDepthWater.dispose();
     inputFootingBase.dispose();
@@ -265,50 +274,73 @@ void calculateP() {
 
       if (df != null && dw != null && fDim != null && c != null) {
         if (widget.state.soilProp) { //if soilProp is on
-          if (gs != null && e != null) { //if Gs and e only are given
-            yPrime = (gs!*yw!)/(1 + e!);
-          } else if (gs != null && e != null && w != null) { // if  Gs, e and w only are given
-            yPrime = (gs!*yw!)*((1 + w!)/(1 + e!));
-          } else if (gs != null && s != null && e != null) { // if  Gs, e and S only are given
-            yPrime = (gs!*yw!)*((1 + ((e!*s!)/gs!))/(1 + e!));
-          } else if (gs != null && s != null && e != null) { // if  Gs, w and S only are given
-            yPrime = (gs!*yw!)*((1 + w!)/(1 + ((w!*gs!)/s!)));
-          } else if (gs != null && s != null && w != null && e != null) { // if  all are given
-            yPrime = (gs!*yw!)*((1 + w!)/(1 + e!));
+          if (dw! > df!) { // if Df > Dw
+            if (gs != null && e != null) { //if Gs and e only are given
+              yFinal = (gs!*yw!)/(1 + e!); // final y = yDry
+            } else if (gs != null && e != null && w != null) { // if  Gs, e and w only are given
+              yFinal = (gs!*yw!)*((1 + w!)/(1 + e!)); // final y = y
+            } else if (gs != null && s != null && e != null) { // if  Gs, e and S only are given
+              yFinal = (gs!*yw!)*((1 + ((e!*s!)/gs!))/(1 + e!)); // final y = y
+            } else if (gs != null && s != null && e != null) { // if  Gs, w and S only are given
+              yFinal = (gs!*yw!)*((1 + w!)/(1 + ((w!*gs!)/s!))); // final y = y
+            } else if (gs != null && s != null && w != null && e != null) { // if  all are given
+              yFinal = (gs!*yw!)*((1 + w!)/(1 + e!));
+            } else {
+              yFinal = 1000;
+            } 
           } else {
-            yPrime = 1000;
+            if (gs != null && e != null) { //if Gs and e only are given
+              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
+            } else if (gs != null && w != null) { // if  Gs and w only are given
+              yFinal = gs!*yw!*((1 + w!)/(1 + (w!*gs!))); // final y = ySat
+            } else if (e != null && w != null) { // if  e and w only are given
+              yFinal = yw!*(e!/w!)*((1 + w!)/(1 + e!)); // final y = ySat 
+            } else if (gs != null && e != null && w != null) { // if  Gs, e and w only are given
+              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
+            } else if (gs != null && s != 1 && e != null) { // if  Gs, e and S only are given (S must be 1)
+              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
+            } else if (gs != null && s != 1 && e != null) { // if  Gs, w and S only are given (S must be 1)
+              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
+            } else if (gs != null && s != 1 && w != null && e != null) { // if  all are given (S must be 1)
+              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
+            } else {
+              yFinal = 2000;
+            } 
           }
-        } else {
-          yPrime = 2000;
+        } else { //if soilProp is off
+          if (yDry != null && y != null && ySat != null) { // if all are given
+            yFinal = ySat!;
+          } else if (yDry != null && y != null) { // if only yDry and y are given
+            yFinal = y!;
+          } else if (yDry != null && ySat != null) { // if only yDry and ySat are given
+            yFinal = ySat!;
+          } else if (y != null && ySat != null) { // if only y and ySat are given
+            yFinal = ySat!;
+          } else {
+            yFinal = 3000;
+          }
+        }
+
+        hw = df! - dw!;
+        dfPlusB = df! + fDim!;
+
+        if (dw! <= df!) { // Case 1 for y' and q
+          yPrime = yFinal! - yw!;
+          q = y!*df! + yPrime!*hw!;
+        } else if (df! >= dfPlusB!) { // Case 3 for y' and q
+          yPrime = yFinal!;
+          q = y!*df!;
+        } else { // Case 2 for y' and q
+          yPrime = yFinal! - yw!*(1 - ((dw! - df!)/fDim!));
+          q = y!*df!; 
         }
       } else {
-        yPrime = 3000;
+        yFinal = 4000;
       }
+
   // Print the results for debugging
-  print("yw = $yw, yc = $yc, yPrime = $yPrime");
+  print("yw = $yw, yc = $yc, yFinal = $yFinal, yPrime = $yPrime, q = $q");
   }
-/*
-  // Check if soil properties are enabled
-  if (widget.state.soilProp) {
-    // Use the null check operator to assert that df and dw are not null
-    if (dw != null && df != null) {
-      if (dw! >= df!) { // Use '!' to assert that they are not null
-        setState(() {
-          result_P = gs! + e!; // Example calculation
-        });
-      } else {
-        setState(() {
-          result_P = gs! - e!; // Example calculation
-        });
-      }
-    } else {
-      // Handle the case where df or dw is null
-      setState(() {
-        result_P = 0.0; // Reset result if inputs are invalid
-      });
-    }
-  }
-  */
 
 @override
 Widget build(BuildContext context) {
@@ -327,10 +359,17 @@ Widget build(BuildContext context) {
     ),
     body: Padding(
       padding: const EdgeInsets.only(right: 4.0),
+      child:  ScrollbarTheme(
+        data: ScrollbarThemeData(
+          thumbColor: WidgetStateProperty.all(Colors.grey[800]), // Set the thumb color to white
+          trackColor: WidgetStateProperty.all(Colors.grey[800]), // Optional: Set the track color
+        ),
       child: Scrollbar(
-        thickness: 2.2,
+        controller: _scrollController,
+        thickness: 4,
         radius: Radius.circular(10),
           child: SingleChildScrollView(
+            controller: _scrollController,
             child: Padding(
               padding: const EdgeInsets.all(16.0),
               child: Center(
@@ -372,6 +411,7 @@ Widget build(BuildContext context) {
               ),
             ),
           ),
+        ),
       ),
     ),
   );
@@ -712,7 +752,7 @@ Widget build(BuildContext context) {
               child: Container(
                 width: 150,
                 child: Text(
-                  'Cohesion, c:',
+                  'Cohesion, c (in kPa):',
                   style: TextStyle(color: Colors.white),
                 ),
               )
