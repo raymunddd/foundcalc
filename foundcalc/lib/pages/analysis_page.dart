@@ -63,11 +63,26 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
   double? df; 
   double? dw;
+  double? c;
+  double? fDim;
+
+  double? t;
+  double? fs;
 
   double? gs;
   double? w;
   double? e;
   double? s;
+
+  double? yDry;
+  double? y;
+  double? ySat;
+
+  double? theta;
+
+  double? nc;
+  double? nq;
+  double? ny;
 
   double result_P = 0.0;
 
@@ -220,18 +235,36 @@ String? selectedFootingType = 'Square';
 
 void calculateP() {
   // Parse the input values
+    // Non-nullable
   df = double.tryParse(inputDepthFoundation.text);
   dw = double.tryParse(inputDepthWater.text);
+  c = double.tryParse(inputCohesion.text);
+  fDim = double.tryParse(inputFootingBase.text);
+    // Nullable
+  t = double.tryParse(inputFootingThickness.text);
   gs = double.tryParse(inputSpecificGravity.text);
   w = double.tryParse(inputWaterContent.text);
   e = double.tryParse(inputVoidRatio.text);
   s = double.tryParse(inputDegreeSat.text);
 
-  // Default values for unit weights
+  yDry = double.tryParse(inputGammaDry.text);
+  y = double.tryParse(inputGammaMoist.text);
+  ySat = double.tryParse(inputGammaSat.text);
+  theta = double.tryParse(inputAngleFriction.text);
+  nc = double.tryParse(inputFactCohesion.text);
+  nq = double.tryParse(inputFactOverburden.text);
+  ny = double.tryParse(inputFactUnitWeight.text);
+
+    // Default values
   yw = double.tryParse(inputUnitWeightWater.text) ?? 9.81; // Default to 9.81 if null
   yc = double.tryParse(inputUnitWeightConcrete.text) ?? 24; // Default to 24 if null
+  fs = double.tryParse(inputFactorSafety.text) ?? 3; // Default to 3 if null
 
-  /*
+  // Print the results for debugging
+  print("yw = $yw, yc = $yc, result_P = $result_P");
+}
+
+/*
   // Check if soil properties are enabled
   if (widget.state.soilProp) {
     // Use the null check operator to assert that df and dw are not null
@@ -253,10 +286,6 @@ void calculateP() {
     }
   }
   */
-
-  // Print the results for debugging
-  print("yw = $yw, yc = $yc, result_P = $result_P");
-}
 
 @override
 Widget build(BuildContext context) {
@@ -924,7 +953,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Specific gravity of soil solids, Gs:',
                 style: TextStyle(color: Colors.white),
@@ -991,7 +1020,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Water content, ω (%):',
                 style: TextStyle(color: Colors.white),
@@ -1058,7 +1087,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Void ratio, e:',
                 style: TextStyle(color: Colors.white),
@@ -1125,7 +1154,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Degree of saturation, S:',
                 style: TextStyle(color: Colors.white),
@@ -1244,7 +1273,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Dry/bulk unit weight, γdry (in kN/m³):',
                 style: TextStyle(color: Colors.white),
@@ -1309,7 +1338,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Moist unit weight, γ (in kN/m³):',
                 style: TextStyle(color: Colors.white),
@@ -1374,7 +1403,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Saturated unit weight, γsat (in kN/m³):',
                 style: TextStyle(color: Colors.white),
@@ -1446,7 +1475,7 @@ Widget build(BuildContext context) {
           children: [
             Flexible(
               child: Container(
-                width: 150,
+                width: 120,
                 child: Text(
                   'Angle of internal friction',
                   style: TextStyle(color: Colors.white),
@@ -1517,7 +1546,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Angle of internal friction, θ (in degrees):',
                 style: TextStyle(color: Colors.white),
@@ -1616,7 +1645,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Cohesion factor, Nc:',
                 style: TextStyle(color: Colors.white),
@@ -1683,7 +1712,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Overburden factor, Nq:',
                 style: TextStyle(color: Colors.white),
@@ -1750,7 +1779,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Unit weight factor, Nγ:',
                 style: TextStyle(color: Colors.white),
@@ -1821,7 +1850,7 @@ Widget build(BuildContext context) {
           children: [
             Flexible(
               child: Container(
-                width: 150,
+                width: 120,
                 child: Text(
                   'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
                   style: TextStyle(color: Colors.white),
@@ -1890,7 +1919,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Unit weight of water, γw (in kN/m³):',
                 style: TextStyle(color: Colors.white),
@@ -1961,7 +1990,7 @@ Widget build(BuildContext context) {
           children: [
             Flexible(
               child: Container(
-                width: 150,
+                width: 120,
                 child: Text(
                   'Unit weight of concrete (assumed as 24 kN/m³ if not given)',
                   style: TextStyle(color: Colors.white),
@@ -2030,7 +2059,7 @@ Widget build(BuildContext context) {
         children: [
           Flexible(
             child: Container(
-              width: 150,
+              width: 120,
               child: Text(
                 'Unit weight of concrete, γconc. (in kN/m³):',
                 style: TextStyle(color: Colors.white),
