@@ -13,7 +13,7 @@ Basta need ng
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../settings/analysis_state.dart';
+import '../../settings/analysis_state.dart';
 
 class AnalysisPage extends StatefulWidget {
   final String title;
