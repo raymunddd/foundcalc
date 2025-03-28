@@ -96,20 +96,25 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? qUlt;
   double? qAll;
   double? qNetAll;
+  double? qNet;
   double? af;
   double? p;
+  double? a;
+  double? b;
   double? pf;
   double? ps;
   double? udl;
   
-  double result_P = 0.0;
+  bool showResults = false;
+  bool isItStrip = true;
 
   @override
   void initState() {
     super.initState();
 
     _scrollController = ScrollController();
-    
+    showResults = false;
+
     // Initialize controllers with saved state
     inputDepthFoundation = TextEditingController(text: widget.state.inputDepthFoundation);
     inputDepthWater = TextEditingController(text: widget.state.inputDepthWater);
@@ -152,6 +157,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
         inputFactUnitWeight.addListener(_updateState);
           inputUnitWeightWater.addListener(_updateState);
           inputUnitWeightConcrete.addListener(_updateState);
+          
+    if (widget.state.selectedFootingType == 'Strip or continuous') {
+        isItStrip = true;
+      } else {
+        isItStrip = false;
+      }
   }
 
   List<String> thetaValues = []; // List to hold values from the "theta" column
@@ -295,6 +306,10 @@ String? selectedFootingType = 'Square';
     'Circular',
   ];
 
+  double roundToFourDecimalPlaces(double value) {
+    return (value * 10000).round() / 10000;
+  }
+
   Future<void> calculateP() async {
     // Parse the input values
       // Non-nullable
@@ -323,7 +338,36 @@ String? selectedFootingType = 'Square';
 
       if (df != null && fDim != null && c != null) {
         if (widget.state.soilProp == true) { //if soilProp is on
-          if (dw! >= df! && dw == null) { // if Dw ≥ Df and no Dw
+          if (dw != null) {
+            hw = df! - dw!;
+            if (dw! >= df!) {
+              if (gs != null && e!= null && w != null) {
+                yFinal = (gs!*yw!*(1+(0.01*w!)))/(1+e!); // final y = y
+              } else if (gs != null && e != null) {
+                yFinal = (gs!*yw!)/(1+e!);
+              } else {
+                yFinal = null; // any other option
+              }
+            } else { // Dw < Df
+              if (gs != null) {
+                if (e != null) {
+                  if (w != null) { // Gs, e, w
+                    yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
+                  } else { // Gs, e
+                    yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
+                  }
+                } else if (w != null) { // Gs, w
+                  yFinal = (gs!*yw!*(1+0.01*w!))/(1+(0.01*w!*gs!)); // final y = ysat
+                } else { // Gs
+                  yFinal = null;
+                }
+              } else if (e != null && w != null) { // e, w
+                yFinal = ((yw!*e!)/w!)/((1+(0.01*w!))/(1+e!));  // final y = ysat
+              } else { // none
+                yFinal = null;
+              }
+            }
+          } else {
             if (gs != null && e!= null && w != null) {
               yFinal = (gs!*yw!*(1+(0.01*w!)))/(1+e!); // final y = y
             } else if (gs != null && e != null) {
@@ -331,56 +375,42 @@ String? selectedFootingType = 'Square';
             } else {
               yFinal = null; // any other option
             }
-          } else { // Dw < Df
-            if (gs != null) {
-              if (e != null) {
-                if (w != null) { // Gs, e, w
-                  yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
-                } else { // Gs, e
-                  yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
-                }
-              } else if (w != null) { // Gs, w
-                yFinal = (gs!*yw!*(1+0.01*w!))/(1+(0.01*w!*gs!)); // final y = ysat
-              } else { // Gs
-                yFinal = null;
-              }
-            } else if (e != null && w != null) { // e, w
-              yFinal = ((yw!*e!)/w!)/((1+(0.01*w!))/(1+e!));  // final y = ysat
-            } else { // none
-              yFinal = null;
-            }
           }
         } else { // if soilProp is off
-          if (dw! >= df! || dw == null) { // (at least 1)
-            if (yDry != null && y != null) {
-              yFinal = null;
-            } else if (yDry != null) {
-              yFinal = yDry!;
-            } else if (y != null) {
-              yFinal = y!;
+          if (dw != null) {
+            hw = df! - dw!;
+            if (dw! != 0) {
+              if (dw! >= df!) {
+                if (yDry != null && y != null) {
+                  yFinal = null;
+                } else if (yDry != null) {
+                  yFinal = yDry!;
+                } else if (y != null) {
+                  yFinal = y!;
+                } else {
+                  yFinal = null;
+                }
+              } else { // Dw < Df (at least 2)
+                if (yDry != null && ySat != null) { // yDry, ySat
+                  yFinal = ySat!; // final y = ySat
+                } else if (y != null && ySat != null) { // y, ySat
+                  yFinal = ySat!; // final y = ySat
+                } else { // none
+                  yFinal = null; 
+                }
+              }
             } else {
-              yFinal = null;
+              if (ySat != null) {
+                yFinal = ySat!;
+              } else {
+                yFinal = null;
+              }
             }
-          } else if (dw! < df!) { // Dw < Df (at least 2)
-            if (yDry != null && ySat != null) { // yDry, ySat
-              yFinal = ySat!; // final y = ySat
-            } else if (y != null && ySat != null) { // y, ySat
-              yFinal = ySat!; // final y = ySat
-            } else { // none
-              yFinal = null; 
-            }
-          } else if (dw == 0) {
-            if (ySat != null) {
-              yFinal = ySat!;
-            } else {
-              yFinal = null;
-            }      
           } else {
-            yFinal = null;
+
           }
         }
 
-        hw = df! - dw!;
         dfPlusB = df! + fDim!;
 
         if (yFinal != null && yw != null && df != null && fDim != null) {
@@ -464,35 +494,49 @@ String? selectedFootingType = 'Square';
           af = null;
         }
 
+        if (qUlt != null && q != null) {
+          qAll = qUlt!/fs!;
+          qNetAll = (qUlt! - q!)/fs!;
+          qNet = qNetAll!*fs!;
+        }
+
         if (q != null && qUlt != null) {
           if (t != null && hw != null) {
-            qAll = null;
-            qNetAll = (qUlt! - q!)/fs!;
+            a = df! - hw!;
+            b = df! - t!;
             if (af != null) { // square/circular
-              
+              pf = yc!*af!*t!;
+              ps = af!*(y!*a!-ySat!*b!);
+              p = (af!*(qUlt!+yw!*hw!)) - pf! - ps!;
+              p = roundToFourDecimalPlaces(p!);
+              udl = 0;
             } else { // strip
+              pf = yc!*fDim!*t!;
+              ps = fDim!*(y!*a!-ySat!*b!);
+              p = 0;
+              udl = (fDim!*(qUlt!+yw!*hw!)) - pf! - ps!;
+              udl = roundToFourDecimalPlaces(udl!);
             }
           } else { // if no t
-            qAll = qUlt!/fs!;
-            qNetAll = null;
             if (af != null) { // square/circular
               p = qAll!*af!;
-              udl = null;
+              p = roundToFourDecimalPlaces(p!);
+              udl = 0;
             } else { // strip
-              p = null;
+              p = 0;
               udl = qAll!*fDim!;
+              udl = roundToFourDecimalPlaces(udl!);
             }
           }
         }
-
       } else {
-        yFinal = 4000;
+        yFinal = null;
       }
 
   // Print the results for debugging
   print("yw = $yw, yc = $yc, yFinal = $yFinal, yPrime = $yPrime, q = $q");
   print('///////////////////');
-  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt, qAll = $qAll, P = $p');
+  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt, qAll = $qAll, qNet = $qNet, qAllNet = $qNetAll, P = $p, w = $udl');
   }
 
 @override
@@ -558,7 +602,12 @@ String? selectedFootingType = 'Square';
                       row16yConcreteDetOn(),
                       SizedBox(height: 10),
                       submitButton(),
-                      resulttt(),
+                      SizedBox(height: 10),
+                      if (showResults && selectedFootingType == 'Strip or continuous')
+                        resultStrip(),
+                      if (showResults && (selectedFootingType == 'Square' || selectedFootingType == 'Circular'))
+                        resultNotStrip(),
+                      SizedBox(height: 40),
                     ],
                   ),
                 ),
@@ -575,7 +624,9 @@ String? selectedFootingType = 'Square';
       onPressed: () {
         // Handle form submission
         calculateP();
-        setState(() {});
+        setState(() {
+          showResults = true;
+        });
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -585,10 +636,22 @@ String? selectedFootingType = 'Square';
     );
   }
 
-  Widget resulttt() {
+  Widget resultStrip() {
     return Text(
-      "yw = $yw, yc = $yc, yFinal = $yFinal, q = $q",
-      style: TextStyle(color: Colors.white),
+      "w = $udl",
+      style: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+  Widget resultNotStrip() {
+    return Text(
+      "P = $p",
+      style: TextStyle(
+        color: Colors.white,
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 
