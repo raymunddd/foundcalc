@@ -96,6 +96,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? qNetAll;
   double? p;
 
+//Hint Text para magpalit
+  late String gsHint = "Input required";
+  late String eHint = "Input required";
+  late String wHint = "Optional";
+  late String sHint = "Optional";
+
 
   double result_P = 0.0;
 
@@ -106,51 +112,54 @@ class _AnalysisPageState extends State<AnalysisPage> {
     _scrollController = ScrollController();
     
     // Initialize controllers with saved state
-    inputDepthFoundation = TextEditingController(text: widget.state.inputDepthFoundation);
-    inputDepthWater = TextEditingController(text: widget.state.inputDepthWater);
-    inputFootingBase = TextEditingController(text: widget.state.inputFootingBase);
-    inputCohesion = TextEditingController(text: widget.state.inputCohesion);
-    inputFootingThickness = TextEditingController(text: widget.state.inputFootingThickness);
-    inputFactorSafety = TextEditingController(text: widget.state.inputFactorSafety);
-      inputSpecificGravity = TextEditingController(text: widget.state.inputSpecificGravity);
-      inputWaterContent = TextEditingController(text: widget.state.inputWaterContent);
-      inputVoidRatio = TextEditingController(text: widget.state.inputVoidRatio);
-      inputDegreeSat = TextEditingController(text: widget.state.inputDegreeSat);
-      inputGammaDry = TextEditingController(text: widget.state.inputGammaDry);
-      inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
-      inputGammaSat = TextEditingController(text: widget.state.inputGammaSat);
-        inputAngleFriction = TextEditingController(text: widget.state.inputAngleFriction);
-        inputFactCohesion = TextEditingController(text: widget.state.inputFactCohesion);
-        inputFactOverburden = TextEditingController(text: widget.state.inputFactOverburden);
-        inputFactUnitWeight = TextEditingController(text: widget.state.inputFactUnitWeight);
-          inputUnitWeightWater = TextEditingController(text: widget.state.inputUnitWeightWater);
-          inputUnitWeightConcrete = TextEditingController(text: widget.state.inputUnitWeightConcrete);
-    
-    selectedShearFailure = widget.state.selectedShearFailure;
-    selectedFootingType = widget.state.selectedFootingType;
+      inputDepthFoundation = TextEditingController(text: widget.state.inputDepthFoundation);
+      inputDepthWater = TextEditingController(text: widget.state.inputDepthWater);
+      inputFootingBase = TextEditingController(text: widget.state.inputFootingBase);
+      inputCohesion = TextEditingController(text: widget.state.inputCohesion);
+      inputFootingThickness = TextEditingController(text: widget.state.inputFootingThickness);
+      inputFactorSafety = TextEditingController(text: widget.state.inputFactorSafety);
+        inputSpecificGravity = TextEditingController(text: widget.state.inputSpecificGravity);
+        inputWaterContent = TextEditingController(text: widget.state.inputWaterContent);
+        inputVoidRatio = TextEditingController(text: widget.state.inputVoidRatio);
+        inputDegreeSat = TextEditingController(text: widget.state.inputDegreeSat);
+        inputGammaDry = TextEditingController(text: widget.state.inputGammaDry);
+        inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
+        inputGammaSat = TextEditingController(text: widget.state.inputGammaSat);
+          inputAngleFriction = TextEditingController(text: widget.state.inputAngleFriction);
+          inputFactCohesion = TextEditingController(text: widget.state.inputFactCohesion);
+          inputFactOverburden = TextEditingController(text: widget.state.inputFactOverburden);
+          inputFactUnitWeight = TextEditingController(text: widget.state.inputFactUnitWeight);
+            inputUnitWeightWater = TextEditingController(text: widget.state.inputUnitWeightWater);
+            inputUnitWeightConcrete = TextEditingController(text: widget.state.inputUnitWeightConcrete);
+      
+      selectedShearFailure = widget.state.selectedShearFailure;
+      selectedFootingType = widget.state.selectedFootingType;
 
 
     // Add listeners to update state when text changes
-    inputDepthFoundation.addListener(_updateState);
-    inputDepthWater.addListener(_updateState);
-    inputFootingBase.addListener(_updateState);
-    inputCohesion.addListener(_updateState);
-    inputFootingThickness.addListener(_updateState);
-    inputFactorSafety.addListener(_updateState);
-      inputSpecificGravity.addListener(_updateState);
-      inputWaterContent.addListener(_updateState);
-      inputVoidRatio.addListener(_updateState);
-      inputDegreeSat.addListener(_updateState);
-      inputGammaDry.addListener(_updateState);
-      inputGammaMoist.addListener(_updateState);
-      inputGammaSat.addListener(_updateState);
-        inputAngleFriction.addListener(_updateState);
-        inputFactCohesion.addListener(_updateState);
-        inputFactOverburden.addListener(_updateState);
-        inputFactUnitWeight.addListener(_updateState);
-          inputUnitWeightWater.addListener(_updateState);
-          inputUnitWeightConcrete.addListener(_updateState);
+        inputDepthFoundation.addListener(_updateState);
+        inputDepthWater.addListener(_updateState);
+        inputFootingBase.addListener(_updateState);
+        inputCohesion.addListener(_updateState);
+        inputFootingThickness.addListener(_updateState);
+        inputFactorSafety.addListener(_updateState);
+          inputSpecificGravity.addListener(() {_updateState();updateSoilHints();});
+          inputWaterContent.addListener(() {_updateState();updateSoilHints();});
+          inputVoidRatio.addListener(() {_updateState();updateSoilHints();});
+          inputDegreeSat.addListener(() {_updateState();updateSoilHints();});
+          
+          inputGammaDry.addListener(_updateState);
+          inputGammaMoist.addListener(_updateState);
+          inputGammaSat.addListener(_updateState);
+            inputAngleFriction.addListener(_updateState);
+            inputFactCohesion.addListener(_updateState);
+            inputFactOverburden.addListener(_updateState);
+            inputFactUnitWeight.addListener(_updateState);
+              inputUnitWeightWater.addListener(_updateState);
+              inputUnitWeightConcrete.addListener(_updateState);
     
+  //
+  
   }
 
   List<String> thetaValues = []; // List to hold values from the "theta" column
@@ -256,6 +265,31 @@ class _AnalysisPageState extends State<AnalysisPage> {
           inputUnitWeightConcrete.dispose();
     super.dispose();
   }
+
+//Update hints
+  void updateSoilHints() {
+    setState(() {
+      // Get current input values
+    bool mayGs = inputSpecificGravity.text.isNotEmpty;
+    bool mayE = inputVoidRatio.text.isNotEmpty;
+    bool mayW = inputWaterContent.text.isNotEmpty;
+    bool mayS = inputDegreeSat.text.isNotEmpty;
+    
+    //Mahabang if else statement
+      if (mayGs || mayE || mayW || mayS) {
+          gsHint = mayGs ? "Input required" : "Optional"; //If mayGs is true, then si gsHint magiging "Input required", else "Optional"
+          eHint = mayE ? "Input required" : "Optional";
+          wHint = mayW ? "Input required" : "Optional";
+          sHint = mayS ? "Input required" : "Optional";
+    } else {
+      // Default state
+          gsHint = "Input required";
+          eHint = "Input required"; 
+          wHint = "Optional";
+          sHint = "Optional";
+    }
+  });
+}
 
 
   String get footingDetLabel {
@@ -1180,7 +1214,7 @@ String? selectedFootingType = 'Square';
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
+                    hintText: gsHint,
                     hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -1204,7 +1238,7 @@ String? selectedFootingType = 'Square';
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputSpecificGravity.clear();
+                        inputSpecificGravity.clear(); updateSoilHints();
                       },
                     ),
                   ),
@@ -1247,7 +1281,7 @@ String? selectedFootingType = 'Square';
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Optional",
+                    hintText: wHint,
                     hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -1272,6 +1306,7 @@ String? selectedFootingType = 'Square';
                       onPressed: () {
                         // Clear the text field
                         inputWaterContent.clear();
+                        updateSoilHints();
                       },
                     ),
                   ),
@@ -1314,7 +1349,7 @@ String? selectedFootingType = 'Square';
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Input required",
+                    hintText: eHint,
                     hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -1339,6 +1374,7 @@ String? selectedFootingType = 'Square';
                       onPressed: () {
                         // Clear the text field
                         inputVoidRatio.clear();
+                        updateSoilHints();
                       },
                     ),
                   ),
@@ -1381,7 +1417,7 @@ String? selectedFootingType = 'Square';
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "Optional",
+                    hintText: sHint,
                     hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -1406,6 +1442,7 @@ String? selectedFootingType = 'Square';
                       onPressed: () {
                         // Clear the text field
                         inputDegreeSat.clear();
+                        updateSoilHints();
                       },
                     ),
                   ),
@@ -2347,4 +2384,4 @@ String? selectedFootingType = 'Square';
       ),
     );
   }
-} // AnalysisPageState
+}
