@@ -10,7 +10,7 @@ Basta need ng
   
 */
 
-import 'package:flutter/foundation.dart';
+import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../settings/analysis_state.dart';
@@ -71,6 +71,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? fs;
 
   double? gs;
+  double? waterContent;
   double? w;
   double? e;
   double? s;
@@ -91,6 +92,10 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? hw;
   double? dfPlusB;
   double? q;
+  double? qUlt;
+  double? qNetAll;
+  double? p;
+
 
   double result_P = 0.0;
 
@@ -148,6 +153,51 @@ class _AnalysisPageState extends State<AnalysisPage> {
     
   }
 
+  List<String> thetaValues = []; // List to hold values from the "theta" column
+
+  Future<void> searchThetaGeneral() async {
+
+    ByteData data = await rootBundle.load('assets/generalShear.xlsx');
+    var bytes = data.buffer.asUint8List();
+    var excel = Excel.decodeBytes(bytes);
+
+    Sheet sheet = excel.tables.values.first;
+
+    for (var row in sheet.rows.skip(1)) {
+      double? thetaValue = double.tryParse(row[0]?.value.toString() ?? '');
+
+      if (thetaValue != null && thetaValue == this.theta) {
+        setState(() {
+          nc = double.tryParse(row[1]?.value.toString() ?? '');
+          nq = double.tryParse(row[2]?.value.toString() ?? '');
+          ny = double.tryParse(row[3]?.value.toString() ?? '');
+        });
+        break;
+      }
+    }
+  }
+
+  Future<void> searchThetaLocal() async {
+
+    ByteData data = await rootBundle.load('assets/localShear.xlsx');
+    var bytes = data.buffer.asUint8List();
+    var excel = Excel.decodeBytes(bytes);
+
+    Sheet sheet = excel.tables.values.first;
+
+    for (var row in sheet.rows.skip(1)) {
+      double? thetaValue = double.tryParse(row[0]?.value.toString() ?? '');
+
+      if (thetaValue != null && thetaValue == this.theta) {
+        setState(() {
+          nc = double.tryParse(row[1]?.value.toString() ?? '');
+          nq = double.tryParse(row[2]?.value.toString() ?? '');
+          ny = double.tryParse(row[3]?.value.toString() ?? '');
+        });
+        break;
+      }
+    }
+  }
 
 //Update function
   void _updateState() {
@@ -245,177 +295,257 @@ String? selectedFootingType = 'Square';
     'Circular',
   ];
 
-void calculateP() {
-  // Parse the input values
-    // Non-nullable
-  df = double.tryParse(inputDepthFoundation.text);
-  dw = double.tryParse(inputDepthWater.text);
-  c = double.tryParse(inputCohesion.text);
-  fDim = double.tryParse(inputFootingBase.text);
-    // Nullable
-  t = double.tryParse(inputFootingThickness.text);
-  gs = double.tryParse(inputSpecificGravity.text);
-  w = double.tryParse(inputWaterContent.text);
-  e = double.tryParse(inputVoidRatio.text);
-  s = double.tryParse(inputDegreeSat.text);
+  Future<void> calculateP() async {
+    // Parse the input values
+      // Non-nullable
+    df = double.tryParse(inputDepthFoundation.text);
+    dw = double.tryParse(inputDepthWater.text);
+    c = double.tryParse(inputCohesion.text);
+    fDim = double.tryParse(inputFootingBase.text);
+      // Nullable
+    t = double.tryParse(inputFootingThickness.text);
+    gs = double.tryParse(inputSpecificGravity.text);
+    w = double.tryParse(inputWaterContent.text);
+    e = double.tryParse(inputVoidRatio.text);
+    s = double.tryParse(inputDegreeSat.text);
 
-  yDry = double.tryParse(inputGammaDry.text);
-  y = double.tryParse(inputGammaMoist.text);
-  ySat = double.tryParse(inputGammaSat.text);
-  theta = double.tryParse(inputAngleFriction.text);
-  nc = double.tryParse(inputFactCohesion.text);
-  nq = double.tryParse(inputFactOverburden.text);
-  ny = double.tryParse(inputFactUnitWeight.text);
+    yDry = double.tryParse(inputGammaDry.text);
+    y = double.tryParse(inputGammaMoist.text);
+    ySat = double.tryParse(inputGammaSat.text);
+    theta = double.tryParse(inputAngleFriction.text);
+    nc = double.tryParse(inputFactCohesion.text);
+    nq = double.tryParse(inputFactOverburden.text);
+    ny = double.tryParse(inputFactUnitWeight.text);
 
-    // Default values
-  yw = double.tryParse(inputUnitWeightWater.text) ?? 9.81; // Default to 9.81 if null
-  yc = double.tryParse(inputUnitWeightConcrete.text) ?? 24; // Default to 24 if null
-  fs = double.tryParse(inputFactorSafety.text) ?? 3; // Default to 3 if null
+      // Default values
+    yw = double.tryParse(inputUnitWeightWater.text) ?? 9.81; // Default to 9.81 if null
+    yc = double.tryParse(inputUnitWeightConcrete.text) ?? 24; // Default to 24 if null
+    fs = double.tryParse(inputFactorSafety.text) ?? 3; // Default to 3 if null
 
       if (df != null && dw != null && fDim != null && c != null) {
-        if (widget.state.soilProp) { //if soilProp is on
-          if (dw! > df!) { // if Df > Dw
-            if (gs != null && e != null) { //if Gs and e only are given
-              yFinal = (gs!*yw!)/(1 + e!); // final y = yDry
-            } else if (gs != null && e != null && w != null) { // if  Gs, e and w only are given
-              yFinal = (gs!*yw!)*((1 + w!)/(1 + e!)); // final y = y
-            } else if (gs != null && s != null && e != null) { // if  Gs, e and S only are given
-              yFinal = (gs!*yw!)*((1 + ((e!*s!)/gs!))/(1 + e!)); // final y = y
-            } else if (gs != null && s != null && e != null) { // if  Gs, w and S only are given
-              yFinal = (gs!*yw!)*((1 + w!)/(1 + ((w!*gs!)/s!))); // final y = y
-            } else if (gs != null && s != null && w != null && e != null) { // if  all are given
-              yFinal = (gs!*yw!)*((1 + w!)/(1 + e!));
+        if (widget.state.soilProp == true) { //if soilProp is on
+          if (dw! >= df!) { // if Dw ≥ Df
+            if (gs != null) {
+              if (e != null) {
+                if (w != null) { 
+                  if (s != null) { // Gs, e, w, S
+                    yFinal = 1;
+                  } else { // Gs, e, w
+                    yFinal = (gs!*yw!)*(1+(0.01*w!))/(1+e!); // final y = y
+                  }
+                } else if (s != null) { // Gs, e, S
+                  yFinal = (gs!*yw!)*(1+((e!*s!)/gs!))/(1+e!); // final y = y
+                } else { // Gs, e
+                  yFinal = (gs!*yw!)*(1 + e!); // final y = ydry
+                }
+              } else if (w != null && s != null) { // Gs, w, S
+                yFinal = (gs!*yw!)*(1+(0.01*w!))/(1+((0.01*w!*gs!)/s!));
+              } else {
+                yFinal = null;
+              }
             } else {
-              yFinal = 1000;
-            } 
-          } else {
-            if (gs != null && e != null) { //if Gs and e only are given
-              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
-            } else if (gs != null && w != null) { // if  Gs and w only are given
-              yFinal = gs!*yw!*((1 + w!)/(1 + (w!*gs!))); // final y = ySat
-            } else if (e != null && w != null) { // if  e and w only are given
-              yFinal = yw!*(e!/w!)*((1 + w!)/(1 + e!)); // final y = ySat 
-            } else if (gs != null && e != null && w != null) { // if  Gs, e and w only are given
-              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
-            } else if (gs != null && s != 1 && e != null) { // if  Gs, e and S only are given (S must be 1)
-              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
-            } else if (gs != null && s != 1 && e != null) { // if  Gs, w and S only are given (S must be 1)
-              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
-            } else if (gs != null && s != 1 && w != null && e != null) { // if  all are given (S must be 1)
-              yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ySat
-            } else {
-              yFinal = 2000;
-            } 
+              yFinal = null;
+            }
+              
+          } else { // Dw < Df
+            if (gs != null) {
+              if (e != null) {
+                if (w != null) { // Gs, e, w
+                  yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
+                } else { // Gs, e
+                  yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
+                }
+              } else if (w != null) { // Gs, w
+                yFinal = (gs!*yw!*(1+0.01*w!))/(1+(0.01*w!*gs!));
+              } else { // Gs
+                yFinal = null;
+              }
+            } else if (e != null && w != null) { // e, w
+              yFinal = ((yw!*e!)/w!)/((1+(0.01*w!))/(1+e!));
+            } else { // none
+              yFinal = null;
+            }
           }
         } else { //if soilProp is off
-          if (yDry != null && y != null && ySat != null) { // if all are given
-            yFinal = ySat!;
-          } else if (yDry != null && y != null) { // if only yDry and y are given
-            yFinal = y!;
-          } else if (yDry != null && ySat != null) { // if only yDry and ySat are given
-            yFinal = ySat!;
-          } else if (y != null && ySat != null) { // if only y and ySat are given
-            yFinal = ySat!;
-          } else {
-            yFinal = 3000;
+          if (yDry != null && y != null && ySat != null) { // yDry, y, ySat
+            yFinal = ySat!; // final y = ySat
+          } else if (yDry != null && y != null) { // yDry, y
+            yFinal = y!; // final y = y
+          } else if (yDry != null && ySat != null) { // yDry, ySat
+            yFinal = ySat!; // final y = ySat
+          } else if (yDry != null) { // yDry
+            yFinal = yDry!; // final y = yDry
+          } else if (y != null && ySat != null) { // y, ySat
+            yFinal = ySat!; // final y = ySat
+          } else if (y != null) { // y
+            yFinal = y!; // final y = y
+          } else if (ySat != null) { // ySat
+            yFinal = ySat!; // final y = ySat
+          } else { // none
+            yFinal = null; 
           }
         }
 
         hw = df! - dw!;
         dfPlusB = df! + fDim!;
 
-        if (dw! <= df!) { // Case 1 for y' and q
-          yPrime = yFinal! - yw!;
-          q = y!*df! + yPrime!*hw!;
-        } else if (df! >= dfPlusB!) { // Case 3 for y' and q
-          yPrime = yFinal!;
-          q = y!*df!;
-        } else { // Case 2 for y' and q
-          yPrime = yFinal! - yw!*(1 - ((dw! - df!)/fDim!));
-          q = y!*df!; 
+        if (yFinal != null && yw != null && dw != null && df != null && fDim != null) {
+          if (dw! <= df!) { // Case 1 for y' and q
+            yPrime = yFinal! - yw!;
+            q = yFinal!*df! + yPrime!*hw!;
+          } else if (dw! >= dfPlusB!) { // Case 3 for y' and q
+            yPrime = yFinal!;
+            q = yFinal!*df!;
+          } else { // Case 2 for y' and q
+            yPrime = yFinal! - yw!*(1 - ((dw! - df!)/fDim!));
+            q = yFinal!*df!; 
+          }
+        } else {
+          yPrime = null;
+          q = null;
         }
+
+
+        if (widget.state.angleDet == true) {
+          if (theta != null) {
+            if (theta! >= 0 && theta! <= 50) {
+              if (widget.state.selectedShearFailure == 'General') {
+                await searchThetaGeneral();
+                if (widget.state.selectedFootingType == "Strip or continuous") {
+                  qUlt = c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
+                } else if (widget.state.selectedFootingType == "Square") {
+                  qUlt = 1.3*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
+                } else { // if circular
+                  qUlt = 1.3*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+                }
+              } else { // local shear
+                await searchThetaLocal();
+                if (widget.state.selectedFootingType == "Strip or continuous") {
+                  qUlt = (2/3)*c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
+                } else if (widget.state.selectedFootingType == "Square") {
+                  qUlt = 0.867*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
+                } else { // if circular
+                  qUlt = 0.867*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+                }
+              }
+            } else {
+              qUlt = null;
+            }
+          } else {
+            qUlt = null;
+          }
+        } else {
+          if (widget.state.selectedShearFailure == 'General') {
+            if (widget.state.selectedFootingType == "Strip or continuous") {
+              qUlt = c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
+            } else if (widget.state.selectedFootingType == "Square") {
+              qUlt = 1.3*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
+            } else { // if circular
+              qUlt = 1.3*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+            }
+          } else { // local shear
+            if (widget.state.selectedFootingType == "Strip or continuous") {
+              qUlt = (2/3)*c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
+            } else if (widget.state.selectedFootingType == "Square") {
+              qUlt = 0.867*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
+            } else { // if circular
+              qUlt = 0.867*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+            }
+          }
+        }
+
+        if (q != null && qUlt != null) {
+          if (t != null) {
+            qNetAll = 1545;
+        } else { // if no t
+          qNetAll = (qUlt! - q!)/fs!;
+        }
+        }
+
       } else {
         yFinal = 4000;
       }
 
   // Print the results for debugging
   print("yw = $yw, yc = $yc, yFinal = $yFinal, yPrime = $yPrime, q = $q");
+  print('///////////////////');
+  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt');
   }
 
 @override
-Widget build(BuildContext context) {
-  return Scaffold(
-    backgroundColor: Color(0xFF363434),
-// App Bar
-    appBar: AppBar(
-      title: Text(
-        widget.title,
-        style: TextStyle(color: Colors.white),
-      ),
+  Widget build(BuildContext context) {
+    return Scaffold(
       backgroundColor: Color(0xFF363434),
-      elevation: 0,
-      surfaceTintColor: Colors.transparent,
-      centerTitle: true,
-    ),
-    body: Padding(
-      padding: const EdgeInsets.only(right: 4.0),
-      child:  ScrollbarTheme(
-        data: ScrollbarThemeData(
-          thumbColor: WidgetStateProperty.all(Colors.grey[800]), // Set the thumb color to white
-          trackColor: WidgetStateProperty.all(Colors.grey[800]), // Optional: Set the track color
+  // App Bar
+      appBar: AppBar(
+        title: Text(
+          widget.title,
+          style: TextStyle(color: Colors.white),
         ),
-      child: Scrollbar(
-        controller: _scrollController,
-        thickness: 4,
-        radius: Radius.circular(10),
-          child: SingleChildScrollView(
-            controller: _scrollController,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
-                  // row managerrrr
-                  children: [
-                    row1ShearFailure(),
-                    row2FootingType(),
-                    row3Df(),
-                    row4Dw(),
-                    row5footingDim(),
-                    row6Cohesion(),
-                    row7Thickness(),
-                    row8FactorOfSafety(),
-                    row9SoilProp(),
-                    Stack(
-                      children: [
-                        row10aSoilPropOn(),
-                        row10bSoilPropOff(),
-                      ]
-                    ),
-                    row11AngleDet(),
-                    Stack(
-                      children: [
-                        row12aAngleDetOn(),
-                        row12bAngleDetOff(),
-                      ]
-                    ),
-                    row13yWaterDet(),
-                    row14yWaterDetOn(),
-                    row15yConcreteDet(),
-                    row16yConcreteDetOn(),
-                    SizedBox(height: 10),
-                    submitButton(),
-                    resulttt(),
-                  ],
+        backgroundColor: Color(0xFF363434),
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.only(right: 4.0),
+        child:  ScrollbarTheme(
+          data: ScrollbarThemeData(
+            thumbColor: WidgetStateProperty.all(Colors.grey[800]), // Set the thumb color to white
+            trackColor: WidgetStateProperty.all(Colors.grey[800]), // Optional: Set the track color
+          ),
+        child: Scrollbar(
+          controller: _scrollController,
+          thickness: 4,
+          radius: Radius.circular(10),
+            child: SingleChildScrollView(
+              controller: _scrollController,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
+                    // row managerrrr
+                    children: [
+                      row1ShearFailure(),
+                      row2FootingType(),
+                      row3Df(),
+                      row4Dw(),
+                      row5footingDim(),
+                      row6Cohesion(),
+                      row7Thickness(),
+                      row8FactorOfSafety(),
+                      row9SoilProp(),
+                      Stack(
+                        children: [
+                          row10aSoilPropOn(),
+                          row10bSoilPropOff(),
+                        ]
+                      ),
+                      row11AngleDet(),
+                      Stack(
+                        children: [
+                          row12aAngleDetOn(),
+                          row12bAngleDetOff(),
+                        ]
+                      ),
+                      row13yWaterDet(),
+                      row14yWaterDetOn(),
+                      row15yConcreteDet(),
+                      row16yConcreteDetOn(),
+                      SizedBox(height: 10),
+                      submitButton(),
+                      resulttt(),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 
   Widget submitButton() {
     return ElevatedButton(
@@ -434,7 +564,7 @@ Widget build(BuildContext context) {
 
   Widget resulttt() {
     return Text(
-      "yw = $yw, yc = $yc",
+      "yw = $yw, yc = $yc, yFinal = $yFinal, q = $q",
       style: TextStyle(color: Colors.white),
     );
   }
@@ -1366,6 +1496,8 @@ Widget build(BuildContext context) {
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
+                    hintText: "",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
@@ -1431,6 +1563,8 @@ Widget build(BuildContext context) {
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
+                    hintText: "",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
@@ -1600,11 +1734,32 @@ Widget build(BuildContext context) {
               mainAxisSize: MainAxisSize.min,
               children: [
 // Angle Det On Manager
+                row12aHeader(),
                 row12aaAngle(),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+  Widget row12aHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, // Centers the text
+        children: [
+          Flexible(
+            child: Text(
+              'Input an integer within this range: 0 ≤ θ ≤ 50',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold, // Makes text bold
+              ),
+              textAlign: TextAlign.center, // Centers the text inside the widget
+            ),
+          ),
+        ],
       ),
     );
   }
