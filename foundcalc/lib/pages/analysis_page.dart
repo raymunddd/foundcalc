@@ -98,6 +98,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? qNetAll;
   double? af;
   double? p;
+  double? pf;
+  double? ps;
   double? udl;
   
   double result_P = 0.0;
@@ -360,13 +362,9 @@ String? selectedFootingType = 'Square';
               yFinal = null;
             }
           } else if (dw! < df!) { // Dw < Df (at least 2)
-            if (yDry != null && y != null && ySat != null) { // yDry, y, ySat
-              yFinal = ySat!; // final y = ySat
-            } else if (yDry != null && ySat != null) { // yDry, ySat
+            if (yDry != null && ySat != null) { // yDry, ySat
               yFinal = ySat!; // final y = ySat
             } else if (y != null && ySat != null) { // y, ySat
-              yFinal = ySat!; // final y = ySat
-            } else if (ySat != null) { // ySat
               yFinal = ySat!; // final y = ySat
             } else { // none
               yFinal = null; 
@@ -467,9 +465,13 @@ String? selectedFootingType = 'Square';
         }
 
         if (q != null && qUlt != null) {
-          if (t != null) {
+          if (t != null && hw != null) {
             qAll = null;
-            qNetAll = (qUlt! - q!)/fs!;     
+            qNetAll = (qUlt! - q!)/fs!;
+            if (af != null) { // square/circular
+              
+            } else { // strip
+            }
           } else { // if no t
             qAll = qUlt!/fs!;
             qNetAll = null;
