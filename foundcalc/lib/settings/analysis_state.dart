@@ -15,7 +15,6 @@ class AnalysisState {
       String inputSpecificGravity = '';
       String inputWaterContent = '';
       String inputVoidRatio = '';
-      String inputDegreeSat = '';
     //Unit Weights
       String inputGammaDry = '';
       String inputGammaMoist = '';
@@ -29,6 +28,7 @@ class AnalysisState {
 
       String inputUnitWeightWater = '';
       String inputUnitWeightConcrete = '';
+
 
 //TOGGLES
     bool soilProp = true;

@@ -10,10 +10,13 @@ Basta need ng
   
 */
 
+import 'dart:collection';
+
 import 'package:excel/excel.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../settings/analysis_state.dart';
+import 'dart:math';
 
 class AnalysisPage extends StatefulWidget {
   final String title;
@@ -44,7 +47,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
   late TextEditingController inputSpecificGravity;
   late TextEditingController inputWaterContent;
   late TextEditingController inputVoidRatio;
-  late TextEditingController inputDegreeSat;
 //Unit Weights
   late TextEditingController inputGammaDry;
   late TextEditingController inputGammaMoist;
@@ -74,7 +76,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? waterContent;
   double? w;
   double? e;
-  double? s;
 
   double? yDry;
   double? y;
@@ -93,10 +94,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? dfPlusB;
   double? q;
   double? qUlt;
+  double? qAll;
   double? qNetAll;
+  double? af;
   double? p;
-
-
+  double? udl;
+  
   double result_P = 0.0;
 
   @override
@@ -115,7 +118,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
       inputSpecificGravity = TextEditingController(text: widget.state.inputSpecificGravity);
       inputWaterContent = TextEditingController(text: widget.state.inputWaterContent);
       inputVoidRatio = TextEditingController(text: widget.state.inputVoidRatio);
-      inputDegreeSat = TextEditingController(text: widget.state.inputDegreeSat);
       inputGammaDry = TextEditingController(text: widget.state.inputGammaDry);
       inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
       inputGammaSat = TextEditingController(text: widget.state.inputGammaSat);
@@ -129,7 +131,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
     selectedShearFailure = widget.state.selectedShearFailure;
     selectedFootingType = widget.state.selectedFootingType;
 
-
     // Add listeners to update state when text changes
     inputDepthFoundation.addListener(_updateState);
     inputDepthWater.addListener(_updateState);
@@ -140,7 +141,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
       inputSpecificGravity.addListener(_updateState);
       inputWaterContent.addListener(_updateState);
       inputVoidRatio.addListener(_updateState);
-      inputDegreeSat.addListener(_updateState);
       inputGammaDry.addListener(_updateState);
       inputGammaMoist.addListener(_updateState);
       inputGammaSat.addListener(_updateState);
@@ -150,7 +150,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
         inputFactUnitWeight.addListener(_updateState);
           inputUnitWeightWater.addListener(_updateState);
           inputUnitWeightConcrete.addListener(_updateState);
-    
   }
 
   List<String> thetaValues = []; // List to hold values from the "theta" column
@@ -211,7 +210,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
         widget.state.inputSpecificGravity = inputSpecificGravity.text;
         widget.state.inputWaterContent = inputWaterContent.text;
         widget.state.inputVoidRatio = inputVoidRatio.text;
-        widget.state.inputDegreeSat = inputDegreeSat.text;
         widget.state.inputGammaDry = inputGammaDry.text;
         widget.state.inputGammaMoist = inputGammaMoist.text;
         widget.state.inputGammaSat = inputGammaSat.text;
@@ -225,9 +223,10 @@ class _AnalysisPageState extends State<AnalysisPage> {
       widget.state.selectedShearFailure = selectedShearFailure;
       widget.state.selectedFootingType = selectedFootingType;      
 
-        calculateP();
+      calculateP();
 
-        widget.onStateChanged(widget.state);
+      widget.onStateChanged(widget.state);
+
     });
   }
 
@@ -244,7 +243,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
       inputSpecificGravity.dispose();
       inputWaterContent.dispose();
       inputVoidRatio.dispose();
-      inputDegreeSat.dispose();
       inputGammaDry.dispose();
       inputGammaMoist.dispose();
       inputGammaSat.dispose();
@@ -307,7 +305,6 @@ String? selectedFootingType = 'Square';
     gs = double.tryParse(inputSpecificGravity.text);
     w = double.tryParse(inputWaterContent.text);
     e = double.tryParse(inputVoidRatio.text);
-    s = double.tryParse(inputDegreeSat.text);
 
     yDry = double.tryParse(inputGammaDry.text);
     y = double.tryParse(inputGammaMoist.text);
@@ -322,31 +319,16 @@ String? selectedFootingType = 'Square';
     yc = double.tryParse(inputUnitWeightConcrete.text) ?? 24; // Default to 24 if null
     fs = double.tryParse(inputFactorSafety.text) ?? 3; // Default to 3 if null
 
-      if (df != null && dw != null && fDim != null && c != null) {
+      if (df != null && fDim != null && c != null) {
         if (widget.state.soilProp == true) { //if soilProp is on
-          if (dw! >= df!) { // if Dw ≥ Df
-            if (gs != null) {
-              if (e != null) {
-                if (w != null) { 
-                  if (s != null) { // Gs, e, w, S
-                    yFinal = 1;
-                  } else { // Gs, e, w
-                    yFinal = (gs!*yw!)*(1+(0.01*w!))/(1+e!); // final y = y
-                  }
-                } else if (s != null) { // Gs, e, S
-                  yFinal = (gs!*yw!)*(1+((e!*s!)/gs!))/(1+e!); // final y = y
-                } else { // Gs, e
-                  yFinal = (gs!*yw!)*(1 + e!); // final y = ydry
-                }
-              } else if (w != null && s != null) { // Gs, w, S
-                yFinal = (gs!*yw!)*(1+(0.01*w!))/(1+((0.01*w!*gs!)/s!));
-              } else {
-                yFinal = null;
-              }
+          if (dw! >= df! && dw == null) { // if Dw ≥ Df and no Dw
+            if (gs != null && e!= null && w != null) {
+              yFinal = (gs!*yw!*(1+(0.01*w!)))/(1+e!); // final y = y
+            } else if (gs != null && e != null) {
+              yFinal = (gs!*yw!)/(1+e!);
             } else {
-              yFinal = null;
+              yFinal = null; // any other option
             }
-              
           } else { // Dw < Df
             if (gs != null) {
               if (e != null) {
@@ -356,55 +338,73 @@ String? selectedFootingType = 'Square';
                   yFinal = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
                 }
               } else if (w != null) { // Gs, w
-                yFinal = (gs!*yw!*(1+0.01*w!))/(1+(0.01*w!*gs!));
+                yFinal = (gs!*yw!*(1+0.01*w!))/(1+(0.01*w!*gs!)); // final y = ysat
               } else { // Gs
                 yFinal = null;
               }
             } else if (e != null && w != null) { // e, w
-              yFinal = ((yw!*e!)/w!)/((1+(0.01*w!))/(1+e!));
+              yFinal = ((yw!*e!)/w!)/((1+(0.01*w!))/(1+e!));  // final y = ysat
             } else { // none
               yFinal = null;
             }
           }
-        } else { //if soilProp is off
-          if (yDry != null && y != null && ySat != null) { // yDry, y, ySat
-            yFinal = ySat!; // final y = ySat
-          } else if (yDry != null && y != null) { // yDry, y
-            yFinal = y!; // final y = y
-          } else if (yDry != null && ySat != null) { // yDry, ySat
-            yFinal = ySat!; // final y = ySat
-          } else if (yDry != null) { // yDry
-            yFinal = yDry!; // final y = yDry
-          } else if (y != null && ySat != null) { // y, ySat
-            yFinal = ySat!; // final y = ySat
-          } else if (y != null) { // y
-            yFinal = y!; // final y = y
-          } else if (ySat != null) { // ySat
-            yFinal = ySat!; // final y = ySat
-          } else { // none
-            yFinal = null; 
+        } else { // if soilProp is off
+          if (dw! >= df! || dw == null) { // (at least 1)
+            if (yDry != null && y != null) {
+              yFinal = null;
+            } else if (yDry != null) {
+              yFinal = yDry!;
+            } else if (y != null) {
+              yFinal = y!;
+            } else {
+              yFinal = null;
+            }
+          } else if (dw! < df!) { // Dw < Df (at least 2)
+            if (yDry != null && y != null && ySat != null) { // yDry, y, ySat
+              yFinal = ySat!; // final y = ySat
+            } else if (yDry != null && ySat != null) { // yDry, ySat
+              yFinal = ySat!; // final y = ySat
+            } else if (y != null && ySat != null) { // y, ySat
+              yFinal = ySat!; // final y = ySat
+            } else if (ySat != null) { // ySat
+              yFinal = ySat!; // final y = ySat
+            } else { // none
+              yFinal = null; 
+            }
+          } else if (dw == 0) {
+            if (ySat != null) {
+              yFinal = ySat!;
+            } else {
+              yFinal = null;
+            }      
+          } else {
+            yFinal = null;
           }
         }
 
         hw = df! - dw!;
         dfPlusB = df! + fDim!;
 
-        if (yFinal != null && yw != null && dw != null && df != null && fDim != null) {
-          if (dw! <= df!) { // Case 1 for y' and q
-            yPrime = yFinal! - yw!;
-            q = yFinal!*df! + yPrime!*hw!;
-          } else if (dw! >= dfPlusB!) { // Case 3 for y' and q
+        if (yFinal != null && yw != null && df != null && fDim != null) {
+          if (dw != null) { // Dw is given
+            if (dw! <= df!) { // Case 1 for y' and q
+              yPrime = yFinal! - yw!;
+              q = yFinal!*df! + yPrime!*hw!;
+            } else if (dw! >= dfPlusB!) { // Case 3 for y' and q
+              yPrime = yFinal!;
+              q = yFinal!*df!;
+            } else { // Case 2 for y' and q
+              yPrime = yFinal! - yw!*(1 - ((dw! - df!)/fDim!));
+              q = yFinal!*df!; 
+            }
+          } else { // no Dw
             yPrime = yFinal!;
             q = yFinal!*df!;
-          } else { // Case 2 for y' and q
-            yPrime = yFinal! - yw!*(1 - ((dw! - df!)/fDim!));
-            q = yFinal!*df!; 
-          }
+          }         
         } else {
           yPrime = null;
           q = null;
         }
-
 
         if (widget.state.angleDet == true) {
           if (theta != null) {
@@ -458,11 +458,28 @@ String? selectedFootingType = 'Square';
           }
         }
 
+        if (selectedFootingType == 'Square') {
+          af = fDim!*fDim!;
+        } else if (selectedFootingType == 'Circular') {
+          af = 0.25*pi*fDim!*fDim!;
+        } else {
+          af = null;
+        }
+
         if (q != null && qUlt != null) {
           if (t != null) {
-              qNetAll = 1545;
+            qAll = null;
+            qNetAll = (qUlt! - q!)/fs!;     
           } else { // if no t
-            qNetAll = (qUlt! - q!)/fs!;
+            qAll = qUlt!/fs!;
+            qNetAll = null;
+            if (af != null) { // square/circular
+              p = qAll!*af!;
+              udl = null;
+            } else { // strip
+              p = null;
+              udl = qAll!*fDim!;
+            }
           }
         }
 
@@ -473,7 +490,7 @@ String? selectedFootingType = 'Square';
   // Print the results for debugging
   print("yw = $yw, yc = $yc, yFinal = $yFinal, yPrime = $yPrime, q = $q");
   print('///////////////////');
-  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt');
+  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt, qAll = $qAll, P = $p');
   }
 
 @override
@@ -514,9 +531,9 @@ String? selectedFootingType = 'Square';
                       row1ShearFailure(),
                       row2FootingType(),
                       row3Df(),
-                      row4Dw(),
-                      row5footingDim(),
-                      row6Cohesion(),
+                      row4footingDim(),
+                      row5Cohesion(),
+                      row6Dw(),
                       row7Thickness(),
                       row8FactorOfSafety(),
                       row9SoilProp(),
@@ -740,74 +757,8 @@ String? selectedFootingType = 'Square';
         ),
       ),        
     );
-  }
-  Widget row4Dw() {
-    return Padding(
-      padding: EdgeInsets.only(top: 20),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        constraints: BoxConstraints(maxWidth: 500),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-          children: [
-            Flexible(
-              child: Container(
-                width: 150,
-                child: Text(
-                  'Depth of the water table from ground level, Dw (in m):',
-                  style: TextStyle(color: Colors.white),
-                ),
-              )
-            ),
-            Container(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
-                ),
-                child: SizedBox(
-                  height: 40, // Adjust height as needed
-                  child: TextField(
-                    controller: inputDepthWater,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Input required",
-                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[800],
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          Icons.clear, 
-                          color: Colors.white54,
-                        ),
-                        iconSize: 17,
-                        onPressed: () {
-                          // Clear the text field
-                          inputDepthWater.clear();
-                        },
-                      ),
-                    ),
-                  ),
-                )
-              )
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget row5footingDim() {
+  } 
+  Widget row4footingDim() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -873,7 +824,7 @@ String? selectedFootingType = 'Square';
       ),
     );
   }
-  Widget row6Cohesion() {
+  Widget row5Cohesion() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -927,6 +878,72 @@ String? selectedFootingType = 'Square';
                         onPressed: () {
                           // Clear the text field
                           inputCohesion.clear();
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget row6Dw() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Depth of the water table from ground level, Dw (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputDepthWater,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputDepthWater.clear();
                         },
                       ),
                     ),
@@ -1139,9 +1156,8 @@ String? selectedFootingType = 'Square';
               children: [
 // Soil Prop On Manager
                 row10aaGs(),
-                row10abWaterContent(),
-                row10acVoidRatio(),
-                row10adDegSat(),
+                row10abVoidRatio(),
+                row10acWaterContent(),
               ],
             ),
           ),
@@ -1216,74 +1232,7 @@ String? selectedFootingType = 'Square';
       ),
     );
   }
-  Widget row10abWaterContent() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Flexible(
-            child: Container(
-              width: 120,
-              child: Text(
-                'Water content, ω (%):',
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
-              ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  controller: inputWaterContent,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Optional",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    filled: true,
-                    fillColor: Color.fromARGB(255, 51, 149, 53),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.clear, 
-                        color: Colors.white54,
-                      ),
-                      iconSize: 17,
-                      onPressed: () {
-                        // Clear the text field
-                        inputWaterContent.clear();
-                      },
-                    ),
-                  ),
-                ),
-              )
-            )
-          ),
-        ],
-      ),
-    );
-  }
-  Widget row10acVoidRatio() {
+  Widget row10abVoidRatio() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -1350,7 +1299,7 @@ String? selectedFootingType = 'Square';
       ),
     );
   }
-  Widget row10adDegSat() {
+  Widget row10acWaterContent() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -1360,7 +1309,7 @@ String? selectedFootingType = 'Square';
             child: Container(
               width: 120,
               child: Text(
-                'Degree of saturation, S:',
+                'Water content, ω (%):',
                 style: TextStyle(color: Colors.white),
               ),
             )
@@ -1374,7 +1323,7 @@ String? selectedFootingType = 'Square';
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputDegreeSat,
+                  controller: inputWaterContent,
                   keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
@@ -1405,7 +1354,7 @@ String? selectedFootingType = 'Square';
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputDegreeSat.clear();
+                        inputWaterContent.clear();
                       },
                     ),
                   ),
