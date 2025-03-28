@@ -434,32 +434,36 @@ String? selectedFootingType = 'Square';
           } else {
             qUlt = null;
           }
-        } else {
-          if (widget.state.selectedShearFailure == 'General') {
-            if (widget.state.selectedFootingType == "Strip or continuous") {
-              qUlt = c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
-            } else if (widget.state.selectedFootingType == "Square") {
-              qUlt = 1.3*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
-            } else { // if circular
-              qUlt = 1.3*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+        } else { // Nc, Nq, Ny are given (angleDet = false)
+          if (nc != null && nq != null && ny != null) {
+            if (widget.state.selectedShearFailure == 'General') {
+              if (widget.state.selectedFootingType == "Strip or continuous") {
+                qUlt = c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
+              } else if (widget.state.selectedFootingType == "Square") {
+                qUlt = 1.3*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
+              } else { // if circular
+                qUlt = 1.3*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+              }
+            } else { // local shear
+              if (widget.state.selectedFootingType == "Strip or continuous") {
+                qUlt = (2/3)*c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
+              } else if (widget.state.selectedFootingType == "Square") {
+                qUlt = 0.867*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
+              } else { // if circular
+                qUlt = 0.867*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+              }
             }
-          } else { // local shear
-            if (widget.state.selectedFootingType == "Strip or continuous") {
-              qUlt = (2/3)*c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
-            } else if (widget.state.selectedFootingType == "Square") {
-              qUlt = 0.867*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
-            } else { // if circular
-              qUlt = 0.867*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
-            }
+          } else { // no Nc, Nq and Ny
+            qUlt = null;
           }
         }
 
         if (q != null && qUlt != null) {
           if (t != null) {
-            qNetAll = 1545;
-        } else { // if no t
-          qNetAll = (qUlt! - q!)/fs!;
-        }
+              qNetAll = 1545;
+          } else { // if no t
+            qNetAll = (qUlt! - q!)/fs!;
+          }
         }
 
       } else {
