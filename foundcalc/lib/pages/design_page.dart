@@ -6,11 +6,13 @@ class DesignPage extends StatefulWidget {
   final DesignState state;
   final Function(DesignState) onStateChanged;
 
+
   DesignPage({
     required this.title,
     required this.state,
     required this.onStateChanged,
   });
+
 
   @override
   _DesignPageState createState() => _DesignPageState();
@@ -22,6 +24,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
 @override
   bool get wantKeepAlive => true; // 2. Override wantKeepAlive and return true
+  String get displayTitle {
+  if (widget.title.startsWith('Design')) {
+        int index = int.tryParse(widget.title.split(' ').last) ?? 0;
+        return "Design of Footings $index"; // Shorter for tab
+      }
+
+      return widget.title; 
+    }
+
 
   @override
   Widget build(BuildContext context) {
@@ -30,14 +41,14 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       backgroundColor: Color(0xFF363434),
       appBar: AppBar(
         title: Text(
-          widget.title,
+          displayTitle,
           style: TextStyle(color: Colors.white)
         ),
         backgroundColor: Color(0xFF363434),
       ),
       body: Center(
         child: Text(
-          'Details for ${widget.title}',
+          'Details for $displayTitle',
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
       ),
