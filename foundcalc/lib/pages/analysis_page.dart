@@ -111,7 +111,14 @@ class _AnalysisPageState extends State<AnalysisPage> {
   bool showSolution = false;
   bool isItStrip = true;
 
+String get displayTitle {
+if (widget.title.startsWith('Analysis')) {
+      int index = int.tryParse(widget.title.split(' ').last) ?? 0;
+      return "Analysis of Footings $index"; // Shorter for tab
+    }
 
+    return widget.title; 
+  }
 
   @override
   void initState() {
@@ -635,7 +642,7 @@ String? selectedFootingType = 'Square';
   // App Bar
       appBar: AppBar(
         title: Text(
-          widget.title,
+          displayTitle,
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Color(0xFF363434),
