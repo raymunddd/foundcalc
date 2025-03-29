@@ -119,7 +119,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   void _addAnalRectMomentItem() {
     setState(() {
       int nextNumber = _getNextNumber(analRectMomentItems, "RectMoment");
-      String newItem = 'RectMoment $nextNumber';
+      String newItem = 'Analysis of Rectangular Footing with Moments $nextNumber';
       analRectMomentItems.add(newItem);
       analRectMomentStates[newItem] = AnalRectMomentState(title: newItem); // Create state
 
