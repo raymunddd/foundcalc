@@ -685,6 +685,8 @@ String? selectedFootingType = 'Square';
                       row15yConcreteDet(),
                       row16yConcreteDetOn(),
                       SizedBox(height: 10),
+                      clearButton(),
+                      SizedBox(height: 10),
                       submitButton(),
                       SizedBox(height: 10),
                       if (showResults && selectedFootingType == 'Strip or continuous')
@@ -705,6 +707,18 @@ String? selectedFootingType = 'Square';
     );
   }
 
+  Widget clearButton() {
+    return ElevatedButton(
+      onPressed: () {
+        // add method/function to clear all values
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  }
   Widget submitButton() {
     return ElevatedButton(
       onPressed: () {
