@@ -3,7 +3,6 @@ import 'pages/analysis_page.dart'; // Import AnalysisPage
 import 'pages/design_page.dart';   // Import DesignPage
 import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'pages/about_page.dart';    // Import AboutPage
-import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'settings/analysis_state.dart'; // Import AnalysisState
 import 'settings/design_state.dart';   // Import DesignState
 import 'settings/anal_rectmoment_state.dart'; // Import AnalRectMomentState
@@ -25,7 +24,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   Map<String, AnalysisState> analysisStates = {};
   Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize empty
   Map<String, DesignState> designStates = {};
-  Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize states map for RectMoment
+
 
 
   @override

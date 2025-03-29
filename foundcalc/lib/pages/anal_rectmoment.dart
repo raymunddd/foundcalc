@@ -2,11 +2,7 @@
 //import 'package:excel/excel.dart';
 //import 'dart:math';
 import 'package:flutter/material.dart';
-<<<<<<< Updated upstream
 import '../settings/anal_rectmoment_state.dart';
-=======
-import '../../settings/anal_rectmoment_state.dart';
->>>>>>> Stashed changes
 
 
 class AnalRectMomentPage extends StatefulWidget {
