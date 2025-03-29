@@ -111,9 +111,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
   bool showSolution = false;
   bool isItStrip = true;
 
-  bool isGammaDryEnabled = true;
-  bool isGammaMoistEnabled = true;
-  bool isGammaSatEnabled = true;
+
 
   @override
   void initState() {
@@ -141,8 +139,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
         inputFactUnitWeight = TextEditingController(text: widget.state.inputFactUnitWeight);
           inputUnitWeightWater = TextEditingController(text: widget.state.inputUnitWeightWater);
           inputUnitWeightConcrete = TextEditingController(text: widget.state.inputUnitWeightConcrete);
-    
-    isGammaSatEnabled = widget.state.isGammaSatEnabled;
+
 
     selectedShearFailure = widget.state.selectedShearFailure;
     selectedFootingType = widget.state.selectedFootingType;
@@ -245,9 +242,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
       widget.state.selectedShearFailure = selectedShearFailure;
       widget.state.selectedFootingType = selectedFootingType;
 
-      widget.state.isGammaSatEnabled = isGammaSatEnabled;
-      widget.state.isGammaDryEnabled = isGammaDryEnabled;
-      widget.state.isGammaMoistEnabled = isGammaMoistEnabled;
+
 
       df = double.tryParse(inputDepthFoundation.text);
       dw = double.tryParse(inputDepthWater.text);
@@ -270,15 +265,15 @@ class _AnalysisPageState extends State<AnalysisPage> {
       y = double.tryParse(inputGammaMoist.text);
 
       if (yDry != null) {
-        isGammaMoistEnabled = false;
+        widget.state.isGammaMoistEnabled = false;
       } else {
-        isGammaMoistEnabled = true;
+        widget.state.isGammaMoistEnabled = true;
       }
 
       if (y != null) {
-        isGammaDryEnabled = false;
+        widget.state.isGammaDryEnabled = false;
       } else {
-        isGammaDryEnabled = true;
+        widget.state.isGammaDryEnabled = true;
       }
 
       calculateP();
@@ -629,8 +624,8 @@ String? selectedFootingType = 'Square';
   // Print the results for debugging
   print("yw = $yw, yc = $yc, yFinal = $yFinal, yPrime = $yPrime, q = $q");
   print('///////////////////');
-  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt, qAll = $qAll, qNet = $qNet, qAllNet = $qNetAll, P = $p, w = $udl, isGammaSatEnabled = $isGammaSatEnabled');
-  print('isGammaDryEnabled = $isGammaDryEnabled, isGammaMoistEnabled = $isGammaMoistEnabled');
+  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt, qAll = $qAll, qNet = $qNet, qAllNet = $qNetAll, P = $p, w = $udl, isGammaSatEnabled = ${widget.state.isGammaSatEnabled}');
+  print('isGammaDryEnabled = ${widget.state.isGammaDryEnabled}, isGammaMoistEnabled = ${widget.state.isGammaMoistEnabled}');
   }
 
 @override
@@ -1639,7 +1634,7 @@ String? selectedFootingType = 'Square';
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputGammaDry,
-                  enabled: isGammaDryEnabled,
+                  enabled: widget.state.isGammaDryEnabled,
                   keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
@@ -1707,7 +1702,7 @@ String? selectedFootingType = 'Square';
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputGammaMoist,
-                  enabled: isGammaMoistEnabled,
+                  enabled: widget.state.isGammaMoistEnabled,
                   keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
