@@ -119,7 +119,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   void _addAnalRectMomentItem() {
     setState(() {
       int nextNumber = _getNextNumber(analRectMomentItems, "RectMoment");
-      String newItem = 'Analysis of Rectangular Footing with Moments $nextNumber';
+      String newItem = 'RectMoment $nextNumber';
       analRectMomentItems.add(newItem);
       analRectMomentStates[newItem] = AnalRectMomentState(title: newItem); // Create state
 
@@ -237,7 +237,6 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       const SizedBox(width: 8),
                       InkWell(
                         onTap: () {
-
                           // EKIS ang di hometab
                           setState(() {
                             int index = _tabs.indexOf(title);
@@ -305,7 +304,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                 ListTile(
                   tileColor: Color(0xFF414141),
                   title: Text(
-                    'Rectangular Moment Tabs',
+                    'Analysis of Rectangular Footing with Moments',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
@@ -351,31 +350,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     },
                   ),
               ],
-              if (analRectMomentItems.isNotEmpty) ...[
-                ListTile(
-                  tileColor: Color(0xFF414141),
-                  title: Text(
-                    'Analysis of Rectangular Moment Tabs',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-                for (int i = 0; i < analRectMomentItems.length; i++)
-                  ListTile(
-                    tileColor: Color(0xFF414141),
-                    title: Text(
-                      analRectMomentItems[i],
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.white),
-                      onPressed: () => _removeAnalRectMomentItem(i+1), //+1 because home is index 0
-                    ),
-                    onTap: () {
-                      _tabController.animateTo(analysisItems.length + i + 1); //+1 because home is index 0
-                      Navigator.of(context).pop(); // Close the drawer
-                    },
-                  ),
-              ],
+              
               /*
               if (<[NameNgCalc]>Items.isNotEmpty) ...[
                 ListTile(
