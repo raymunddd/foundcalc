@@ -279,7 +279,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                 ListTile(
                   tileColor: Color(0xFF424140),
                   title: Text(
-                    'Analysis Tabs',
+                    'Analysis of Footings',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
@@ -304,7 +304,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                 ListTile(
                   tileColor: Color(0xFF414141),
                   title: Text(
-                    'Analysis of Rectangular Footing with Moments',
+                    'Analysis of Rectangular Footing with Moment',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
@@ -329,7 +329,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                 ListTile(
                   tileColor: Color(0xFF414141),
                   title: Text(
-                    'Design Tabs',
+                    'Design of Footings',
                     style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
@@ -435,7 +435,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                         foregroundColor: Colors.white,
                       ),
                       onPressed: _addAnalysisItem,
-                      child: Text("Analysis"),
+                      child: Text("Analysis of Footings"),
                     ),
                     SizedBox(height: 10),
                     ElevatedButton(
@@ -444,7 +444,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                         foregroundColor: Colors.white,
                       ),
                       onPressed: _addDesignItem,
-                      child: Text("Design"),
+                      child: Text("Design of Footings"),
                     ),
                     SizedBox(height: 10),
                     ElevatedButton(
@@ -453,7 +453,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                         foregroundColor: Colors.white,
                       ),
                       onPressed: _addAnalRectMomentItem,
-                      child: Text("Rectangular Moment"),
+                      child: Text("Analysis of Rectangular Footings with Moment"),
                     ),
                   ],
                 ),
