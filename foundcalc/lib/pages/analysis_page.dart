@@ -98,9 +98,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
 //Hint Text para magpalit
   late String gsHint = "Input required";
-  late String eHint = "Input required";
-  late String wHint = "Optional";
-  late String sHint = "Optional";
+  late String wHint = "Input at least one";
+  late String eHint = "Input at least one";
+  late String sHint = "Input at least one";
 
 
   double result_P = 0.0;
@@ -276,18 +276,35 @@ class _AnalysisPageState extends State<AnalysisPage> {
     bool mayS = inputDegreeSat.text.isNotEmpty;
     
     //Mahabang if else statement
-      if (mayGs || mayE || mayW || mayS) {
-          gsHint = mayGs ? "Input required" : "Optional"; //If mayGs is true, then si gsHint magiging "Input required", else "Optional"
-          eHint = mayE ? "Input required" : "Optional";
-          wHint = mayW ? "Input required" : "Optional";
-          sHint = mayS ? "Input required" : "Optional";
-    } else {
-      // Default state
-          gsHint = "Input required";
-          eHint = "Input required"; 
-          wHint = "Optional";
-          sHint = "Optional";
-    }
+      if (mayGs) {
+        gsHint = "Input required";
+          if (mayE) { //if may input na sa e, magiging optional nalang si w at S
+              wHint = "Optional";
+              sHint = "Optional";
+          }
+          else if (mayW) { //if may input na sa W, magiging optional nalang si e at Required na si S
+              eHint = "Optional";
+              sHint = "Input required";
+          }
+          else if (mayS) { //if may input na sa S, optional na yun dalawa
+              eHint = "Optional";
+              wHint = "Optional";
+          }
+          else if (mayE && mayW){ //Kapag may both, then optional si S
+              sHint = "Optional";
+          }
+          else if (mayE && mayS){ //optional naman si W
+              wHint = "Optional";
+          }
+
+          else { //if wala pang input, Required pa rin si e, w at S
+              eHint = "Input at least one";
+              wHint = "Input at least one";
+              sHint = "Input at least one";
+          }
+
+
+      }
   });
 }
 
