@@ -513,11 +513,42 @@ String? selectedFootingType = 'Square';
           q = null;
         }
 
-        if (widget.state.angleDet == true) {
-          if (theta != null) {
-            if (theta! >= 0 && theta! <= 50) {
+        if (q != null && yPrime != null) {
+          if (widget.state.angleDet == true) {
+            if (theta != null) {
+              if (theta! >= 0 && theta! <= 50) {
+                if (widget.state.selectedShearFailure == 'General') {
+                  await searchThetaGeneral();
+                  if (nc != null && nq != null && ny != null) {
+                    if (widget.state.selectedFootingType == "Strip or continuous") {
+                      qUlt = c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
+                    } else if (widget.state.selectedFootingType == "Square") {
+                      qUlt = 1.3*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
+                    } else { // if circular
+                      qUlt = 1.3*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+                    }
+                  }
+                } else { // local shear
+                  await searchThetaLocal();
+                  if (nc != null && nq != null && ny != null) {
+                    if (widget.state.selectedFootingType == "Strip or continuous") {
+                      qUlt = (2/3)*c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
+                    } else if (widget.state.selectedFootingType == "Square") {
+                      qUlt = 0.867*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
+                    } else { // if circular
+                      qUlt = 0.867*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
+                    }
+                  }
+                }
+              } else {
+                qUlt = null;
+              }
+            } else {
+              qUlt = null;
+            }
+          } else { // Nc, Nq, Ny are given (angleDet = false)
+            if (nc != null && nq != null && ny != null) {
               if (widget.state.selectedShearFailure == 'General') {
-                await searchThetaGeneral();
                 if (widget.state.selectedFootingType == "Strip or continuous") {
                   qUlt = c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
                 } else if (widget.state.selectedFootingType == "Square") {
@@ -526,7 +557,6 @@ String? selectedFootingType = 'Square';
                   qUlt = 1.3*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
                 }
               } else { // local shear
-                await searchThetaLocal();
                 if (widget.state.selectedFootingType == "Strip or continuous") {
                   qUlt = (2/3)*c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
                 } else if (widget.state.selectedFootingType == "Square") {
@@ -535,33 +565,9 @@ String? selectedFootingType = 'Square';
                   qUlt = 0.867*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
                 }
               }
-            } else {
+            } else { // no Nc, Nq and Ny
               qUlt = null;
             }
-          } else {
-            qUlt = null;
-          }
-        } else { // Nc, Nq, Ny are given (angleDet = false)
-          if (nc != null && nq != null && ny != null) {
-            if (widget.state.selectedShearFailure == 'General') {
-              if (widget.state.selectedFootingType == "Strip or continuous") {
-                qUlt = c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
-              } else if (widget.state.selectedFootingType == "Square") {
-                qUlt = 1.3*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
-              } else { // if circular
-                qUlt = 1.3*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
-              }
-            } else { // local shear
-              if (widget.state.selectedFootingType == "Strip or continuous") {
-                qUlt = (2/3)*c!*nc!+q!*nq!+0.5*yPrime!*fDim!*ny!;
-              } else if (widget.state.selectedFootingType == "Square") {
-                qUlt = 0.867*c!*nc!+q!*nq!+0.4*yPrime!*fDim!*ny!;
-              } else { // if circular
-                qUlt = 0.867*c!*nc!+q!*nq!+0.3*yPrime!*fDim!*ny!;
-              }
-            }
-          } else { // no Nc, Nq and Ny
-            qUlt = null;
           }
         }
 
@@ -721,8 +727,27 @@ String? selectedFootingType = 'Square';
 
   Widget clearButton() {
     return ElevatedButton(
-      onPressed: () {
-        // add method/function to clear all values
+      onPressed: () {        
+        selectedShearFailure = null;
+        selectedFootingType = null;
+        inputDepthFoundation.clear();
+        inputDepthWater.clear();
+        inputFootingBase.clear();
+        inputCohesion.clear();
+        inputFootingThickness.clear();
+        inputFactorSafety.clear();
+        inputSpecificGravity.clear();
+        inputWaterContent.clear();
+        inputVoidRatio.clear();
+        inputGammaDry.clear();
+        inputGammaMoist.clear();
+        inputGammaSat.clear();
+        inputAngleFriction.clear();
+        inputFactCohesion.clear();
+        inputFactOverburden.clear();
+        inputFactUnitWeight.clear();
+        inputUnitWeightWater.clear();
+        inputUnitWeightConcrete.clear();
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
