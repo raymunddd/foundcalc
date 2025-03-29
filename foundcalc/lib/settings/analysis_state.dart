@@ -36,6 +36,8 @@ class AnalysisState {
     bool waterDet = false;
     bool concreteDet = false;
 
+    bool isGammaSatEnabled = true;
+
 //syempre, yun tab name hahaaha
   final String title;
   AnalysisState({required this.title});

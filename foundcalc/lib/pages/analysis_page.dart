@@ -104,9 +104,16 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? pf;
   double? ps;
   double? udl;
+
+  double? sol;
   
   bool showResults = false;
+  bool showSolution = false;
   bool isItStrip = true;
+
+  bool isGammaDryEnabled = true;
+  bool isGammaMoistEnabled = true;
+  bool isGammaSatEnabled = true;
 
   @override
   void initState() {
@@ -135,6 +142,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
           inputUnitWeightWater = TextEditingController(text: widget.state.inputUnitWeightWater);
           inputUnitWeightConcrete = TextEditingController(text: widget.state.inputUnitWeightConcrete);
     
+    isGammaSatEnabled = widget.state.isGammaSatEnabled;
+
     selectedShearFailure = widget.state.selectedShearFailure;
     selectedFootingType = widget.state.selectedFootingType;
 
@@ -159,10 +168,10 @@ class _AnalysisPageState extends State<AnalysisPage> {
           inputUnitWeightConcrete.addListener(_updateState);
           
     if (widget.state.selectedFootingType == 'Strip or continuous') {
-        isItStrip = true;
-      } else {
-        isItStrip = false;
-      }
+      isItStrip = true;
+    } else {
+      isItStrip = false;
+    }
   }
 
   List<String> thetaValues = []; // List to hold values from the "theta" column
@@ -234,7 +243,41 @@ class _AnalysisPageState extends State<AnalysisPage> {
             widget.state.inputUnitWeightConcrete = inputUnitWeightConcrete.text;
 
       widget.state.selectedShearFailure = selectedShearFailure;
-      widget.state.selectedFootingType = selectedFootingType;      
+      widget.state.selectedFootingType = selectedFootingType;
+
+      widget.state.isGammaSatEnabled = isGammaSatEnabled;
+
+      df = double.tryParse(inputDepthFoundation.text);
+      dw = double.tryParse(inputDepthWater.text);
+
+      if (dw != null) {
+        if (df != null) {
+          if (dw! < df!) {
+            widget.state.isGammaSatEnabled = true;
+          } else {
+            widget.state.isGammaSatEnabled = false;
+          }
+        } else {
+          widget.state.isGammaSatEnabled = true;
+        }
+      } else {
+        widget.state.isGammaSatEnabled = false;
+      }
+
+      yDry = double.tryParse(inputGammaDry.text);
+      y = double.tryParse(inputGammaMoist.text);
+
+      if (yDry != null) {
+        isGammaMoistEnabled = false;
+      } else {
+        isGammaMoistEnabled = true;
+      }
+
+      if (y != null) {
+        isGammaDryEnabled = false;
+      } else {
+        isGammaDryEnabled = true;
+      }
 
       calculateP();
 
@@ -268,6 +311,38 @@ class _AnalysisPageState extends State<AnalysisPage> {
     super.dispose();
   }
 
+
+  String get gammaSatHint {
+    if (widget.state.isGammaSatEnabled) {
+      return 'Input required';
+    } else {
+      return 'Input not required';
+    }
+  }
+
+  String get soilPropOffHeader {
+    if (widget.state.isGammaSatEnabled) {
+      return 'Input only two (2)';
+    } else {
+      return 'Input only one (1)';
+    }
+  }
+
+  String get gammaDryHint {
+    if (isGammaDryEnabled) {
+      return '';
+    } else {
+      return 'Input not required';
+    }
+  }
+
+  String get gammaMoistHint {
+    if (isGammaMoistEnabled) {
+      return '';
+    } else {
+      return 'Input not required';
+    }
+  }
 
   String get footingDetLabel {
     switch (selectedFootingType) {
@@ -505,12 +580,16 @@ String? selectedFootingType = 'Square';
             a = df! - hw!;
             b = df! - t!;
             if (af != null) { // square/circular
+              sol = 1; // with t, square/circular
+              
               pf = yc!*af!*t!;
               ps = af!*(y!*a!-ySat!*b!);
               p = (af!*(qUlt!+yw!*hw!)) - pf! - ps!;
               p = roundToFourDecimalPlaces(p!);
               udl = 0;
             } else { // strip
+              sol = 2; // with t, strip
+
               pf = yc!*fDim!*t!;
               ps = fDim!*(y!*a!-ySat!*b!);
               p = 0;
@@ -519,10 +598,14 @@ String? selectedFootingType = 'Square';
             }
           } else { // if no t
             if (af != null) { // square/circular
+              sol = 3; // with no t, square/circular
+
               p = qAll!*af!;
               p = roundToFourDecimalPlaces(p!);
               udl = 0;
             } else { // strip
+              sol = 1; // with t, strip
+
               p = 0;
               udl = qAll!*fDim!;
               udl = roundToFourDecimalPlaces(udl!);
@@ -536,7 +619,8 @@ String? selectedFootingType = 'Square';
   // Print the results for debugging
   print("yw = $yw, yc = $yc, yFinal = $yFinal, yPrime = $yPrime, q = $q");
   print('///////////////////');
-  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt, qAll = $qAll, qNet = $qNet, qAllNet = $qNetAll, P = $p, w = $udl');
+  print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt, qAll = $qAll, qNet = $qNet, qAllNet = $qNetAll, P = $p, w = $udl, isGammaSatEnabled = $isGammaSatEnabled');
+  print('isGammaDryEnabled = $isGammaDryEnabled, isGammaMoistEnabled = $isGammaMoistEnabled');
   }
 
 @override
@@ -607,7 +691,9 @@ String? selectedFootingType = 'Square';
                         resultStrip(),
                       if (showResults && (selectedFootingType == 'Square' || selectedFootingType == 'Circular'))
                         resultNotStrip(),
-                      SizedBox(height: 40),
+                      SizedBox(height: 10),
+                      if (showResults)
+                        solutionButton(),
                     ],
                   ),
                 ),
@@ -635,10 +721,23 @@ String? selectedFootingType = 'Square';
       child: Text(buttonLabel),
     );
   }
-
+  Widget solutionButton() {
+    return ElevatedButton(
+      onPressed: () {
+        setState(() {
+          showSolution = true;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text('View solution'),
+    );
+  }
   Widget resultStrip() {
     return Text(
-      "w = $udl",
+      "w = $udl kN/m",
       style: TextStyle(
         color: Colors.white,
         fontWeight: FontWeight.bold,
@@ -647,7 +746,7 @@ String? selectedFootingType = 'Square';
   }
   Widget resultNotStrip() {
     return Text(
-      "P = $p",
+      "P = $p kN",
       style: TextStyle(
         color: Colors.white,
         fontWeight: FontWeight.bold,
@@ -1472,7 +1571,7 @@ String? selectedFootingType = 'Square';
         children: [
           Flexible(
             child: Text(
-              'Input at least one (1)',
+              soilPropOffHeader,
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold, // Makes text bold
@@ -1509,13 +1608,14 @@ String? selectedFootingType = 'Square';
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputGammaDry,
+                  enabled: isGammaDryEnabled,
                   keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "",
+                    hintText: gammaDryHint,
                     hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -1576,13 +1676,14 @@ String? selectedFootingType = 'Square';
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputGammaMoist,
+                  enabled: isGammaMoistEnabled,
                   keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "",
+                    hintText: gammaMoistHint,
                     hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -1643,13 +1744,14 @@ String? selectedFootingType = 'Square';
                 height: 40, // Adjust height as needed
                 child: TextField(
                   controller: inputGammaSat,
+                  enabled: widget.state.isGammaSatEnabled,
                   keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
                     ],
                   style: TextStyle(color: Colors.white),
                   decoration: InputDecoration(
-                    hintText: "",
+                    hintText: gammaSatHint,
                     hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                     enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(25),
@@ -2358,6 +2460,17 @@ String? selectedFootingType = 'Square';
               )
             )
           ),
+        ],
+      ),
+    );
+  }
+  // to be fixed
+  Widget row17Solution() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
         ],
       ),
     );
