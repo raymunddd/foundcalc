@@ -25,7 +25,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   Map<String, AnalysisState> analysisStates = {};
   Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize empty
   Map<String, DesignState> designStates = {};
-  Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize states map for RectMoment
+
 
 
   @override
