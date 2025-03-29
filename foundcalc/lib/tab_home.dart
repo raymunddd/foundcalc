@@ -3,6 +3,7 @@ import 'pages/analysis_page.dart'; // Import AnalysisPage
 import 'pages/design_page.dart';   // Import DesignPage
 import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'pages/about_page.dart';    // Import AboutPage
+import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'settings/analysis_state.dart'; // Import AnalysisState
 import 'settings/design_state.dart';   // Import DesignState
 import 'settings/anal_rectmoment_state.dart'; // Import AnalRectMomentState
@@ -20,10 +21,11 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   int _tabCounter = 1; // Start counter at 1 (Home is already tab 0)
   List<String> analysisItems = []; // Initialize empty
   List<String> designItems = [];   // Initialize empty
-  List<String> analRectMomentItems = [];   // Initialize empty
+  List<String> analRectMomentItems = []; // Initialize empty for RectMoment
   Map<String, AnalysisState> analysisStates = {};
   Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize empty
   Map<String, DesignState> designStates = {};
+  Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize states map for RectMoment
 
 
   @override
@@ -98,11 +100,14 @@ class _TabbedHomePageState extends State<TabbedHomePage>
             int designIndex = designItems.indexOf(tabToRemove);
             
             if (designIndex != -1) {
+              // Remove from analysisItems and states
               String removedTab = designItems.removeAt(designIndex);
               designStates.remove(removedTab);
 
+              // Remove from tabs
               _tabs.removeAt(index);
               
+              // UPDATE (Wag kalimutan)
               _tabController = TabController(length: _tabs.length, vsync: this);
               if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
                 _tabController.animateTo(_tabs.length - 1);
@@ -111,35 +116,35 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           });
         }
 
+//ANAL RECT MOMENT
   void _addAnalRectMomentItem() {
     setState(() {
-      int nextNumber = _getNextNumber(analRectMomentItems, "Analysis");
-      String newItem = 'Analysis of Rectangular Footing with Moment $nextNumber';
+      int nextNumber = _getNextNumber(analRectMomentItems, "RectMoment");
+      String newItem = 'RectMoment $nextNumber';
       analRectMomentItems.add(newItem);
-      
+      analRectMomentStates[newItem] = AnalRectMomentState(title: newItem); // Create state
 
-      analRectMomentStates[newItem] = AnalRectMomentState(title: newItem);
-      
-      // Add to tabs list
-      _tabs.add(newItem);
+      _tabs.add(newItem); // Add to tabs list for display
       _tabController = TabController(length: _tabs.length, vsync: this);
-      _tabController.animateTo(_tabs.length - 1);
+      _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
+      _tabCounter++;
     });
   }
 
   void _removeAnalRectMomentItem(int index) {
     setState(() {
       String tabToRemove = _tabs[index];
-      int analRectmomentIndex = analRectMomentItems.indexOf(tabToRemove);
+      int rectMomentIndex = analRectMomentItems.indexOf(tabToRemove);
       
-      if (analRectmomentIndex != -1) {
-        // Remove from items and states
-        String removedTab = analRectMomentItems.removeAt(analRectmomentIndex);
-        analRectMomentStates.remove(removedTab); // Remove from states
+      if (rectMomentIndex != -1) {
+        // Remove from analRectMomentItems and states
+        String removedTab = analRectMomentItems.removeAt(rectMomentIndex);
+        analRectMomentStates.remove(removedTab);
 
         // Remove from tabs
         _tabs.removeAt(index);
         
+        // UPDATE
         _tabController = TabController(length: _tabs.length, vsync: this);
         if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
           _tabController.animateTo(_tabs.length - 1);
@@ -149,7 +154,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   }
 
 
-/* TEMPLATE KUNG LALAGAY NG IBA PANG CALC
+  /*TEMPLATE KUNG LALAGAY NG IBA PANG CALC
         
   void _add<[NameNgCalc]>Item() {
     setState(() {
@@ -241,8 +246,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                               _removeAnalysisItem(index);
                             } else if (title.startsWith('Design')) {
                               _removeDesignItem(index);
-                            }
-                            else if (title.startsWith('Analysis of Rectangular Footing with Moment')) {
+                            } else if (title.startsWith('RectMoment')) {
                               _removeAnalRectMomentItem(index);
                             }
                           });
@@ -294,6 +298,31 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     ),
                     onTap: () {
                       _tabController.animateTo(i+1); //+1 because home is index 0
+                      Navigator.of(context).pop(); // Close the drawer
+                    },
+                  ),
+              ],
+              if (analRectMomentItems.isNotEmpty) ...[
+                ListTile(
+                  tileColor: Color(0xFF414141),
+                  title: Text(
+                    'Rectangular Moment Tabs',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                for (int i = 0; i < analRectMomentItems.length; i++)
+                  ListTile(
+                    tileColor: Color(0xFF414141),
+                    title: Text(
+                      analRectMomentItems[i],
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.white),
+                      onPressed: () => _removeAnalRectMomentItem(analysisItems.length + designItems.length + i + 1),
+                    ),
+                    onTap: () {
+                      _tabController.animateTo(analysisItems.length + designItems.length + i + 1);
                       Navigator.of(context).pop(); // Close the drawer
                     },
                   ),
@@ -450,18 +479,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                         foregroundColor: Colors.white,
                       ),
                       onPressed: _addAnalRectMomentItem,
-                      child: Text("Analysis of Rectangular Footing with Moment"),
+                      child: Text("Rectangular Moment"),
                     ),
-                    /*
-                    SizedBox(height: 10),
-                    ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Color(0xFF1F538D),
-                        foregroundColor: Colors.white,
-                      ),
-                      onPressed: _add<[NameNgCalc]>Item,
-                      child: Text("<[NameNgCalc]>"),
-                    ), */
                   ],
                 ),
               ),
@@ -475,35 +494,33 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           ..._tabs.where((title) => title != 'Home').map((title) {
             //Copy paste nalang natin to if need gumawa bagong calc
             if (title.startsWith('Analysis')) {
-                    return AnalysisPage( 
-                      title: title,
-                      state: analysisStates[title]!,
-                      onStateChanged: (newState) {
-                        analysisStates[title] = newState;
-                      },
-                    );
-            } else if (title.startsWith('Analysis of Rectangular Footing with Moment')) {
-                    return AnalRectMomentPage( 
-                      title: title,
-                      state: analRectMomentStates[title]!,
-                      onStateChanged: (newState) {
-                        analRectMomentStates[title] = newState;
-                      },
-                    );  
-                  }
-
-            /* 
-            else if (title.startsWith('<[NameNgCalc]>')) {
-                    return <[NameNgCalc]>Page( 
-                      title: title,
-                      state: <[NameNgCalc]>States[title]!,
-                      onStateChanged: (newState) {
-                        <[NameNgCalc]>States[title] = newState;
-                      },
-                    );
-                  }*/
-
-  
+              return AnalysisPage( 
+                title: title,
+                state: analysisStates[title]!,
+                onStateChanged: (newState) {
+                  analysisStates[title] = newState;
+                },
+              );
+            } 
+            else if (title.startsWith('RectMoment')) {
+              return AnalRectMomentPage(
+                title: title,
+                state: analRectMomentStates[title]!,
+                onStateChanged: (newState) {
+                  analRectMomentStates[title] = newState;
+                },
+              ); }
+            //Lagay ng else din if dito kung anong title ng calc na yun
+                /* Ito template:
+                            if (title.startsWith('Analysis')) {
+                              return AnalysisPage( 
+                                title: title,
+                                state: analysisStates[title]!,
+                                onStateChanged: (newState) {
+                                  analysisStates[title] = newState;
+                                },
+                              );
+                            }  */
             else {
               return DesignPage(
                 title: title,
