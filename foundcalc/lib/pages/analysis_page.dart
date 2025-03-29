@@ -742,6 +742,7 @@ String? selectedFootingType = 'Square';
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedFootingType = newValue;
+                    showResults = false;
                     });
                   },
                 items: footingTypes.map((String value) {
