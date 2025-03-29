@@ -107,7 +107,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
   double? sol;
   
-  bool showResults = false;
+
   bool showSolution = false;
   bool isItStrip = true;
 
@@ -118,9 +118,9 @@ class _AnalysisPageState extends State<AnalysisPage> {
   @override
   void initState() {
     super.initState();
-
+    
     _scrollController = ScrollController();
-    showResults = false;
+
 
     // Initialize controllers with saved state
     inputDepthFoundation = TextEditingController(text: widget.state.inputDepthFoundation);
@@ -246,6 +246,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
       widget.state.selectedFootingType = selectedFootingType;
 
       widget.state.isGammaSatEnabled = isGammaSatEnabled;
+      widget.state.isGammaDryEnabled = isGammaDryEnabled;
+      widget.state.isGammaMoistEnabled = isGammaMoistEnabled;
 
       df = double.tryParse(inputDepthFoundation.text);
       dw = double.tryParse(inputDepthWater.text);
@@ -329,7 +331,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
   }
 
   String get gammaDryHint {
-    if (isGammaDryEnabled) {
+    if (widget.state.isGammaDryEnabled) {
       return '';
     } else {
       return 'Input not required';
@@ -337,7 +339,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
   }
 
   String get gammaMoistHint {
-    if (isGammaMoistEnabled) {
+    if (widget.state.isGammaMoistEnabled) {
       return '';
     } else {
       return 'Input not required';
@@ -587,6 +589,8 @@ String? selectedFootingType = 'Square';
               p = (af!*(qUlt!+yw!*hw!)) - pf! - ps!;
               p = roundToFourDecimalPlaces(p!);
               udl = 0;
+              widget.state.finalAnswerP = p;
+              widget.state.finalAnswerUdl = udl;
             } else { // strip
               sol = 2; // with t, strip
 
@@ -595,6 +599,8 @@ String? selectedFootingType = 'Square';
               p = 0;
               udl = (fDim!*(qUlt!+yw!*hw!)) - pf! - ps!;
               udl = roundToFourDecimalPlaces(udl!);
+              widget.state.finalAnswerP = p;
+              widget.state.finalAnswerUdl = udl;
             }
           } else { // if no t
             if (af != null) { // square/circular
@@ -603,12 +609,16 @@ String? selectedFootingType = 'Square';
               p = qAll!*af!;
               p = roundToFourDecimalPlaces(p!);
               udl = 0;
+              widget.state.finalAnswerP = p;
+              widget.state.finalAnswerUdl = udl;
             } else { // strip
               sol = 1; // with t, strip
 
               p = 0;
               udl = qAll!*fDim!;
               udl = roundToFourDecimalPlaces(udl!);
+              widget.state.finalAnswerP = p;
+              widget.state.finalAnswerUdl = udl;
             }
           }
         }
@@ -689,12 +699,12 @@ String? selectedFootingType = 'Square';
                       SizedBox(height: 10),
                       submitButton(),
                       SizedBox(height: 10),
-                      if (showResults && selectedFootingType == 'Strip or continuous')
+                      if (widget.state.showResults && selectedFootingType == 'Strip or continuous')
                         resultStrip(),
-                      if (showResults && (selectedFootingType == 'Square' || selectedFootingType == 'Circular'))
+                      if (widget.state.showResults && (selectedFootingType == 'Square' || selectedFootingType == 'Circular'))
                         resultNotStrip(),
                       SizedBox(height: 10),
-                      if (showResults)
+                      if (widget.state.showResults)
                         solutionButton(),
                     ],
                   ),
@@ -725,7 +735,7 @@ String? selectedFootingType = 'Square';
         // Handle form submission
         calculateP();
         setState(() {
-          showResults = true;
+          widget.state.showResults = true;
         });
       },
       style: ElevatedButton.styleFrom(
@@ -750,23 +760,30 @@ String? selectedFootingType = 'Square';
     );
   }
   Widget resultStrip() {
-    return Text(
-      "w = $udl kN/m",
+    return Visibility(
+    visible: widget.state.showResults,
+    child: Text(
+      "w = ${widget.state.finalAnswerUdl} kN/m",
       style: TextStyle(
         color: Colors.white,
-        fontWeight: FontWeight.bold,
+        fontWeight: FontWeight.bold, 
       ),
-    );
+    ),
+  );
   }
+
   Widget resultNotStrip() {
-    return Text(
-      "P = $p kN",
+  return Visibility(
+    visible: widget.state.showResults,
+    child: Text(
+      "P = ${widget.state.finalAnswerP}  kN",
       style: TextStyle(
         color: Colors.white,
         fontWeight: FontWeight.bold,
       ),
-    );
-  }
+    ),
+  );
+}
 
   Widget row1ShearFailure() {
     return Padding(
@@ -855,7 +872,7 @@ String? selectedFootingType = 'Square';
                 onChanged: (String? newValue) {
                   setState(() {
                     selectedFootingType = newValue;
-                    showResults = false;
+                    widget.state.showResults = false;
                     });
                   },
                 items: footingTypes.map((String value) {

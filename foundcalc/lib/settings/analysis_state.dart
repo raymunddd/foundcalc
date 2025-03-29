@@ -37,6 +37,13 @@ class AnalysisState {
     bool concreteDet = false;
 
     bool isGammaSatEnabled = true;
+    bool isGammaDryEnabled = true;
+    bool isGammaMoistEnabled = true;
+    bool showResults = false;
+
+//Final answer, No erasures
+    double? finalAnswerP;
+    double? finalAnswerUdl;
 
 //syempre, yun tab name hahaaha
   final String title;
