@@ -105,7 +105,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
   double? sol;
   
-
   bool showSolution = false;
   bool isItStrip = true;
 
@@ -881,6 +880,9 @@ String? selectedFootingType = 'Square';
         inputFactUnitWeight.clear();
         inputUnitWeightWater.clear();
         inputUnitWeightConcrete.clear();
+        setState(() {
+          widget.state.showResults = false;
+        });
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -892,7 +894,6 @@ String? selectedFootingType = 'Square';
   Widget submitButton() {
     return ElevatedButton(
       onPressed: () {
-        // Handle form submission
         calculateP();
         setState(() {
           widget.state.showResults = true;
