@@ -44,11 +44,14 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           displayTitle,
           style: TextStyle(color: Colors.white)
         ),
-        backgroundColor: Color(0xFF363434),
+        backgroundColor: Color(0xFF363434),   
+        elevation: 0,
+        surfaceTintColor: Colors.transparent,
+        centerTitle: true,
       ),
       body: Center(
         child: Text(
-          'Details for $displayTitle',
+          'Coming soon!',
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
       ),

@@ -1,7 +1,9 @@
 class AnalRectMomentState {
   //String? selectedSoilType;
   //String? selectedFootingType;
-  //String depthOfFoundation = '';
+  String inputNumberOne = '';
+  String inputNumberTwo = '';
+  String inputNumberThree= '';
   //String waterTableDistance = '';
   //String baseOfFoundation = '';
   final String title;
