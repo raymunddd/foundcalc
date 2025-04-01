@@ -2,7 +2,7 @@
 //import 'package:excel/excel.dart';
 //import 'dart:math';
 import 'package:flutter/material.dart';
-import '../settings/anal_rectmoment_state.dart';
+import 'anal_rectmoment_state.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 

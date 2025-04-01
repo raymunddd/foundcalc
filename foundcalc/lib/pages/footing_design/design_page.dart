@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../settings/design_state.dart';
+import 'design_state.dart';
 
 class DesignPage extends StatefulWidget {
   final String title;

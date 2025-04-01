@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'pages/analysis_page.dart'; // Import AnalysisPage
-import 'pages/design_page.dart';   // Import DesignPage
-import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
-import 'pages/about_page.dart';    // Import AboutPage
-import 'settings/analysis_state.dart'; // Import AnalysisState
-import 'settings/design_state.dart';   // Import DesignState
-import 'settings/anal_rectmoment_state.dart'; // Import AnalRectMomentState
+import 'pages/footing_analysis/analysis_page.dart'; // Import AnalysisPage
+import 'pages/footing_design/design_page.dart';   // Import DesignPage
+import 'pages/rectangular_moment/anal_rectmoment.dart'; // Import AnalRectMomentPage
+import 'settings/about_page.dart';    // Import AboutPage
+import 'pages/footing_analysis/analysis_state.dart'; // Import AnalysisState
+import 'pages/footing_design/design_state.dart';   // Import DesignState
+import 'pages/rectangular_moment/anal_rectmoment_state.dart'; // Import AnalRectMomentState
 
 class TabbedHomePage extends StatefulWidget {
   @override

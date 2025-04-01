@@ -13,7 +13,7 @@ Basta need ng
 import 'dart:collection';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../settings/analysis_state.dart';
+import 'analysis_state.dart';
 import 'dart:math';
 
 class AnalysisPage extends StatefulWidget {
