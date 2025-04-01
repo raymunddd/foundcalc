@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'pages/footing_analysis/analysis_page.dart'; // Import AnalysisPage
+import 'pages/footing_analysis/analysis_mainpage.dart'; // Import AnalysisPage
 import 'pages/footing_design/design_page.dart';   // Import DesignPage
 import 'pages/rectangular_moment/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'settings/about_page.dart';    // Import AboutPage
