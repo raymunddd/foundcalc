@@ -15,7 +15,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
 
-import 'analysis_shear.dart';
 import 'analysis_state.dart';
 import 'analysis_calculating.dart';
 
