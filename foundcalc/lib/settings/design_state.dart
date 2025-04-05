@@ -39,6 +39,7 @@ class DesignState {
   bool botToggle = false;
   bool soilProp = true;
   bool weightPressures = false;
+  bool concreteDet = false;
 
   bool isGammaSatEnabled = true;
   bool isGammaDryEnabled = true;
