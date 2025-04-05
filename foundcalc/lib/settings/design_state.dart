@@ -22,6 +22,11 @@ class DesignState {
   String inputGammaDry = '';
   String inputGammaMoist = '';
   String inputGammaSat = '';
+  String inputFloorLoading = '';
+  String inputFloorThickness = '';
+  String inputFootingThickness = '';
+  String inputYw = '';
+  String inputYc = '';
   //String? selectedFootingType;
   //String depthOfFoundation = '';
   //String waterTableDistance = '';
@@ -33,6 +38,7 @@ class DesignState {
   bool topToggle = false;
   bool botToggle = false;
   bool soilProp = true;
+  bool weightPressures = false;
 
   bool isGammaSatEnabled = true;
   bool isGammaDryEnabled = true;
