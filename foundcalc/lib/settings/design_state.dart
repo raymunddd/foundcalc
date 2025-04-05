@@ -5,6 +5,7 @@ class DesignState {
   //String waterTableDistance = '';
   //String baseOfFoundation = '';
   final String title;
+    bool scrollToTop = false;
 
   DesignState({required this.title});
 }

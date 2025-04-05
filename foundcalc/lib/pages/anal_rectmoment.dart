@@ -63,10 +63,29 @@ if (widget.title.startsWith('RectMoment')) {
     inputNumberThree = TextEditingController(text: widget.state.inputNumberThree);
 
     // listeners
-
     inputNumberOne.addListener(_updateState);
     inputNumberTwo.addListener(_updateState);
     inputNumberThree.addListener(_updateState);
+  }
+
+  @override
+  void didUpdateWidget(AnalRectMomentPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // Check if we need to scroll to top
+    if (widget.state.scrollToTop) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          0,
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      });
+      
+      // Reset the flag
+      widget.state.scrollToTop = false;
+      widget.onStateChanged(widget.state);
+    }
   }
 
   void _updateState() {

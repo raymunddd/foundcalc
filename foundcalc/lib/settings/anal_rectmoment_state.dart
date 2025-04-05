@@ -1,12 +1,14 @@
 class AnalRectMomentState {
-  //String? selectedSoilType;
-  //String? selectedFootingType;
-  String inputNumberOne = '';
-  String inputNumberTwo = '';
-  String inputNumberThree= '';
-  //String waterTableDistance = '';
-  //String baseOfFoundation = '';
-  final String title;
+  String title;
+  String inputNumberOne;
+  String inputNumberTwo;
+  String inputNumberThree;
+  bool scrollToTop = false;
 
-  AnalRectMomentState({required this.title});
+  AnalRectMomentState({
+    required this.title,
+    this.inputNumberOne = '',
+    this.inputNumberTwo = '',
+    this.inputNumberThree = '',
+  });
 }
