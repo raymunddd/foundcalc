@@ -253,7 +253,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
           inputUnitWeightWater = TextEditingController(text: widget.state.inputUnitWeightWater);
           inputUnitWeightConcrete = TextEditingController(text: widget.state.inputUnitWeightConcrete);
 
-
     selectedShearFailure = widget.state.selectedShearFailure;
     selectedFootingType = widget.state.selectedFootingType;
 
