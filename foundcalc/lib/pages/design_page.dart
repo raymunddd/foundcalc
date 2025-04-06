@@ -42,7 +42,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   late TextEditingController inputfcPrime;
   late TextEditingController inputDf;
   late TextEditingController inputDw;
-  late TextEditingController inputPUlt;
   late TextEditingController inputPDL;
   late TextEditingController inputPLL;
   late TextEditingController inputTop;
@@ -64,6 +63,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   late TextEditingController inputYw;
   late TextEditingController inputYc;
 
+  // solvar
+
   double? gs;
   double? w;
   double? e;
@@ -77,6 +78,10 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? yc;
   double? fs;
   double? t;
+  double? qa;
+  double? qult;
+  double? qn;
+  double? qo;
 
   void initState() {
     super.initState();
@@ -89,7 +94,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputFS = TextEditingController(text: widget.state.inputFS);
     inputfcPrime = TextEditingController(text: widget.state.inputfcPrime);
     inputDf = TextEditingController(text: widget.state.inputDf);
-    inputPUlt = TextEditingController(text: widget.state.inputPUlt);
     inputPDL = TextEditingController(text: widget.state.inputPDL);
     inputPLL = TextEditingController(text: widget.state.inputPLL);
     inputTop = TextEditingController(text: widget.state.inputTop);
@@ -112,7 +116,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputFS.addListener(_updateState);
     inputfcPrime.addListener(_updateState);
     inputDf.addListener(_updateState);
-    inputPUlt.addListener(_updateState);
     inputPDL.addListener(_updateState);
     inputPLL.addListener(_updateState);
     inputTop.addListener(_updateState);
@@ -138,9 +141,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.inputFS = inputFS.text;
       widget.state.inputfcPrime = inputfcPrime.text;
       widget.state.inputDf = inputDf.text;
-      widget.state.inputPUlt = inputPUlt.text;
-      widget.state.inputPDL = inputPUlt.text;
-      widget.state.inputPLL = inputPUlt.text;
+      widget.state.inputPDL = inputPDL.text;
+      widget.state.inputPLL = inputPLL.text;
       widget.state.inputTop = inputTop.text;
       widget.state.inputBot = inputBot.text;
       widget.state.inputGs = inputGs.text;
@@ -188,7 +190,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         widget.state.isGammaDryEnabled = true;
       }
 
-    // calculateP();
+     calculate();
 
       widget.onStateChanged(widget.state);
 
@@ -205,7 +207,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputFS.dispose();
     inputfcPrime.dispose();
     inputDf.dispose();
-    inputPUlt.dispose();
     inputPLL.dispose();
     inputTop.dispose();
     inputBot.dispose();
@@ -265,6 +266,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   }
 
   void calculate() {
+    qa = double.tryParse(inputQAll.text);
+    qult = double.tryParse(inputQUlt.text);
+
     df = double.tryParse(inputDf.text);
     dw = double.tryParse(inputDw.text);
     fc = double.tryParse(inputfcPrime.text);
@@ -282,6 +286,40 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
     yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
     fs = double.tryParse(inputFS.text) ?? 3; // Default to 3 if null
+
+    if (widget.state.qToggle) {
+      qa = qa;
+    } else {
+      qa = qult!/fs!;
+    }
+
+    if (widget.state.soilProp) {
+      if (gs != null && e != null && w != null) {
+        y = ((gs!*yw!)*(1+w!))/(1+e!);
+      } else if (gs != null && e != null) {
+        y = (gs!*yw!)/(1+e!);
+      } else {
+        y = null;
+      }
+    } else {
+      if (y != null && yDry == null) {
+        y = y;
+      } else if (y == null && yDry != null) {
+        y = yDry;
+      }
+    }
+
+    if (dw != null) {
+      if (dw! < df!) {
+        qo = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+      } else {
+        qo = yc!*t!+y!*(df!-t!);
+      }
+    } else {
+      qo = yc!*t!+y!*(df!-t!);
+    }
+
+    print("qa = $qa, qo = $qo");
   }
 
   @override
@@ -320,6 +358,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                     // row managerrrr
                     children: [
                       rowColClass(),
+                      rowPdead(),
+                      rowPlive(),
                       rowfcPrime(),                     
                       rowDf(),
                       rowThickness(),
@@ -336,13 +376,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                         children: [
                           containerQToggleOn(),
                           containerQToggleOff(),
-                        ]
-                      ),
-                      rowPToggle(),
-                      Stack(
-                        children: [
-                          containerPToggleOn(),
-                          containerPToggleOff(),
                         ]
                       ),
                       rowTopToggle(),
@@ -882,7 +915,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                     ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
-                      hintText: "Required",
+                      hintText: "Input required",
                       hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(25),
@@ -914,7 +947,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       ),
     );
   }
-  Widget rowPToggle() {
+  Widget rowPdead() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -927,7 +960,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  'Ultimate load',
+                  'Service dead load, PDL (in kN):',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -940,18 +973,38 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 ),
                 child: SizedBox(
                   height: 40, // Adjust height as needed
-                  child: Switch(
-                    value: widget.state.pToggle,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        widget.state.pToggle = newValue;
-                        widget.onStateChanged(widget.state);
-                      });
-                    },
-                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
-                    inactiveThumbColor: Colors.white,
-                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
-                  )
+                  child: TextField(
+                    controller: inputPDL,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                          icon: Icon(
+                            Icons.clear, 
+                            color: Colors.white54,
+                          ),
+                          iconSize: 17,
+                          onPressed: () {
+                            // Clear the text field
+                            inputPDL.clear();
+                          },
+                        ),
+                    ),
+                  ),
                 )
               )
             ),
@@ -960,259 +1013,69 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       ),
     );
   }
-  Widget containerPToggleOn() {
+  Widget rowPlive() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 15),
-      child: Visibility(
-        visible: widget.state.qToggle,
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          constraints: BoxConstraints(maxWidth: 500),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            color: const Color.fromARGB(255, 10, 131, 14),
-          ),
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                subPUlt(),
-              ]
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Service live load, PLL (in kN):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
-          ),
-        ),
-      ),
-    );
-  }
-  Widget subPUlt() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Flexible(
-            child: Container(
-              width: 120,
-              child: Text(
-                'Ultimate load, Pu (in kN):',
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
-              ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  controller: inputPUlt,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputPLL,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
                     ],
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    filled: true,
-                    fillColor: Color.fromARGB(255, 51, 149, 53),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.clear, 
-                        color: Colors.white54,
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
                       ),
-                      iconSize: 17,
-                      onPressed: () {
-                        // Clear the text field
-                        inputPUlt.clear();
-                      },
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                          icon: Icon(
+                            Icons.clear, 
+                            color: Colors.white54,
+                          ),
+                          iconSize: 17,
+                          onPressed: () {
+                            // Clear the text field
+                            inputPLL.clear();
+                          },
+                        ),
                     ),
                   ),
-                ),
+                )
               )
-            )
-          ),
-        ],
-      ),
-    );
-  }
-  Widget containerPToggleOff() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 15),
-      child: Visibility(
-        visible: !widget.state.pToggle,
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          constraints: BoxConstraints(maxWidth: 500),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            color: const Color.fromARGB(255, 201, 40, 29),
-          ),
-          alignment: Alignment.center,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(20.0),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  subPDead(),
-                  subPLive(),
-                ],
-              ),
             ),
-          ),
+          ],
         ),
-      ),
-    );
-  }
-  Widget subPDead() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Flexible(
-            child: Container(
-              width: 120,
-              child: Text(
-                'Service dead load, PDL (in kN):',
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
-              ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  controller: inputPDL,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
-                    ),
-                    filled: true,
-                    fillColor: Color.fromARGB(255, 226, 65, 54),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.clear, 
-                        color: Colors.white54,
-                      ),
-                      iconSize: 17,
-                      onPressed: () {
-                        // Clear the text field
-                        inputPDL.clear();
-                      },
-                    ),
-                  ),
-                ),
-              )
-            )
-          ),
-        ],
-      ),
-    );
-  }
-  Widget subPLive() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Flexible(
-            child: Container(
-              width: 120,
-              child: Text(
-                'Service live load, PLL (in kN):',
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
-              ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  controller: inputPLL,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
-                    ),
-                    filled: true,
-                    fillColor: Color.fromARGB(255, 226, 65, 54),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.clear, 
-                        color: Colors.white54,
-                      ),
-                      iconSize: 17,
-                      onPressed: () {
-                        // Clear the text field
-                        inputPLL.clear();
-                      },
-                    ),
-                  ),
-                ),
-              )
-            )
-          ),
-        ],
       ),
     );
   }

@@ -11,7 +11,6 @@ class DesignState {
   String inputfcPrime = '';
   String inputDf = '';
   String inputDw = '';
-  String inputPUlt = '';
   String inputPDL = '';
   String inputPLL = '';
   String inputTop = '';
