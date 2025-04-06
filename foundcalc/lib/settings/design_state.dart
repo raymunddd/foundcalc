@@ -2,7 +2,7 @@ class DesignState {
 
   // Dropdowns
   String? colClass;
-
+  String? material;
 
   // TextFields
   String inputQAll = '';
@@ -26,6 +26,7 @@ class DesignState {
   String inputFootingThickness = '';
   String inputYw = '';
   String inputYc = '';
+  String inputOtherUnitWeight = '';
   //String? selectedFootingType;
   //String depthOfFoundation = '';
   //String waterTableDistance = '';
@@ -39,6 +40,7 @@ class DesignState {
   bool soilProp = true;
   bool weightPressures = false;
   bool concreteDet = false;
+  bool otherMat = false;
 
   bool isGammaSatEnabled = true;
   bool isGammaDryEnabled = true;

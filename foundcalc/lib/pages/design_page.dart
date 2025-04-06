@@ -63,6 +63,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   late TextEditingController inputYw;
   late TextEditingController inputYc;
 
+  late TextEditingController inputOtherUnitWeight;
+
   // solvar
 
   double? gs;
@@ -110,6 +112,10 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputFootingThickness = TextEditingController(text: widget.state.inputFootingThickness);
     inputYw = TextEditingController(text: widget.state.inputYw);
     inputYc = TextEditingController(text: widget.state.inputYc);
+    inputOtherUnitWeight = TextEditingController(text: widget.state.inputOtherUnitWeight);
+
+    colClass = widget.state.colClass;
+    material = widget.state.material;
 
     inputQAll.addListener(_updateState);
     inputQUlt.addListener(_updateState);
@@ -132,6 +138,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputFootingThickness.addListener(_updateState);
     inputYw.addListener(_updateState);
     inputYc.addListener(_updateState);
+    inputOtherUnitWeight.addListener(_updateState);
   }
 
   void _updateState() {
@@ -157,6 +164,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.inputFootingThickness = inputFootingThickness.text;
       widget.state.inputYw = inputYw.text;
       widget.state.inputYc = inputYc.text;
+      widget.state.inputOtherUnitWeight = inputOtherUnitWeight.text;
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -190,10 +198,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         widget.state.isGammaDryEnabled = true;
       }
 
+      if (widget.state.material == 'Concrete') {
+        widget.state.otherMat = false;
+      } else {
+        widget.state.otherMat = true;
+      }
+
      calculate();
 
       widget.onStateChanged(widget.state);
-
     });
   }
 
@@ -222,9 +235,16 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputFootingThickness.dispose();
     inputYw.dispose();
     inputYc.dispose();
+    inputOtherUnitWeight.dispose();
   }
 
   // conditional labels
+
+  String? material;
+  final List<String> materials = [
+    'Concrete',
+    'Others',
+  ];
 
   String? colClass;
   final List<String> colClassValues = [
@@ -319,8 +339,12 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       qo = yc!*t!+y!*(df!-t!);
     }
 
+
+
     print("qa = $qa, qo = $qo");
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -2162,6 +2186,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               children: [
                 subFloorLoading(),
                 subFloorThickness(),
+                subFloorMaterial(),
+                if (widget.state.otherMat)
+                  subUnitWeightOfMaterial(),
               ],
             ),
           ),
@@ -2303,5 +2330,123 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       ),
     );
   }
-  
+  Widget subFloorMaterial() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Material of the slab',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 179,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Color.fromARGB(255, 51, 149, 53),
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: material,
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
+                dropdownColor: Colors.grey[800],
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(color: Colors.white),
+                underline: SizedBox(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    material = newValue;
+                    widget.state.otherMat = (newValue == 'Others');
+                    });
+                  },
+                items: materials.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget subUnitWeightOfMaterial() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Unit weight of material (in kN/m³):',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputOtherUnitWeight,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputOtherUnitWeight.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  }
 } // Design Page
