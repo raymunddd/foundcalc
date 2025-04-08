@@ -27,6 +27,7 @@ class DesignState {
   String inputYw = '';
   String inputYc = '';
   String inputOtherUnitWeight = '';
+  String inputColBase = '';
   final String title;
 
   bool scrollToTop = false;

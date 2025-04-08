@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../settings/design_state.dart';
+import 'dart:math';
 
 class DesignPage extends StatefulWidget {
   final String title;
@@ -64,6 +65,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   late TextEditingController inputYc;
 
   late TextEditingController inputOtherUnitWeight;
+  late TextEditingController inputColBase;
 
   // solvar
 
@@ -89,6 +91,17 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? fLoad;
   double? fThick;
   double? qall;
+  double? pLL;
+  double? pDL;
+  double? sumP;
+  double? b;
+  double? pu;
+  double? qnu;
+  double? C;
+  double? x;
+
+  int? bRound;
+  // double? qp;
 
   void initState() {
     super.initState();
@@ -118,9 +131,12 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputYw = TextEditingController(text: widget.state.inputYw);
     inputYc = TextEditingController(text: widget.state.inputYc);
     inputOtherUnitWeight = TextEditingController(text: widget.state.inputOtherUnitWeight);
+    inputColBase = TextEditingController(text: widget.state.inputColBase);
 
     colClass = widget.state.colClass;
-    material = widget.state.material;
+
+    material = "Concrete"; // Set default value here
+    widget.state.material = material; // Update the state
 
     inputQAll.addListener(_updateState);
     inputQUlt.addListener(_updateState);
@@ -144,6 +160,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputYw.addListener(_updateState);
     inputYc.addListener(_updateState);
     inputOtherUnitWeight.addListener(_updateState);
+    inputColBase.addListener(_updateState);
   }
 
   void _updateState() {
@@ -170,6 +187,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.inputYw = inputYw.text;
       widget.state.inputYc = inputYc.text;
       widget.state.inputOtherUnitWeight = inputOtherUnitWeight.text;
+      widget.state.inputColBase = inputColBase.text;
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -220,6 +238,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputfcPrime.dispose();
     inputDf.dispose();
     inputPLL.dispose();
+    inputPDL.dispose();
     inputTop.dispose();
     inputBot.dispose();
     inputGs.dispose();
@@ -235,6 +254,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputYw.dispose();
     inputYc.dispose();
     inputOtherUnitWeight.dispose();
+    inputColBase.dispose();
   }
 
   // conditional labels
@@ -305,6 +325,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     fLoad = double.tryParse(inputFloorLoading.text);
     fThick= double.tryParse(inputFloorThickness.text);
 
+    pLL= double.tryParse(inputPLL.text);
+    pDL = double.tryParse(inputPDL.text);
+
+    C = double.tryParse(inputColBase.text);
+
       // Default values
     yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
     yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
@@ -363,7 +388,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     if (widget.state.weightPressures) {
       if (widget.state.material == 'Concrete') {
         yMat = yc!;
-        yMatInput = null;
       } else { //others
         if (yMatInput != null) {
           yMat = yMatInput!;
@@ -373,8 +397,10 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }
       if (qall != null && fLoad != null && yMat != null && fThick != null && qo != null) {
         qn = qall! - fLoad! - yMat!*(fThick!/1000) - qo!;
+        //qp = yMat!*(fThick!/1000);
       } else {
         qn = 3;
+        //qp = 4;
       }
     } else { // no weight pressures
       if (qall != null && qo != null) {
@@ -384,10 +410,56 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }     
     }
 
+    if (pLL != null && pDL != null) {
+      sumP = pLL! + pDL!;
+      pu = 1.2*pDL! + 1.6*pLL!;
+    } else {
+      sumP = null;
+      pu = null;
+    }
+
+    if (qn != null && sumP != null) {
+      b = ((sqrt(sumP!/qn!))/0.025);
+      
+      if (b != null) {
+        bRound = b!.ceil();  
+      } else {
+        bRound = null;
+      }
+      if (bRound != null) {
+        b = 0.025 * (bRound!.toDouble());
+      } else {
+        // Handle the case where bRound is null, if necessary
+        b = 0.01; // Or any other default behavior
+      }
+    } else {
+      bRound = null;
+      b = 0.02;
+    }
+
+    if (pu != null) {
+      if (b != null) {
+        qnu = pu!/(b!*b!); 
+      } else {
+        qnu = null;
+      }
+    } else {
+      qnu = null;
+    }
+
+
+
+    if (colClass == "Interior") {
+      //x = (B!/2) - (C!/2) - 
+    } else if (colClass == "Edge") {
+
+    } else { // Corner
+
+    }
 
     print('otherMat = ${widget.state.otherMat}');
-    print("yc = $yc, yMat = $yMat");
-    print("qa = $qall, qo = $qo, qn = $qn");
+    print("yc = $yc, yMat = $yMat, fLoad = $fLoad");
+    print("qa = $qall, qo = $qo, qn = $qn, Pa = $sumP, b = $b, bRound = $bRound, Pu = $pu, qnu = $qnu");
     print('isGammaDryEnabled = ${widget.state.isGammaDryEnabled}, isGammaMoistEnabled = ${widget.state.isGammaMoistEnabled}');
   }
 
@@ -429,6 +501,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                     // row managerrrr
                     children: [
                       rowColClass(),
+                      rowColBase(),
                       rowPdead(),
                       rowPlive(),
                       rowfcPrime(),                     
@@ -1138,6 +1211,72 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                           onPressed: () {
                             // Clear the text field
                             inputPLL.clear();
+                          },
+                        ),
+                    ),
+                  ),
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget rowColBase() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Base of column (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputColBase,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                          icon: Icon(
+                            Icons.clear, 
+                            color: Colors.white54,
+                          ),
+                          iconSize: 17,
+                          onPressed: () {
+                            // Clear the text field
+                            inputColBase.clear();
                           },
                         ),
                     ),
@@ -2412,9 +2551,16 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 onChanged: (String? newValue) {
                   setState(() {
                     material = newValue;
-                    // Update the state based on the selected material
-                    widget.state.otherMat = (newValue == 'Others');
-                    widget.onStateChanged(widget.state); // Notify parent about the state change
+                    widget.state.material = newValue; // Update the state
+                    
+                    // Set otherMat based on the selected material
+                    if (newValue == 'Concrete') {
+                      widget.state.otherMat = false; // Set to false if Concrete is selected
+                    } else {
+                      widget.state.otherMat = true; // Set to true for other materials
+                    }
+
+                    calculate(); // Call calculate to update yMat
                   });
                 },
                 items: materials.map((String value) {
