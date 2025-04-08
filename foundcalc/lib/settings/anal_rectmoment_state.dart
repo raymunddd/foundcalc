@@ -8,5 +8,7 @@ class AnalRectMomentState {
   //String baseOfFoundation = '';
   final String title;
 
+  bool scrollToTop = false;
+
   AnalRectMomentState({required this.title});
 }

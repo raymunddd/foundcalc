@@ -27,11 +27,9 @@ class DesignState {
   String inputYw = '';
   String inputYc = '';
   String inputOtherUnitWeight = '';
-  //String? selectedFootingType;
-  //String depthOfFoundation = '';
-  //String waterTableDistance = '';
-  //String baseOfFoundation = '';
   final String title;
+
+  bool scrollToTop = false;
 
   bool qToggle = true;
   bool pToggle = true;

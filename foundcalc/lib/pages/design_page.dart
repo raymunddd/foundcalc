@@ -84,6 +84,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? qult;
   double? qn;
   double? qo;
+  double? yMat;
+  double? yMatInput;
+  double? fLoad;
+  double? fThick;
+  double? qall;
 
   void initState() {
     super.initState();
@@ -198,12 +203,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         widget.state.isGammaDryEnabled = true;
       }
 
-      if (widget.state.material == 'Concrete') {
-        widget.state.otherMat = false;
-      } else {
-        widget.state.otherMat = true;
-      }
-
      calculate();
 
       widget.onStateChanged(widget.state);
@@ -302,17 +301,30 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     y = double.tryParse(inputGammaMoist.text);
     ySat = double.tryParse(inputGammaSat.text);
 
+    yMatInput = double.tryParse(inputOtherUnitWeight.text);
+    fLoad = double.tryParse(inputFloorLoading.text);
+    fThick= double.tryParse(inputFloorThickness.text);
+
       // Default values
     yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
     yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
     fs = double.tryParse(inputFS.text) ?? 3; // Default to 3 if null
 
-    if (widget.state.qToggle) {
-      qa = qa;
-    } else {
-      qa = qult!/fs!;
-    }
-
+  
+    if (widget.state.qToggle) { //using qall
+      if (qa != null) {
+        qall = qa!;
+      } else {
+        qall = null;
+      } 
+    } else { // using qult
+      if (qult != null) {
+        qall = qult!/fs!;
+      } else {
+        qall = null;
+      }     
+    } 
+    
     if (widget.state.soilProp) {
       if (gs != null && e != null && w != null) {
         y = ((gs!*yw!)*(1+w!))/(1+e!);
@@ -321,27 +333,62 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       } else {
         y = null;
       }
-    } else {
+    } else { //Soil Prop is OFF
       if (y != null && yDry == null) {
         y = y;
       } else if (y == null && yDry != null) {
         y = yDry;
+      } else {
+        y = null;
       }
     }
-
-    if (dw != null) {
-      if (dw! < df!) {
-        qo = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+    
+    if (df != null && t != null && y != null) {
+      if (dw != null) {
+        if (dw! < df!) {
+          if (ySat != null) {
+            qo = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+          } else {
+            qo = null;
+          }
+        } else {
+          qo = yc!*t!+y!*(df!-t!);
+        }
       } else {
         qo = yc!*t!+y!*(df!-t!);
       }
-    } else {
-      qo = yc!*t!+y!*(df!-t!);
     }
 
 
+    if (widget.state.weightPressures) {
+      if (widget.state.material == 'Concrete') {
+        yMat = yc!;
+        yMatInput = null;
+      } else { //others
+        if (yMatInput != null) {
+          yMat = yMatInput!;
+        } else {
+          yMat = 4;
+        }
+      }
+      if (qall != null && fLoad != null && yMat != null && fThick != null && qo != null) {
+        qn = qall! - fLoad! - yMat!*(fThick!/1000) - qo!;
+      } else {
+        qn = 3;
+      }
+    } else { // no weight pressures
+      if (qall != null && qo != null) {
+        qn = qall! - qo!;
+      } else {
+        qn = 2;
+      }     
+    }
 
-    print("qa = $qa, qo = $qo");
+
+    print('otherMat = ${widget.state.otherMat}');
+    print("yc = $yc, yMat = $yMat");
+    print("qa = $qall, qo = $qo, qn = $qn");
+    print('isGammaDryEnabled = ${widget.state.isGammaDryEnabled}, isGammaMoistEnabled = ${widget.state.isGammaMoistEnabled}');
   }
 
 
@@ -2187,8 +2234,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 subFloorLoading(),
                 subFloorThickness(),
                 subFloorMaterial(),
-                if (widget.state.otherMat)
-                  subUnitWeightOfMaterial(),
+                subUnitWeightOfMaterial(),
               ],
             ),
           ),
@@ -2200,67 +2246,67 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Flexible(
-            child: Container(
-              width: 120,
-              child: Text(
-                'Basement floor loading (in kPa):',
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
-              ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  controller: inputFloorLoading,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Basement floor loading (in kPa):',
                   style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    filled: true,
-                    fillColor: Color.fromARGB(255, 51, 149, 53),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.clear, 
-                        color: Colors.white54,
-                      ),
-                      iconSize: 17,
-                      onPressed: () {
-                        // Clear the text field
-                        inputFloorLoading.clear();
-                      },
-                    ),
-                  ),
                 ),
               )
-            )
-          ),
-        ],
-      ),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputFloorLoading,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                      ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                      ),
+                      filled: true,
+                      fillColor: Color.fromARGB(255, 51, 149, 53),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputFloorLoading.clear();
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              )
+            ),
+          ],
+        ),
     );
   }
   Widget subFloorThickness() {
@@ -2366,9 +2412,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 onChanged: (String? newValue) {
                   setState(() {
                     material = newValue;
+                    // Update the state based on the selected material
                     widget.state.otherMat = (newValue == 'Others');
-                    });
-                  },
+                    widget.onStateChanged(widget.state); // Notify parent about the state change
+                  });
+                },
                 items: materials.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
@@ -2385,68 +2433,92 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   Widget subUnitWeightOfMaterial() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Flexible(
-            child: Container(
-              width: 120,
-              child: Text(
-                'Unit weight of material (in kN/m³):',
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
-              ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  controller: inputOtherUnitWeight,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
+      child: Visibility(
+        visible: widget.state.otherMat, 
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Unit weight of material (in kN/m³):',
                   style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    filled: true,
-                    fillColor: Color.fromARGB(255, 51, 149, 53),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.clear, 
-                        color: Colors.white54,
-                      ),
-                      iconSize: 17,
-                      onPressed: () {
-                        // Clear the text field
-                        inputOtherUnitWeight.clear();
-                      },
-                    ),
-                  ),
                 ),
               )
-            )
-          ),
-        ],
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputOtherUnitWeight,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                      ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                      ),
+                      filled: true,
+                      fillColor: Color.fromARGB(255, 51, 149, 53),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputOtherUnitWeight.clear();
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              )
+            ),
+          ],
+        ),
       ),
     );
   }
+
+  @override
+  void didUpdateWidget(DesignPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    // Check if we need to scroll to top
+    if (widget.state.scrollToTop) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          0,
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      });
+
+      // Reset the flag
+      widget.state.scrollToTop = false;
+      widget.onStateChanged(widget.state);
+    }
+  }
+
 } // Design Page

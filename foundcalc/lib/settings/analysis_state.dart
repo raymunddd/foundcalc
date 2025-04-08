@@ -40,6 +40,7 @@ class AnalysisState {
     bool isGammaDryEnabled = true;
     bool isGammaMoistEnabled = true;
     bool showResults = false;
+    bool scrollToTop = false;
 
 //Final answer, No erasures
     double? finalAnswerP;

@@ -468,44 +468,89 @@ class _TabbedHomePageState extends State<TabbedHomePage>
           ..._tabs.where((title) => title != 'Home').map((title) {
             //Copy paste nalang natin to if need gumawa bagong calc
             if (title.startsWith('Analysis')) {
-              return AnalysisPage( 
-                title: title,
-                state: analysisStates[title]!,
-                onStateChanged: (newState) {
-                  analysisStates[title] = newState;
-                },
+                return Stack(
+                children: [
+                  AnalysisPage( 
+                    title: title,
+                    state: analysisStates[title]!,
+                    onStateChanged: (newState) {
+                      analysisStates[title] = newState;
+                    },
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: Color(0xFF1F538D),
+                      mini: true,
+                      child: Icon(Icons.arrow_upward, color: Colors.white),
+                      onPressed: () {
+                        if (title.startsWith('Analysis')) {
+                          analysisStates[title]!.scrollToTop = true;
+                          setState(() {}); // Trigger rebuild to pass the message
+                        }
+                      },
+                    ),
+                  ),
+                ],
               );
             } 
             else if (title.startsWith('RectMoment')) {
-              return AnalRectMomentPage(
-                title: title,
-                state: analRectMomentStates[title]!,
-                onStateChanged: (newState) {
-                  analRectMomentStates[title] = newState;
-                },
-              ); }
-            //Lagay ng else din if dito kung anong title ng calc na yun
-                /* Ito template:
-                            if (title.startsWith('Analysis')) {
-                              return AnalysisPage( 
-                                title: title,
-                                state: analysisStates[title]!,
-                                onStateChanged: (newState) {
-                                  analysisStates[title] = newState;
-                                },
-                              );
-                            }  */
-            else {
-              return DesignPage(
-                title: title,
-                state: designStates[title]!,
-                onStateChanged: (newState) {
-                  designStates[title] = newState;
-                },
+              return Stack(
+                children: [
+                  AnalRectMomentPage(
+                    title: title,
+                    state: analRectMomentStates[title]!,
+                    onStateChanged: (newState) {
+                      analRectMomentStates[title] = newState;
+                    },
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: Color(0xFF1F538D),
+                      mini: true,
+                      child: Icon(Icons.arrow_upward, color: Colors.white),
+                      onPressed: () {
+                        if (title.startsWith('RectMoment')) {
+                          analRectMomentStates[title]!.scrollToTop = true;
+                          setState(() {}); // Trigger rebuild to pass the message
+                        }
+                      },
+                    ),
+                  ),
+                ],
               );
             }
-
-            
+            else {
+              return Stack(
+                children: [
+                  DesignPage(
+                    title: title,
+                    state: designStates[title]!,
+                    onStateChanged: (newState) {
+                      designStates[title] = newState;
+                    },
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: Color(0xFF1F538D),
+                      mini: true,
+                      child: Icon(Icons.arrow_upward, color: Colors.white),
+                      onPressed: () {
+                        if (title.startsWith('Design')) {
+                          designStates[title]!.scrollToTop = true;
+                          setState(() {}); // Trigger rebuild to pass the message
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }
           }).toList(),
         ],
       ),

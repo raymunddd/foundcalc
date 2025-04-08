@@ -3164,4 +3164,26 @@ String? selectedFootingType = 'Square';
       ),
     );
   }
+
+
+
+  @override
+  void didUpdateWidget(AnalysisPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+
+    if (widget.state.scrollToTop) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          0,
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      });
+
+      // Reset the flag
+      widget.state.scrollToTop = false;
+      widget.onStateChanged(widget.state);
+    }
+  }
 } // AnalysisPageState
