@@ -147,7 +147,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? depth2;
 
   // toggles
-  bool solutionToggle = true;
+  bool showSolution = false;
   bool showSolutionOWS = false;
   bool showSolutionTWS = false;
 
@@ -243,6 +243,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.inputColBase = inputColBase.text;
       widget.state.inputCc = inputCc.text;
 
+
+
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
 
@@ -310,7 +312,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputCc.dispose();
   }
 
-  // conditional labels
+  // string getters
 
   String? material;
   final List<String> materials = [
@@ -365,12 +367,32 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   }
 
   String get solutionButtonLabel {
-    if (showSolutionOWS || showSolutionTWS) {
+    if (showSolution) {
       return 'Hide solution';
     } else {
       return 'View solution';
     }
   }
+
+  ////////////
+
+  String get boolOWS {
+    if (widget.state.showResultsOWSFirst) {
+      return 'solution OWS = true';
+    } else {
+      return 'solution OWS = false';
+    }
+  }
+
+  String get boolTWS {
+    if (showSolutionOWS) {
+      return 'solution TWS = true';
+    } else {
+      return 'solution TWS = false';
+    }
+  }
+
+  ////////////
 
   double roundUpToNearest25(double value) {
     return (value / 25).ceil() * 25;
@@ -432,6 +454,13 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       dbot = 20;
     }
 
+    if (widget.state.modFactor == "Normal-lightweight") {
+      lambda = 1;
+    } else if (widget.state.modFactor == "Sand-lightweight") {
+      lambda = 0.85;
+    } else { // All-lightweight
+      lambda = 0.75;
+    }
 
     if (widget.state.qToggle) { //using qall
       if (qa != null) {
@@ -576,14 +605,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       vucOWS = null;
     }
 
-    if (widget.state.modFactor == "Normal-lightweight") {
-      lambda = 1;
-    } else if (widget.state.modFactor == "Sand-lightweight") {
-      lambda = 0.85;
-    } else { // All-lightweight
-      lambda = 0.75;
-    }
-
     if (vuOWS != null && vucOWS != null) {
       if (vuOWS! > vucOWS!) {
         safetyOWS = 1; // OWS unsafe
@@ -671,7 +692,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       as = 20;
     }
 
-    if (as != null && newDepthOWS != null && bo != null) {
+    if (as != null && newDepthOWS != null && bo != null && fcbod != null) {
       vc3 = 0.083*(2+((as!*newDepthOWS!)/(bo!*1000)))*fcbod!;
     } else {
       vc3 = null;
@@ -774,8 +795,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.finalAnswerD = null;
     }
 
-    if (newtOWS != null && newtOWS != null) {
-      widget.state.finalAnswerT = max(newtOWS!, newtOWS!);
+    if (newtOWS != null && newtTWS != null) {
+      widget.state.finalAnswerT = max(newtOWS!, newtTWS!);
     } else {
       widget.state.finalAnswerT = null;
     }
@@ -1014,7 +1035,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       as = 20;
     }
 
-    if (as != null && depth != null && bo != null) {
+    if (as != null && depth != null && bo != null && fcbod != null) {
       vc3 = 0.083*(2+((as!*depth!)/(bo!*1000)))*fcbod!;
     } else {
       vc3 = null;
@@ -1182,8 +1203,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.finalAnswerD = null;
     }
 
-    if (newtOWS != null && newtOWS != null) {
-      widget.state.finalAnswerT = max(newtOWS!, newtOWS!);
+    if (newtOWS != null && newtTWS != null) {
+      widget.state.finalAnswerT = max(newtOWS!, newtTWS!);
     } else {
       widget.state.finalAnswerT = null;
     }
@@ -1278,6 +1299,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                       if (widget.state.soilProp)
                         containerWaterOn(),
 
+                      clearButton(),
+                      SizedBox(height: 10),
                       buttonOWSFirst(),
                       SizedBox(height: 10),
                       buttonTWSFirst(),
@@ -1289,13 +1312,14 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                         resultTWSFirst(),
 
                       SizedBox(height: 10),
-                      solutionButton(),
+                      if (widget.state.showResultsOWSFirst || widget.state.showResultsTWSFirst)
+                        solutionButton(),
                       SizedBox(height: 10),
 
                       if (showSolutionOWS)
                         containerSolutionOWS(),
-                      //if (showSolutionTWS)
-                        //containerSolutionTWS(),
+                      if (showSolutionTWS)
+                        containerSolutionTWS(),
                     ],
                   ),
                 ),
@@ -3658,7 +3682,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                       widget.state.otherMat = true; // Set to true for other materials
                     }
 
-                    calculate(); // Call calculate to update yMat
                   });
                 },
                 items: materials.map((String value) {
@@ -3898,15 +3921,23 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   }
 
   void toggleSolution() {
-    if (solutionToggle) {
-      showSolutionOWS = true;
-      showSolutionTWS = true;
-    } else {
-      showSolutionOWS = false;
-      showSolutionTWS = false;
-    }
     setState(() {
-      solutionToggle = !solutionToggle; // Toggle between functions
+      showSolution = !showSolution;
+
+      // Hide both solutions when toggling off
+      if (!showSolution) {
+        showSolutionOWS = false;
+        showSolutionTWS = false;
+      } else {
+        // Show the appropriate solution container based on the state
+        if (widget.state.showResultsOWSFirst) {
+          showSolutionOWS = true;
+          showSolutionTWS = false; // Hide TWS solution
+        } else if (widget.state.showResultsTWSFirst) {
+          showSolutionOWS = false; // Hide OWS solution
+          showSolutionTWS = true;
+        }
+      }
     });
   }
   Widget solutionButton() {
@@ -3919,7 +3950,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       child: Text(solutionButtonLabel),
     );
   }
-   Widget containerSolutionOWS() {
+  Widget containerSolutionOWS() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Container(
@@ -4008,6 +4039,160 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           ],
         )
       )
+    );
+  }
+
+  Widget containerSolutionTWS() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 450),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          color: const Color(0xFF1F538D),
+        ),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+// Solution Manager
+            if (safetyOWS == 2 && safetyTWS == 2)
+              safeOWSsafeTWS_tws(),
+            if (safetyOWS == 1 && safetyTWS == 2)
+              unsafeOWSsafeTWS_tws(),
+            if (safetyOWS == 2 && safetyTWS == 1)
+              safeOWSunsafeTWS_tws(),
+            if (safetyOWS == 1 && safetyTWS == 1)
+              unsafeOWSunsafeTWS_tws(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  Widget safeOWSsafeTWS_tws() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'safe OWS, safe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  Widget unsafeOWSsafeTWS_tws() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'unsafe OWS, safe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  Widget safeOWSunsafeTWS_tws() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'safe OWS, unsafe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  Widget unsafeOWSunsafeTWS_tws() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'unsafe OWS, unsafe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+
+  Widget clearButton() {
+    return ElevatedButton(
+      onPressed: () {        
+        modFactor = "Normal-lightweight";
+        colClass = null;
+
+        inputColBase.clear();
+        inputFootingThickness.clear();
+        inputPDL.clear();
+        inputPLL.clear();
+        inputfcPrime.clear();
+        inputDf.clear();
+        inputFootingThickness.clear();
+        inputDw.clear();
+
+        inputGs.clear();
+        inputE.clear();
+        inputW.clear();
+
+        inputGammaDry.clear();
+        inputGammaMoist.clear();
+        inputGammaSat.clear();
+
+        inputQAll.clear();
+
+        inputQUlt.clear();
+        inputFS.clear();
+
+        inputFloorLoading.clear();
+        inputFloorThickness.clear();
+        inputOtherUnitWeight.clear();
+
+        inputTop.clear();
+        inputBot.clear();
+        inputCc.clear();
+        inputYc.clear();
+        inputYw.clear();
+
+        setState(() {
+          widget.state.weightPressures = false;
+          widget.state.topToggle = false;
+          widget.state.botToggle = false;
+          widget.state.concreteCover = false;
+          widget.state.concreteDet = false;
+          widget.state.waterDet = false;
+
+          widget.state.showResultsOWSFirst = false;
+          widget.state.showResultsTWSFirst = false;
+          
+          showSolutionOWS = false;
+          showSolutionTWS = false;
+          showSolution = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
     );
   }
 

@@ -439,18 +439,18 @@ class _AnalysisPageState extends State<AnalysisPage> {
     }
   }
 
-String? selectedShearFailure;
-  final List<String> shearFailureValues = [
-    'General',
-    'Local',
-  ];
+  String? selectedShearFailure;
+    final List<String> shearFailureValues = [
+      'General',
+      'Local',
+    ];
 
-String? selectedFootingType = 'Square';
-  final List<String> footingTypes = [
-    'Strip or continuous',
-    'Square',
-    'Circular',
-  ];
+  String? selectedFootingType = 'Square';
+    final List<String> footingTypes = [
+      'Strip or continuous',
+      'Square',
+      'Circular',
+    ];
 
   double roundToFourDecimalPlaces(double value) {
     return (value * 10000).round() / 10000;
