@@ -289,19 +289,3 @@ class RectMomentWidgets {
   }
 }
 
-class CustomWidget extends StatelessWidget {
-  const CustomWidget({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(16.0),
-      child: const Center(
-        child: Text(
-          'Custom Widget',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-}

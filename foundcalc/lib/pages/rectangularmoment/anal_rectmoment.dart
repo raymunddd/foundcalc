@@ -7,37 +7,44 @@ import 'package:flutter/services.dart';
 import 'dart:math';
 import 'widget_rectmoment.dart';
 
-class AnalRectMomentPage extends StatefulWidget {
-  final String title;
-  final AnalRectMomentState state;
-  final Function(AnalRectMomentState) onStateChanged;
+//Widget class
+  class AnalRectMomentPage extends StatefulWidget {
+    final String title;
+    final AnalRectMomentState state;
+    final Function(AnalRectMomentState) onStateChanged;
 
-  AnalRectMomentPage({
-    required this.title,
-    required this.state,
-    required this.onStateChanged,
-  });
+    AnalRectMomentPage({
+      required this.title,
+      required this.state,
+      required this.onStateChanged,
+    });
 
-  @override
-  _AnalRectMomentPageState createState() => _AnalRectMomentPageState();
-}
 
-class _AnalRectMomentPageState extends State<AnalRectMomentPage> 
-with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
-  // You can add state variables and methods here
 
 @override
-  bool get wantKeepAlive => true; // 2. Override wantKeepAlive and return true
+  _AnalRectMomentPageState createState() => _AnalRectMomentPageState();
+}
+  class _AnalRectMomentPageState extends State<AnalRectMomentPage> 
+    with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
+    // You can add state variables and methods here
+
+  @override
+    bool get wantKeepAlive => true; // tells Flutter to keep this page in memory even when it's not visible.
+
 
 //ITO ANG SALARIN ng title
   String get displayTitle {
-if (widget.title.startsWith('RectMoment')) {
-      int index = int.tryParse(widget.title.split(' ').last) ?? 0;
-      return "Analysis of Rectangular Footing with Moment $index"; // Shorter for tab
+  if (widget.title.startsWith('RectMoment')) {
+        int index = int.tryParse(widget.title.split(' ').last) ?? 0;
+        return "Analysis of Rectangular Footing with Moment $index"; // Shorter for tab
+      }
+
+      return widget.title; 
     }
 
-    return widget.title; 
-  }
+
+//VARIABLES
+  
 
   late ScrollController _scrollController;
   late TextEditingController inputNumberOne;
@@ -52,81 +59,86 @@ if (widget.title.startsWith('RectMoment')) {
 
   bool showResults = false;
 
+  //Initializing
   @override
-  void initState() {
-    super.initState();
-    
-    _scrollController = ScrollController();
-
-    inputNumberOne = TextEditingController(text: widget.state.inputNumberOne);
-    inputNumberTwo = TextEditingController(text: widget.state.inputNumberTwo);
-    inputNumberThree = TextEditingController(text: widget.state.inputNumberThree);
-
-    // listeners
-    inputNumberOne.addListener(_updateState);
-    inputNumberTwo.addListener(_updateState);
-    inputNumberThree.addListener(_updateState);
-  }
-
-  @override
-  void didUpdateWidget(AnalRectMomentPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    
-    // Check if we need to scroll to top
-    if (widget.state.scrollToTop) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollController.animateTo(
-          0,
-          duration: Duration(milliseconds: 500),
-          curve: Curves.easeInOut,
-        );
-      });
+    void initState() {
+      super.initState();
       
-      // Reset the flag
-      widget.state.scrollToTop = false;
-      widget.onStateChanged(widget.state);
+      _scrollController = ScrollController();
+
+      inputNumberOne = TextEditingController(text: widget.state.inputNumberOne);
+      inputNumberTwo = TextEditingController(text: widget.state.inputNumberTwo);
+      inputNumberThree = TextEditingController(text: widget.state.inputNumberThree);
+
+      // listeners
+      inputNumberOne.addListener(_updateState);
+      inputNumberTwo.addListener(_updateState);
+      inputNumberThree.addListener(_updateState);
     }
-  }
 
-  void _updateState() {
-    setState(() {
-      widget.state.inputNumberOne = inputNumberOne.text;
-      widget.state.inputNumberTwo = inputNumberTwo.text;
-      widget.state.inputNumberThree = inputNumberThree.text;
+  //Updating
+  @override
+    //Scroll
+        void didUpdateWidget(AnalRectMomentPage oldWidget) {
+          super.didUpdateWidget(oldWidget);
+          
+          // Check if we need to scroll to top
+          if (widget.state.scrollToTop) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollController.animateTo(
+                0,
+                duration: Duration(milliseconds: 500),
+                curve: Curves.easeInOut,
+              );
+            });
+            
+            // Reset the flag
+            widget.state.scrollToTop = false;
+            widget.onStateChanged(widget.state);
+          }
+        }
 
-      widget.onStateChanged(widget.state);
+  //Ito yun nagsasave
+    void _updateState() {
+      setState(() {
+        widget.state.inputNumberOne = inputNumberOne.text;
+        widget.state.inputNumberTwo = inputNumberTwo.text;
+        widget.state.inputNumberThree = inputNumberThree.text;
 
-    });
-  }
+        widget.onStateChanged(widget.state);
 
+      });
+    }
+
+  //Calculation Functions
   void addNumbers() {
     one = double.tryParse(inputNumberOne.text);
     two = double.tryParse(inputNumberTwo.text);
     three = double.tryParse(inputNumberThree.text);
 
     // Check if all numbers are entered
-    if (one == null || two == null || three == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter all numbers before proceeding.'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return; // Stop execution if any number is missing
-    }
+      if (one == null || two == null || three == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Please enter all numbers before proceeding.'),
+            backgroundColor: Colors.red,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return; // Stop execution if any number is missing
+      }
 
-    // Check if an operation is selected
-    if (selectedOperation == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please select an operation before proceeding.'),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return; // Stop execution if no operation is selected
-    }
+      // Check if an operation is selected
+      if (selectedOperation == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Please select an operation before proceeding.'),
+            backgroundColor: Colors.orange,
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return; // Stop execution if no operation is selected
+      }
 
     // Perform the calculation
     if (selectedOperation == 'Addition') {
@@ -142,12 +154,15 @@ if (widget.title.startsWith('RectMoment')) {
   }
  // addNumbers
 
+//Operation Options
   String? selectedOperation;
   final List<String> operations = [
     'Addition',
     'Multiplication',
   ];
 
+
+//Ibuild na
   @override
   Widget build(BuildContext context) {
     super.build(context); // Call super.build
@@ -215,6 +230,8 @@ if (widget.title.startsWith('RectMoment')) {
                           });
                         },
                       ),
+
+                      // Result display
                       if (showResults)
                       Text(
                         '${selectedOperation == "Multiplication" ? "Product" : "Sum"} = $sum',
@@ -230,5 +247,19 @@ if (widget.title.startsWith('RectMoment')) {
       ),
     );
   } // build (main widget)
+
+//Dispose para di pumuno memory
+@override
+void dispose() {
+  // Clean up controllers
+  inputNumberOne.dispose();
+  inputNumberTwo.dispose();
+  inputNumberThree.dispose();
+  _scrollController.dispose();
+  
+  // Always call super.dispose() last
+    super.dispose();
+  }
+
 } // _AnalRectMomentPageState
 
