@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pages/analysis_page.dart'; // Import AnalysisPage
 import 'pages/design_page.dart';   // Import DesignPage
-import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
+import 'pages/rectangularmoment/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'pages/about_page.dart';    // Import AboutPage
 import 'settings/analysis_state.dart'; // Import AnalysisState
 import 'settings/design_state.dart';   // Import DesignState
