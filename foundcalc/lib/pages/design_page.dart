@@ -66,6 +66,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
   late TextEditingController inputOtherUnitWeight;
   late TextEditingController inputColBase;
+  late TextEditingController inputCc;
 
   // solvar
 
@@ -99,9 +100,56 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? qnu;
   double? C;
   double? x;
+  double? cc;
+  double? dtop;
+  double? dbot;
+  double? depth;
+  double? vuOWS;
+  double? vucOWS;
+  double? newDepthOWS;
+  double? newtOWS;
+  double? safetyOWS;
+  double? lambda;
+  double? bo;
+  double? ao;
+  double? vuTWS;
+  double? fcbod;
+  double? vc1;
+  double? vc2;
+  double? as;
+  double? vc3;
+  double? vucTWS;
+  double? min1;
+  double? newDepthTWS;
+  double? safetyTWS;
+  double? a_quad;
+  double? b_quad;
+  double? c_quad;
+  double? new_vuOWS;
+  double? new_vucOWS;
 
+  double? newtTWS;
+  double? new_vuTWS;
+  double? fcbod2;
+  double? vc1_new;
+  double? vc2_new;
+  double? vc3_new;
+  double? min2;
+  double? new_vucTWS;
+  double? bo2;
+
+  double beta = 1;
   int? bRound;
-  // double? qp;
+
+  // for tws first
+
+  double? depth1;
+  double? depth2;
+
+  // toggles
+  bool solutionToggle = true;
+  bool showSolutionOWS = false;
+  bool showSolutionTWS = false;
 
   void initState() {
     super.initState();
@@ -132,8 +180,12 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputYc = TextEditingController(text: widget.state.inputYc);
     inputOtherUnitWeight = TextEditingController(text: widget.state.inputOtherUnitWeight);
     inputColBase = TextEditingController(text: widget.state.inputColBase);
+    inputCc = TextEditingController(text: widget.state.inputCc);
 
     colClass = widget.state.colClass;
+
+    modFactor = "Normal-lightweight"; // Set default value here
+    widget.state.modFactor = modFactor; // Update the state
 
     material = "Concrete"; // Set default value here
     widget.state.material = material; // Update the state
@@ -161,6 +213,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputYc.addListener(_updateState);
     inputOtherUnitWeight.addListener(_updateState);
     inputColBase.addListener(_updateState);
+    inputCc.addListener(_updateState);
   }
 
   void _updateState() {
@@ -188,6 +241,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.inputYc = inputYc.text;
       widget.state.inputOtherUnitWeight = inputOtherUnitWeight.text;
       widget.state.inputColBase = inputColBase.text;
+      widget.state.inputCc = inputCc.text;
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -221,8 +275,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         widget.state.isGammaDryEnabled = true;
       }
 
-     calculate();
-
       widget.onStateChanged(widget.state);
     });
   }
@@ -255,6 +307,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputYc.dispose();
     inputOtherUnitWeight.dispose();
     inputColBase.dispose();
+    inputCc.dispose();
   }
 
   // conditional labels
@@ -270,6 +323,13 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     'Interior',
     'Edge',
     'Corner',
+  ];
+
+  String? modFactor;
+  final List<String> modFactorValues = [
+    'All-lightweight',
+    'Sand-lightweight',
+    'Normal-lightweight',
   ];
 
   String get soilPropOffHeaderrr {
@@ -304,6 +364,26 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     }
   }
 
+  String get solutionButtonLabel {
+    if (showSolutionOWS || showSolutionTWS) {
+      return 'Hide solution';
+    } else {
+      return 'View solution';
+    }
+  }
+
+  double roundUpToNearest25(double value) {
+    return (value / 25).ceil() * 25;
+  }
+
+  double roundToFourDecimalPlaces(double value) {
+    return (value * 10000).round() / 10000;
+  }
+
+  double roundToOneDecimalPlace(double value) {
+    return (value * 10).round() / 10;
+  }
+
   void calculate() {
     qa = double.tryParse(inputQAll.text);
     qult = double.tryParse(inputQUlt.text);
@@ -329,13 +409,30 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     pDL = double.tryParse(inputPDL.text);
 
     C = double.tryParse(inputColBase.text);
+    cc = double.tryParse(inputCc.text);
+
+    dtop = double.tryParse(inputTop.text);
+    dbot = double.tryParse(inputBot.text);
 
       // Default values
     yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
     yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
     fs = double.tryParse(inputFS.text) ?? 3; // Default to 3 if null
+    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
 
-  
+    if (widget.state.topToggle) {
+      dtop = dtop;
+    } else {
+      dtop = 20;
+    }
+
+    if (widget.state.botToggle) {
+      dbot = dbot;
+    } else {
+      dbot = 20;
+    }
+
+
     if (widget.state.qToggle) { //using qall
       if (qa != null) {
         qall = qa!;
@@ -382,6 +479,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       } else {
         qo = yc!*t!+y!*(df!-t!);
       }
+    } else {
+      qo = null;
     }
 
 
@@ -392,7 +491,420 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         if (yMatInput != null) {
           yMat = yMatInput!;
         } else {
-          yMat = 4;
+          yMat = null;
+        }
+      }
+      if (qall != null && fLoad != null && yMat != null && fThick != null && qo != null) {
+        qn = qall! - fLoad! - yMat!*(fThick!/1000) - qo!;
+        //qp = yMat!*(fThick!/1000);
+      } else {
+        qn = null;
+        //qp = 4;
+      }
+    } else { // no weight pressures
+      if (qall != null && qo != null) {
+        qn = qall! - qo!;
+      } else {
+        qn = 2;
+      }     
+    }
+
+    if (pLL != null && pDL != null) {
+      sumP = pLL! + pDL!;
+      pu = 1.2*pDL! + 1.6*pLL!;
+    } else {
+      sumP = null;
+      pu = null;
+    }
+
+    if (qn != null && sumP != null) {
+      b = ((sqrt(sumP!/qn!))/0.025);
+      
+      if (b != null) {
+        bRound = b!.ceil();  
+      } else {
+        bRound = null;
+      }
+      if (bRound != null) {
+        b = 0.025 * (bRound!.toDouble());
+        widget.state.finalAnswerB = b;
+      } else {
+        b = null; // Or any other default behavior
+      }
+    } else {
+      bRound = null;
+      b = null;
+    }
+
+    if (pu != null) {
+      if (b != null) {
+        qnu = pu!/(b!*b!); 
+      } else {
+        qnu = null;
+      }
+    } else {
+      qnu = null;
+    }
+
+    if (t != null) {
+      depth = (t!*1000) - cc! - dbot! - 0.5*dtop!;
+    } else {
+      depth = null;
+    }
+
+    if (colClass == "Interior") {
+      if (b != null && C != null && depth != null) {
+        x = (b!/2) - (C!/2) - (depth!/1000);
+      } else {
+        x = null;
+      }
+    } else if (colClass == "Edge") {
+      x = null;
+    } else { // Corner
+      x = 3;
+    }
+
+    if (qnu != null && b != null && x != null) {
+      vuOWS = qnu!*b!*x!;
+    } else {
+      vuOWS = null;
+    }
+
+    if (fc != null && b != null && depth != null) {
+      vucOWS = 0.1275*lambda!*sqrt(fc!)*b!*depth!;
+    } else {
+      vucOWS = null;
+    }
+
+    if (widget.state.modFactor == "Normal-lightweight") {
+      lambda = 1;
+    } else if (widget.state.modFactor == "Sand-lightweight") {
+      lambda = 0.85;
+    } else { // All-lightweight
+      lambda = 0.75;
+    }
+
+    if (vuOWS != null && vucOWS != null) {
+      if (vuOWS! > vucOWS!) {
+        safetyOWS = 1; // OWS unsafe
+        if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
+          newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.1275*lambda!*sqrt(fc!)));
+        } else {
+          newDepthOWS = null;
+          widget.state.finalAnswerD = null;
+        }
+      } else { // vuOWS ≤ vuCOWS
+        newDepthOWS = depth;
+        widget.state.finalAnswerVuows = vuOWS;
+        widget.state.finalAnswerVucows = vucOWS;
+        safetyOWS = 2; // OWS safe
+      }
+    } else {
+      newDepthOWS = 2;
+    }
+
+    if (newDepthOWS != null) {
+      newtOWS = newDepthOWS! + cc! + dbot! + 0.5*dtop!;
+    } else {
+      newtOWS = null;
+    }
+
+    if (qnu != null && b != null && newDepthOWS != null) {
+      new_vuOWS = qnu!*b!*(0.5*(b!-C!)-0.001*newDepthOWS!);
+      widget.state.finalAnswerVuows = new_vuOWS;
+    } else {
+      new_vuOWS = null;
+      widget.state.finalAnswerVuows = null;
+    }
+
+    if (fc != null && b != null && newDepthOWS != null) {
+      new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
+      widget.state.finalAnswerVucows = new_vucOWS;
+    } else {
+      new_vucOWS = null;
+      widget.state.finalAnswerVucows = null;
+    }
+
+    // tws solution
+
+    if (colClass == "Interior") {
+      if (C != null && newDepthOWS != null) {
+        bo = 4*(C!+(newDepthOWS!/1000));
+        ao = (C!+(newDepthOWS!/1000))*(C!+(newDepthOWS!/1000));
+      } else {
+        bo = 1;
+        ao = 1;
+      }
+    } else if (colClass == "Edge") {
+      bo = 2;
+      ao = 2;
+    } else { // Corner
+      bo = 3;
+      ao = 3;
+    }
+
+    if (qnu != null && b != null && ao != null) {
+      vuTWS = qnu!*((b!*b!)-ao!);
+    } else {
+      vuTWS = null;
+    }
+
+    if (fc != null && bo != null && newDepthOWS != null) {
+      fcbod = 0.75*lambda!*sqrt(fc!)*bo!*newDepthOWS!;
+      vc1 = 0.75*0.33*lambda!*sqrt(fc!)*bo!*newDepthOWS!;
+    } else {
+      fcbod = null;
+      vc1 = null;
+    }
+
+    if (fcbod != null) {
+      vc2 = 0.17*(1+(2/beta))*fcbod!;
+    } else {
+      vc2 = null;
+    }
+
+    if (colClass == 'Interior') {
+      as = 40;
+    } else if (colClass == 'Edge') {
+      as = 30;
+    } else { // Corner column
+      as = 20;
+    }
+
+    if (as != null && newDepthOWS != null && bo != null) {
+      vc3 = 0.083*(2+((as!*newDepthOWS!)/(bo!*1000)))*fcbod!;
+    } else {
+      vc3 = null;
+    }
+
+    if (vc1 != null && vc2 != null && vc3 != null) {
+      min1 = min(vc1!, vc2!);
+      vucTWS = min(min1!, vc3!);
+    } else {
+      min1 = null;
+      vucTWS = null;
+    }
+
+    if (vuTWS != null && vucTWS != null) {
+      if (vuTWS! > vucTWS!) {
+        safetyTWS = 1; // TWS unsafe
+        if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
+          a_quad = 990*sqrt(fc!) + qnu!;
+          b_quad = 990000*sqrt(fc!)*C!+2000*qnu!*C!;
+          c_quad = -1000000*qnu!*(b!*b!-C!*C!);
+          // quadratic formula
+          newDepthTWS = roundUpToNearest25((-(b_quad!)+sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+        } else {
+          newDepthTWS = 1;
+        }
+      } else { // vuTWS ≤ vuCTWS
+        newDepthTWS = depth;
+        widget.state.finalAnswerVutws = vuTWS;
+        widget.state.finalAnswerVuctws = vucTWS;
+        safetyTWS = 2; // TWS safe
+      }
+    } else {
+      newDepthTWS = 2;
+    }
+    
+    if (newDepthTWS != null) {
+      newtTWS = newDepthTWS! + cc! + dbot! + 0.5*dtop!;
+    } else {
+      newtTWS = null;
+    }
+
+    if (qnu != null && b != null && C != null && newDepthTWS != null) {
+      new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/1000)));
+      widget.state.finalAnswerVutws = new_vuTWS;
+    } else {
+      new_vuTWS = null;
+      widget.state.finalAnswerVutws = null;
+    }
+
+    if (colClass == "Interior") {
+      if (C != null && depth != null) {
+        bo2 = 4*(C!+(newDepthTWS!/1000));
+      } else {
+        bo2 = 1;
+      }
+    } else if (colClass == "Edge") {
+      bo2 = 2;
+    } else { // Corner
+      bo2 = 3;
+    }
+
+    if (fc != null && bo2 != null && depth != null) {
+      fcbod2 = 0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+      vc1_new = 0.33*0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+    } else {
+      fcbod2 = null;
+      vc1_new = null;
+    }
+
+    if (fcbod2 != null) {
+      vc2_new = 0.17*(1+(2/beta))*fcbod2!;
+    } else {
+      vc2_new = null;
+    }
+
+    if (as != null && newDepthTWS != null && bo2 != null) {
+      vc3_new = 0.083*(2+((as!*newDepthTWS!)/(bo2!*1000)))*fcbod2!;
+    } else {
+      vc3_new = null;
+    }
+
+    if (vc1_new != null && vc2_new != null && vc3_new != null) {
+      min2 = min(vc1_new!, vc2_new!);
+      new_vucTWS = min(min2!, vc3_new!);
+      widget.state.finalAnswerVuctws = new_vucTWS;
+
+      setState(() {
+        widget.state.showResultsOWSFirst = true;
+        widget.state.showResultsTWSFirst = false;
+      });
+    } else {
+      min2 = null;
+      new_vucTWS = null;
+      widget.state.finalAnswerVuctws = null;
+    }
+
+    if (newDepthOWS != null && newDepthTWS != null) {
+      widget.state.finalAnswerD = max(newDepthOWS!, newDepthTWS!);
+    } else {
+      widget.state.finalAnswerD = null;
+    }
+
+    if (newtOWS != null && newtOWS != null) {
+      widget.state.finalAnswerT = max(newtOWS!, newtOWS!);
+    } else {
+      widget.state.finalAnswerT = null;
+    }
+
+    print('otherMat = ${widget.state.otherMat}');
+    print("yc = $yc, yMat = $yMat, fLoad = $fLoad, λ = $lambda");
+    print("qa = $qall, qo = $qo, qn = $qn, Pa = $sumP, b = $b, bRound = $bRound, Pu = $pu, qnu = $qnu, depth = $depth, x = $x");
+    print("OWS: VUows = $vuOWS, VUcows = $vucOWS, new d = $newDepthOWS, new T = $newtOWS, new VUows = $new_vuOWS, new VUcows = $new_vucOWS");
+    print("TWS: bo = $bo, VUtws = $vuTWS, VUctws = $vucTWS, new d = $newDepthTWS, new T = $newtTWS, new bo = $bo2, new VUtws = $new_vuTWS, new VUctws = $new_vucTWS");
+    print("vc1 = $vc1, vc2 = $vc2, vc3 = $vc3");
+    print("new vc1 = $vc1_new, new vc2 = $vc2_new, new vc3 = $vc3_new");
+    print('fcbod = $fcbod, as = $as');
+  }
+
+  void calculateTWS() {
+    qa = double.tryParse(inputQAll.text);
+    qult = double.tryParse(inputQUlt.text);
+
+    df = double.tryParse(inputDf.text);
+    dw = double.tryParse(inputDw.text);
+    fc = double.tryParse(inputfcPrime.text);
+      // Nullable
+    t = double.tryParse(inputFootingThickness.text);
+    gs = double.tryParse(inputGs.text);
+    w = double.tryParse(inputW.text);
+    e = double.tryParse(inputE.text);
+
+    yDry = double.tryParse(inputGammaDry.text);
+    y = double.tryParse(inputGammaMoist.text);
+    ySat = double.tryParse(inputGammaSat.text);
+
+    yMatInput = double.tryParse(inputOtherUnitWeight.text);
+    fLoad = double.tryParse(inputFloorLoading.text);
+    fThick= double.tryParse(inputFloorThickness.text);
+
+    pLL= double.tryParse(inputPLL.text);
+    pDL = double.tryParse(inputPDL.text);
+
+    C = double.tryParse(inputColBase.text);
+    cc = double.tryParse(inputCc.text);
+
+    dtop = double.tryParse(inputTop.text);
+    dbot = double.tryParse(inputBot.text);
+
+      // Default values
+    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
+    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
+    fs = double.tryParse(inputFS.text) ?? 3; // Default to 3 if null
+    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
+
+    if (widget.state.topToggle) {
+      dtop = dtop;
+    } else {
+      dtop = 20;
+    }
+
+    if (widget.state.botToggle) {
+      dbot = dbot;
+    } else {
+      dbot = 20;
+    }
+
+    if (widget.state.modFactor == "Normal-lightweight") {
+      lambda = 1;
+    } else if (widget.state.modFactor == "Sand-lightweight") {
+      lambda = 0.85;
+    } else { // All-lightweight
+      lambda = 0.75;
+    }
+
+    if (widget.state.qToggle) { //using qall
+      if (qa != null) {
+        qall = qa!;
+      } else {
+        qall = null;
+      } 
+    } else { // using qult
+      if (qult != null) {
+        qall = qult!/fs!;
+      } else {
+        qall = null;
+      }     
+    } 
+    
+    if (widget.state.soilProp) {
+      if (gs != null && e != null && w != null) {
+        y = ((gs!*yw!)*(1+w!))/(1+e!);
+      } else if (gs != null && e != null) {
+        y = (gs!*yw!)/(1+e!);
+      } else {
+        y = null;
+      }
+    } else { //Soil Prop is OFF
+      if (y != null && yDry == null) {
+        y = y;
+      } else if (y == null && yDry != null) {
+        y = yDry;
+      } else {
+        y = null;
+      }
+    }
+    
+    if (df != null && t != null && y != null) {
+      if (dw != null) {
+        if (dw! < df!) {
+          if (ySat != null) {
+            qo = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+          } else {
+            qo = null;
+          }
+        } else {
+          qo = yc!*t!+y!*(df!-t!);
+        }
+      } else {
+        qo = yc!*t!+y!*(df!-t!);
+      }
+    } else {
+      qo = null;
+    }
+
+
+    if (widget.state.weightPressures) {
+      if (widget.state.material == 'Concrete') {
+        yMat = yc!;
+      } else { //others
+        if (yMatInput != null) {
+          yMat = yMatInput!;
+        } else {
+          yMat = null;
         }
       }
       if (qall != null && fLoad != null && yMat != null && fThick != null && qo != null) {
@@ -428,13 +940,14 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }
       if (bRound != null) {
         b = 0.025 * (bRound!.toDouble());
+        widget.state.finalAnswerB = b;
       } else {
         // Handle the case where bRound is null, if necessary
-        b = 0.01; // Or any other default behavior
+        b = null; // Or any other default behavior
       }
     } else {
       bRound = null;
-      b = 0.02;
+      b = null;
     }
 
     if (pu != null) {
@@ -447,22 +960,243 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       qnu = null;
     }
 
-
+    if (t != null) {
+      depth1 = (t!*1000) - cc! - 0.5*dbot!;
+      depth2 = (t!*1000) - cc! - dbot! - 0.5*dtop!;
+      depth = (depth1! + depth2!)/2;
+    } else {
+      depth1 = null;
+      depth2 = null;
+      depth = null;
+    }
 
     if (colClass == "Interior") {
-      //x = (B!/2) - (C!/2) - 
+      if (C != null && depth != null) {
+        bo = 4*(C!+(depth!/1000));
+        ao = (C!+(depth!/1000))*(C!+(depth!/1000));
+      } else {
+        bo = 1;
+        ao = 1;
+      }
     } else if (colClass == "Edge") {
-
+      bo = 2;
+      ao = 2;
     } else { // Corner
+      bo = 3;
+      ao = 3;
+    }
 
+    if (qnu != null && b != null && ao != null) {
+      vuTWS = qnu!*((b!*b!)-ao!);
+    } else {
+      vuTWS = null;
+    }
+
+    if (fc != null && bo != null && depth != null) {
+      fcbod = 0.75*lambda!*sqrt(fc!)*bo!*depth!;
+      vc1 = 0.75*0.33*lambda!*sqrt(fc!)*bo!*depth!;
+    } else {
+      fcbod = null;
+      vc1 = null;
+    }
+
+    if (fcbod != null) {
+      vc2 = 0.17*(1+(2/beta))*fcbod!;
+    } else {
+      vc2 = null;
+    }
+
+    if (colClass == 'Interior') {
+      as = 40;
+    } else if (colClass == 'Edge') {
+      as = 30;
+    } else { // Corner column
+      as = 20;
+    }
+
+    if (as != null && depth != null && bo != null) {
+      vc3 = 0.083*(2+((as!*depth!)/(bo!*1000)))*fcbod!;
+    } else {
+      vc3 = null;
+    }
+
+    if (vc1 != null && vc2 != null && vc3 != null) {
+      min1 = min(vc1!, vc2!);
+      vucTWS = min(min1!, vc3!);
+    } else {
+      min1 = null;
+      vucTWS = null;
+    }
+
+    if (vuTWS != null && vucTWS != null) {
+      if (vuTWS! > vucTWS!) {
+        safetyTWS = 1; // TWS unsafe
+        if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
+          a_quad = 990*sqrt(fc!) + qnu!;
+          b_quad = 990000*sqrt(fc!)*C!+2000*qnu!*C!;
+          c_quad = -1000000*qnu!*(b!*b!-C!*C!);
+          // quadratic formula
+          newDepthTWS = roundUpToNearest25((-(b_quad!)+sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+        } else {
+          newDepthTWS = null;
+        }
+      } else { // vuOWS ≤ vuCOWS
+        newDepthTWS = depth;
+        widget.state.finalAnswerVutws = vuTWS;
+        widget.state.finalAnswerVuctws = vucTWS;
+        safetyTWS = 2; // TWS safe
+      }
+    } else {
+      newDepthTWS = 2;
+    }
+    
+    if (newDepthTWS != null) {
+      newtTWS = newDepthTWS! + cc! + dbot! + 0.5*dtop!;
+    } else {
+      newtTWS = null;
+    }
+
+    if (qnu != null && b != null && C != null && newDepthTWS != null) {
+      new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/1000)));
+      widget.state.finalAnswerVutws = new_vuTWS;
+    } else {
+      new_vuTWS = null;
+      widget.state.finalAnswerVutws = null;
+    }
+
+    if (colClass == "Interior") {
+      if (C != null && depth != null) {
+        bo2 = 4*(C!+(newDepthTWS!/1000));
+      } else {
+        bo2 = 1;
+      }
+    } else if (colClass == "Edge") {
+      bo2 = 2;
+    } else { // Corner
+      bo2 = 3;
+    }
+
+    if (fc != null && bo2 != null && depth != null) {
+      fcbod2 = 0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+      vc1_new = 0.33*0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+    } else {
+      fcbod2 = null;
+      vc1_new = null;
+    }
+
+    if (fcbod2 != null) {
+      vc2_new = 0.17*(1+(2/beta))*fcbod2!;
+    } else {
+      vc2_new = null;
+    }
+
+    if (as != null && newDepthTWS != null && bo2 != null && fcbod2 != null) {
+      vc3_new = 0.083*(2+((as!*newDepthTWS!)/(bo2!*1000)))*fcbod2!;
+    } else {
+      vc3_new = null;
+    }
+
+    if (vc1_new != null && vc2_new != null && vc3_new != null) {
+      min2 = min(vc1_new!, vc2_new!);
+      new_vucTWS = min(min2!, vc3_new!);
+      widget.state.finalAnswerVuctws = new_vucTWS;
+    } else {
+      min2 = null;
+      new_vucTWS = null;
+      widget.state.finalAnswerVuctws = null;
+    }
+
+    // OWS solution
+
+    if (colClass == "Interior") {
+      if (b != null && C != null && newDepthTWS != null) {
+        x = (b!/2) - (C!/2) - (newDepthTWS!/1000);
+      } else {
+        x = 1;
+      }
+    } else if (colClass == "Edge") {
+      x = 2;
+    } else { // Corner
+      x = 3;
+    }
+
+    if (qnu != null && b != null && x != null) {
+      vuOWS = qnu!*b!*x!;
+    } else {
+      vuOWS = null;
+    }
+
+    if (fc != null && b != null && newDepthTWS != null) {
+      vucOWS = 0.1275*lambda!*sqrt(fc!)*b!*newDepthTWS!;
+    } else {
+      vucOWS = null;
+    }
+
+    if (vuOWS != null && vucOWS != null) {
+      if (vuOWS! > vucOWS!) {
+        safetyOWS = 1; // OWS unsafe
+        if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
+          newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.1275*lambda!*sqrt(fc!)));
+        } else {
+          newDepthOWS = 1;
+        }
+      } else { // vuOWS ≤ vuCOWS
+        newDepthOWS = newDepthTWS;
+        widget.state.finalAnswerVuows = vuOWS;
+        widget.state.finalAnswerVucows = vucOWS;
+        safetyOWS = 2; // OWS safe
+      }
+    } else {
+      newDepthOWS = 2;
+    }
+
+    if (newDepthOWS != null) {
+      newtOWS = newDepthOWS! + cc! + dbot! + 0.5*dtop!;
+    } else {
+      newtOWS = null;
+    }
+
+    if (qnu != null && b != null && newDepthOWS != null) {
+      new_vuOWS = qnu!*b!*(0.5*(b!-C!)-0.001*newDepthOWS!);
+      widget.state.finalAnswerVuows = new_vuOWS;
+    } else {
+      new_vuOWS = null;
+      widget.state.finalAnswerVuows = null;
+    }
+
+    if (fc != null && b != null && newDepthOWS != null) {
+      new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
+      widget.state.finalAnswerVucows = new_vucOWS;
+      setState(() {
+        widget.state.showResultsTWSFirst = true;
+        widget.state.showResultsOWSFirst = false;
+      });
+    } else {
+      new_vucOWS = null;
+      widget.state.finalAnswerVucows = null;
+    }
+
+    if (newDepthOWS != null && newDepthTWS != null) {
+      widget.state.finalAnswerD = max(newDepthOWS!, newDepthTWS!);
+    } else {
+      widget.state.finalAnswerD = null;
+    }
+
+    if (newtOWS != null && newtOWS != null) {
+      widget.state.finalAnswerT = max(newtOWS!, newtOWS!);
+    } else {
+      widget.state.finalAnswerT = null;
     }
 
     print('otherMat = ${widget.state.otherMat}');
-    print("yc = $yc, yMat = $yMat, fLoad = $fLoad");
-    print("qa = $qall, qo = $qo, qn = $qn, Pa = $sumP, b = $b, bRound = $bRound, Pu = $pu, qnu = $qnu");
-    print('isGammaDryEnabled = ${widget.state.isGammaDryEnabled}, isGammaMoistEnabled = ${widget.state.isGammaMoistEnabled}');
+    print("yc = $yc, yMat = $yMat, fLoad = $fLoad, λ = $lambda");
+    print("qa = $qall, qo = $qo, qn = $qn, Pa = $sumP, b = $b, bRound = $bRound, Pu = $pu, qnu = $qnu, depth = $depth, x = $x");
+    print("TWS: bo = $bo, VUtws = $vuTWS, VUctws = $vucTWS, new d = $newDepthTWS, new T = $newtTWS, new bo = $bo2, new VUtws = $new_vuTWS, new VUctws = $new_vucTWS");
+    print("OWS: VUows = $vuOWS, VUcows = $vucOWS, new d = $newDepthOWS, new T = $newtOWS, new VUows = $new_vuOWS, new VUcows = $new_vucOWS");
+    print("vc1 = $vc1, vc2 = $vc2, vc3 = $vc3");
+    print("new vc1 = $vc1_new, new vc2 = $vc2_new, new vc3 = $vc3_new");
+    print('fcbod = $fcbod, as = $as');
   }
-
 
 
   @override
@@ -500,6 +1234,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                     mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
                     // row managerrrr
                     children: [
+                      rowModFactor(),
                       rowColClass(),
                       rowColBase(),
                       rowPdead(),
@@ -522,14 +1257,45 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                           containerQToggleOff(),
                         ]
                       ),
-                      rowTopToggle(),
-                      containerTop(),
-                      rowBotToggle(),
-                      containerBot(),
+
                       rowWPToggle(),
                       containerWPOn(),
+
+                      rowTopToggle(),
+                      containerTop(),
+
+                      rowBotToggle(),
+                      containerBot(),
+
+                      rowCCToggle(),
+                      containerCCOn(),
+
                       rowConcreteDet(),
                       containerConcreteOn(),
+
+                      if (widget.state.soilProp)
+                        rowWaterDet(),
+                      if (widget.state.soilProp)
+                        containerWaterOn(),
+
+                      buttonOWSFirst(),
+                      SizedBox(height: 10),
+                      buttonTWSFirst(),
+                      SizedBox(height: 10),
+
+                      if (widget.state.showResultsOWSFirst)
+                        resultOWSFirst(),
+                      if (widget.state.showResultsTWSFirst)
+                        resultTWSFirst(),
+
+                      SizedBox(height: 10),
+                      solutionButton(),
+                      SizedBox(height: 10),
+
+                      if (showSolutionOWS)
+                        containerSolutionOWS(),
+                      //if (showSolutionTWS)
+                        //containerSolutionTWS(),
                     ],
                   ),
                 ),
@@ -947,6 +1713,57 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                     });
                   },
                 items: colClassValues.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget rowModFactor() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Modification factor for concrete:',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 179,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Colors.grey[800],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: modFactor,
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
+                dropdownColor: Colors.grey[800],
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(color: Colors.white),
+                underline: SizedBox(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    modFactor = newValue;
+                    });
+                  },
+                items: modFactorValues.map((String value) {
                   return DropdownMenuItem<String>(
                     value: value,
                     child: Text(value, style: TextStyle(color: Colors.white)),
@@ -1441,7 +2258,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  'Diameter of top bars (assumed as 20 mm if not given)',
+                  'Diameter of bottom bars (assumed as 20 mm if not given)',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -2262,7 +3079,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               child: SizedBox(
                 height: 40, // Adjust height as needed
                 child: TextField(
-                  controller: inputGs,
+                  controller: inputYc,
                   keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
@@ -2293,7 +3110,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                       iconSize: 17,
                       onPressed: () {
                         // Clear the text field
-                        inputGs.clear();
+                        inputYc.clear();
                       },
                     ),
                   ),
@@ -2306,6 +3123,287 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     );
   }
   
+  Widget rowWaterDet() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.waterDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.waterDet = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget containerWaterOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.waterDet,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+// Soil Prop On Manager
+                subYw(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  Widget subYw() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Unit weight of water, γw (in kN/m³):',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputYw,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputYw.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget rowCCToggle() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Concrete cover (assumed as 75 mm if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.concreteCover,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.concreteCover = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget containerCCOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.concreteCover,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                concreteCoverOn()
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  Widget concreteCoverOn() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Concrete cover (in mm):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputCc,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                      ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                      ),
+                      filled: true,
+                      fillColor: Color.fromARGB(255, 51, 149, 53),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputCc.clear();
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              )
+            ),
+          ],
+        ),
+    );
+  }
+
   Widget rowWPToggle() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -2647,11 +3745,277 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     );
   }
 
+  Widget buttonOWSFirst() {
+    return ElevatedButton(
+      onPressed: () {
+        calculate();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text('Solve using one-way shear first'),
+    );
+  }
+  Widget buttonTWSFirst() {
+    return ElevatedButton(
+      onPressed: () {
+        calculateTWS();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text('Solve using two-way shear first'),
+    );
+  }
+
+  Widget resultOWSFirst() {
+    return Visibility(
+      visible: widget.state.showResultsOWSFirst,
+      child: Flexible(
+        child: Container(
+          width: 445,
+          child: Column(
+            children: [
+              Text(
+                "B = ${widget.state.finalAnswerB} m",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "T = ${roundToOneDecimalPlace(widget.state.finalAnswerT!)} mm",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "d = ${roundToOneDecimalPlace(widget.state.finalAnswerD!)} mm",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "Vuows = ${roundToFourDecimalPlaces(widget.state.finalAnswerVuows!)} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "Vucows = ${roundToFourDecimalPlaces(widget.state.finalAnswerVucows!)} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "Vutws = ${roundToFourDecimalPlaces(widget.state.finalAnswerVutws!)} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "Vuctws = ${roundToFourDecimalPlaces(widget.state.finalAnswerVuctws!)} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  Widget resultTWSFirst() {
+    return Visibility(
+      visible: widget.state.showResultsTWSFirst,
+      child: Flexible(
+        child: Container(
+          width: 445,
+          child: Column(
+            children: [
+              Text(
+                "B = ${widget.state.finalAnswerB} m",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "T = ${roundToOneDecimalPlace(widget.state.finalAnswerT!)} mm",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "d = ${roundToOneDecimalPlace(widget.state.finalAnswerD!)} mm",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "Vutws = ${roundToFourDecimalPlaces(widget.state.finalAnswerVutws!)} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "Vuctws = ${roundToFourDecimalPlaces(widget.state.finalAnswerVuctws!)} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "Vuows = ${roundToFourDecimalPlaces(widget.state.finalAnswerVuows!)} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+              Text(
+                "Vucows = ${roundToFourDecimalPlaces(widget.state.finalAnswerVucows!)} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold, 
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void toggleSolution() {
+    if (solutionToggle) {
+      showSolutionOWS = true;
+      showSolutionTWS = true;
+    } else {
+      showSolutionOWS = false;
+      showSolutionTWS = false;
+    }
+    setState(() {
+      solutionToggle = !solutionToggle; // Toggle between functions
+    });
+  }
+  Widget solutionButton() {
+    return ElevatedButton(
+      onPressed: toggleSolution,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text(solutionButtonLabel),
+    );
+  }
+   Widget containerSolutionOWS() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 450),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          color: const Color(0xFF1F538D),
+        ),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+// Solution Manager
+            if (safetyOWS == 2 && safetyTWS == 2)
+              safeOWSsafeTWS_ows(),
+            if (safetyOWS == 1 && safetyTWS == 2)
+              unsafeOWSsafeTWS_ows(),
+            if (safetyOWS == 2 && safetyTWS == 1)
+              safeOWSunsafeTWS_ows(),
+            if (safetyOWS == 1 && safetyTWS == 1)
+              unsafeOWSunsafeTWS_ows(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  Widget safeOWSsafeTWS_ows() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'safe OWS, safe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  Widget unsafeOWSsafeTWS_ows() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'unsafe OWS, safe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  Widget safeOWSunsafeTWS_ows() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'safe OWS, unsafe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  Widget unsafeOWSunsafeTWS_ows() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'unsafe OWS, unsafe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+
+// for FAB to scroll to top
   @override
   void didUpdateWidget(DesignPage oldWidget) {
     super.didUpdateWidget(oldWidget);
 
-    // Check if we need to scroll to top
     if (widget.state.scrollToTop) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollController.animateTo(
@@ -2666,5 +4030,4 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.onStateChanged(widget.state);
     }
   }
-
 } // Design Page
