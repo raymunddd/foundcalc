@@ -525,10 +525,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }
       if (qall != null && fLoad != null && yMat != null && fThick != null && qo != null) {
         qn = qall! - fLoad! - yMat!*(fThick!/1000) - qo!;
-        //qp = yMat!*(fThick!/1000);
       } else {
         qn = null;
-        //qp = 4;
       }
     } else { // no weight pressures
       if (qall != null && qo != null) {
@@ -616,8 +614,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         }
       } else { // vuOWS ≤ vuCOWS
         newDepthOWS = depth;
-        widget.state.finalAnswerVuows = vuOWS;
-        widget.state.finalAnswerVucows = vucOWS;
+        widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
+        widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
         safetyOWS = 2; // OWS safe
       }
     } else {
@@ -632,7 +630,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     if (qnu != null && b != null && newDepthOWS != null) {
       new_vuOWS = qnu!*b!*(0.5*(b!-C!)-0.001*newDepthOWS!);
-      widget.state.finalAnswerVuows = new_vuOWS;
+      widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
     } else {
       new_vuOWS = null;
       widget.state.finalAnswerVuows = null;
@@ -640,7 +638,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     if (fc != null && b != null && newDepthOWS != null) {
       new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
-      widget.state.finalAnswerVucows = new_vucOWS;
+      widget.state.finalAnswerVucows = roundToFourDecimalPlaces(new_vucOWS!);
     } else {
       new_vucOWS = null;
       widget.state.finalAnswerVucows = null;
@@ -720,8 +718,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         }
       } else { // vuTWS ≤ vuCTWS
         newDepthTWS = depth;
-        widget.state.finalAnswerVutws = vuTWS;
-        widget.state.finalAnswerVuctws = vucTWS;
+        widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
+        widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
         safetyTWS = 2; // TWS safe
       }
     } else {
@@ -736,7 +734,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     if (qnu != null && b != null && C != null && newDepthTWS != null) {
       new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/1000)));
-      widget.state.finalAnswerVutws = new_vuTWS;
+      widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
     } else {
       new_vuTWS = null;
       widget.state.finalAnswerVutws = null;
@@ -768,7 +766,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       vc2_new = null;
     }
 
-    if (as != null && newDepthTWS != null && bo2 != null) {
+    if (as != null && newDepthTWS != null && bo2 != null && fcbod2 != null) {
       vc3_new = 0.083*(2+((as!*newDepthTWS!)/(bo2!*1000)))*fcbod2!;
     } else {
       vc3_new = null;
@@ -777,12 +775,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     if (vc1_new != null && vc2_new != null && vc3_new != null) {
       min2 = min(vc1_new!, vc2_new!);
       new_vucTWS = min(min2!, vc3_new!);
-      widget.state.finalAnswerVuctws = new_vucTWS;
-
-      setState(() {
-        widget.state.showResultsOWSFirst = true;
-        widget.state.showResultsTWSFirst = false;
-      });
+      widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(new_vucTWS!);
     } else {
       min2 = null;
       new_vucTWS = null;
@@ -801,6 +794,19 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.finalAnswerT = null;
     }
 
+    if (widget.state.finalAnswerB != null && widget.state.finalAnswerD != null && widget.state.finalAnswerT != null && widget.state.finalAnswerVucows != null 
+    && widget.state.finalAnswerVuctws != null && widget.state.finalAnswerVuows != null && widget.state.finalAnswerVutws != null) {
+      setState(() {
+        widget.state.showResultsOWSFirst = true;
+        widget.state.showResultsTWSFirst = false;
+      });  
+    } else {
+      setState(() {
+        widget.state.showResultsOWSFirst = false;
+        widget.state.showResultsTWSFirst = false;
+      });  
+    }
+    
     print('otherMat = ${widget.state.otherMat}');
     print("yc = $yc, yMat = $yMat, fLoad = $fLoad, λ = $lambda");
     print("qa = $qall, qo = $qo, qn = $qn, Pa = $sumP, b = $b, bRound = $bRound, Pu = $pu, qnu = $qnu, depth = $depth, x = $x");
@@ -930,10 +936,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }
       if (qall != null && fLoad != null && yMat != null && fThick != null && qo != null) {
         qn = qall! - fLoad! - yMat!*(fThick!/1000) - qo!;
-        //qp = yMat!*(fThick!/1000);
       } else {
         qn = 3;
-        //qp = 4;
       }
     } else { // no weight pressures
       if (qall != null && qo != null) {
@@ -1063,8 +1067,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         }
       } else { // vuOWS ≤ vuCOWS
         newDepthTWS = depth;
-        widget.state.finalAnswerVutws = vuTWS;
-        widget.state.finalAnswerVuctws = vucTWS;
+        widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
+        widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
         safetyTWS = 2; // TWS safe
       }
     } else {
@@ -1079,7 +1083,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     if (qnu != null && b != null && C != null && newDepthTWS != null) {
       new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/1000)));
-      widget.state.finalAnswerVutws = new_vuTWS;
+      widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
     } else {
       new_vuTWS = null;
       widget.state.finalAnswerVutws = null;
@@ -1120,7 +1124,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     if (vc1_new != null && vc2_new != null && vc3_new != null) {
       min2 = min(vc1_new!, vc2_new!);
       new_vucTWS = min(min2!, vc3_new!);
-      widget.state.finalAnswerVuctws = new_vucTWS;
+      widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(new_vucTWS!);
     } else {
       min2 = null;
       new_vucTWS = null;
@@ -1163,8 +1167,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         }
       } else { // vuOWS ≤ vuCOWS
         newDepthOWS = newDepthTWS;
-        widget.state.finalAnswerVuows = vuOWS;
-        widget.state.finalAnswerVucows = vucOWS;
+        widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
+        widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
         safetyOWS = 2; // OWS safe
       }
     } else {
@@ -1179,7 +1183,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     if (qnu != null && b != null && newDepthOWS != null) {
       new_vuOWS = qnu!*b!*(0.5*(b!-C!)-0.001*newDepthOWS!);
-      widget.state.finalAnswerVuows = new_vuOWS;
+      widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
     } else {
       new_vuOWS = null;
       widget.state.finalAnswerVuows = null;
@@ -1187,7 +1191,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     if (fc != null && b != null && newDepthOWS != null) {
       new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
-      widget.state.finalAnswerVucows = new_vucOWS;
+      widget.state.finalAnswerVucows = roundToFourDecimalPlaces(new_vucOWS!);
       setState(() {
         widget.state.showResultsTWSFirst = true;
         widget.state.showResultsOWSFirst = false;
@@ -1207,6 +1211,19 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.finalAnswerT = max(newtOWS!, newtTWS!);
     } else {
       widget.state.finalAnswerT = null;
+    }
+
+    if (widget.state.finalAnswerB != null && widget.state.finalAnswerD != null && widget.state.finalAnswerT != null && widget.state.finalAnswerVucows != null 
+    && widget.state.finalAnswerVuctws != null && widget.state.finalAnswerVuows != null && widget.state.finalAnswerVutws != null) {
+      setState(() {
+        widget.state.showResultsOWSFirst = false;
+        widget.state.showResultsTWSFirst = true;
+      });  
+    } else {
+      setState(() {
+        widget.state.showResultsOWSFirst = false;
+        widget.state.showResultsTWSFirst = false;
+      });  
     }
 
     print('otherMat = ${widget.state.otherMat}');
@@ -3772,6 +3789,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     return ElevatedButton(
       onPressed: () {
         calculate();
+        if (!widget.state.showResultsOWSFirst && !widget.state.showResultsTWSFirst) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Please provide input for all parameters."),
+              backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -3780,10 +3806,20 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       child: Text('Solve using one-way shear first'),
     );
   }
+
   Widget buttonTWSFirst() {
     return ElevatedButton(
       onPressed: () {
         calculateTWS();
+        if (!widget.state.showResultsOWSFirst && !widget.state.showResultsTWSFirst) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text("Please provide input for all parameters."),
+              backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
+              duration: Duration(seconds: 3),
+            ),
+          );
+        }
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -3809,42 +3845,42 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 ),
               ),
               Text(
-                "T = ${roundToOneDecimalPlace(widget.state.finalAnswerT!)} mm",
+                "T = ${widget.state.finalAnswerT} mm",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "d = ${roundToOneDecimalPlace(widget.state.finalAnswerD!)} mm",
+                "d = ${widget.state.finalAnswerD} mm",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "Vuows = ${roundToFourDecimalPlaces(widget.state.finalAnswerVuows!)} kN",
+                "Vuows = ${widget.state.finalAnswerVuows} kN",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "Vucows = ${roundToFourDecimalPlaces(widget.state.finalAnswerVucows!)} kN",
+                "Vucows = ${widget.state.finalAnswerVucows} kN",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "Vutws = ${roundToFourDecimalPlaces(widget.state.finalAnswerVutws!)} kN",
+                "Vutws = ${widget.state.finalAnswerVutws} kN",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "Vuctws = ${roundToFourDecimalPlaces(widget.state.finalAnswerVuctws!)} kN",
+                "Vuctws = ${widget.state.finalAnswerVuctws} kN",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
@@ -3872,42 +3908,42 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 ),
               ),
               Text(
-                "T = ${roundToOneDecimalPlace(widget.state.finalAnswerT!)} mm",
+                "T = ${widget.state.finalAnswerT} mm",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "d = ${roundToOneDecimalPlace(widget.state.finalAnswerD!)} mm",
+                "d = ${widget.state.finalAnswerD} mm",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "Vutws = ${roundToFourDecimalPlaces(widget.state.finalAnswerVutws!)} kN",
+                "Vutws = ${widget.state.finalAnswerVutws} kN",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "Vuctws = ${roundToFourDecimalPlaces(widget.state.finalAnswerVuctws!)} kN",
+                "Vuctws = ${widget.state.finalAnswerVuctws} kN",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "Vuows = ${roundToFourDecimalPlaces(widget.state.finalAnswerVuows!)} kN",
+                "Vuows = ${widget.state.finalAnswerVuows} kN",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 
                 ),
               ),
               Text(
-                "Vucows = ${roundToFourDecimalPlaces(widget.state.finalAnswerVucows!)} kN",
+                "Vucows = ${widget.state.finalAnswerVucows} kN",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold, 

@@ -105,6 +105,17 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? udl;
 
   double? sol;
+
+  double? rounded_yFinal;
+  double? rounded_yPrime;
+  double? rounded_q;
+  double? rounded_qUlt;
+  double? rounded_qAll;
+  double? rounded_qNetAll;
+  double? rounded_af;
+  double? rounded_pf;
+  double? rounded_ps;
+  double? rounded_uD;
   
   bool solutionToggle = true;
   bool showSolution = false;
@@ -613,6 +624,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
           }
         }
 
+        if (yFinal != null) {
+          rounded_yFinal = roundToFourDecimalPlaces(yFinal!);
+        } else {
+          rounded_yFinal = null;
+        }
+
         dfPlusB = df! + fDim!;
 
         if (yFinal != null && yw != null && df != null && fDim != null) {
@@ -634,6 +651,18 @@ class _AnalysisPageState extends State<AnalysisPage> {
         } else {
           yPrime = null;
           q = null;
+        }
+
+        if (yPrime != null) {
+          rounded_yPrime = roundToFourDecimalPlaces(yPrime!);
+        } else {
+          rounded_yPrime = null;
+        }
+
+        if (q != null) {
+          rounded_q = roundToFourDecimalPlaces(q!);
+        } else {
+          rounded_q = null;
         }
 
         if (widget.state.angleDet == true) {
@@ -708,6 +737,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
           }
         }
 
+        if (qUlt != null) {
+          rounded_qUlt = roundToFourDecimalPlaces(qUlt!);
+        } else {
+          rounded_qUlt = null;
+        }
+
         if (selectedFootingType == 'Square') {
           af = fDim!*fDim!;
         } else if (selectedFootingType == 'Circular') {
@@ -716,10 +751,28 @@ class _AnalysisPageState extends State<AnalysisPage> {
           af = null;
         }
 
+        if (af != null) {
+          rounded_af = roundToFourDecimalPlaces(af!);
+        } else {
+          rounded_af = null;
+        }
+
         if (qUlt != null && q != null) {
           qAll = qUlt!/fs!;
           qNetAll = (qUlt! - q!)/fs!;
           qNet = qNetAll!*fs!;
+        }
+
+        if (qAll != null) {
+          rounded_qAll = roundToFourDecimalPlaces(qAll!);
+        } else {
+          rounded_qAll = null;
+        }
+
+        if (qNetAll != null) {
+          rounded_qNetAll = roundToFourDecimalPlaces(qNetAll!);
+        } else {
+          rounded_qNetAll = null;
         }
 
         if (q != null && qAll != null) {
@@ -809,7 +862,29 @@ class _AnalysisPageState extends State<AnalysisPage> {
                 widget.state.showResults = true;
               });
             }
-          }
+          }         
+        } else {
+          setState(() {
+            widget.state.showResults = false;
+          });
+        }
+
+        if (pf != null) {
+          rounded_pf = roundToFourDecimalPlaces(pf!);
+        } else {
+          rounded_pf = null;
+        }
+
+        if (ps != null) {
+          rounded_ps = roundToFourDecimalPlaces(ps!);
+        } else {
+          rounded_ps = null;
+        }
+
+        if (uD != null) {
+          rounded_uD = roundToFourDecimalPlaces(uD!);
+        } else {
+          rounded_uD = null;
         }
       } else {
         yFinal = null;
@@ -842,6 +917,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
           setState(() {
             widget.state.showResults = false;
           });
+          return;
         }
       } else { // soilProp false
         if (dw != null) {
@@ -857,6 +933,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               setState(() {
                 widget.state.showResults = false;
               });
+              return;
             }   
           } else { // if Dw ≥ Df
             if ((y != null && yDry != null) || (y == null && yDry == null)) { 
@@ -870,6 +947,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               setState(() {
                 widget.state.showResults = false;
               });
+              return;
             }
           }
         } else { // if no Dw
@@ -884,6 +962,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
             setState(() {
               widget.state.showResults = false;
             });
+            return;
           }
         }
       }
@@ -891,7 +970,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
         if (theta == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Please provide input for all parameters.'),
+              content: Text('Please provide input for all parameters5.'),
               backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
               duration: Duration(seconds: 3),
             ),
@@ -899,6 +978,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
           setState(() {
             widget.state.showResults = false;
           });
+          return;
         } else {
           if (theta! > 50) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -911,6 +991,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
             setState(() {
               widget.state.showResults = false;
             });
+            return;
           }
         }
       } else { // angleDet == false
@@ -925,13 +1006,14 @@ class _AnalysisPageState extends State<AnalysisPage> {
           setState(() {
             widget.state.showResults = false;
           });
+          return;
         }
       }
     }
 
 
     // Print the results for debugging
-    print("yw = $yw, yc = $yc, yFinal = $yFinal, yPrime = $yPrime, q = $q");
+    print("yw = $yw, yc = $yc, yFinal = $yFinal, yPrime = $yPrime, q = $q, showResults = ${widget.state.showResults}");
     print('Nc = $nc, Nq = $nq, Nγ = $ny, qUlt = $qUlt, qAll = $qAll, qNet = $qNet, qAllNet = $qNetAll, P = $p, w = $udl, isGammaSatEnabled = ${widget.state.isGammaSatEnabled}');
     print('isGammaDryEnabled = ${widget.state.isGammaDryEnabled}, isGammaMoistEnabled = ${widget.state.isGammaMoistEnabled}');
     print('af = $af, P = ${widget.state.finalAnswerP}, w = ${widget.state.finalAnswerUdl}, qAll = $qAll, sol = $sol');
@@ -1004,6 +1086,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
                       SizedBox(height: 10),
                       submitButton(),
                       SizedBox(height: 10),
+                      /*
+                      Text(
+                        'showResults = ${widget.state.showResults}',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                      */
                       if (widget.state.showResults && selectedFootingType == 'Strip or continuous')
                         resultStrip(),
                       if (widget.state.showResults && (selectedFootingType == 'Square' || selectedFootingType == 'Circular'))
@@ -1132,15 +1220,15 @@ class _AnalysisPageState extends State<AnalysisPage> {
         child: Column(
           children: [
             Text(
-              'Most critical γ = ${roundToFourDecimalPlaces(yFinal!)} kN/m³',
+              'Most critical γ = $rounded_yFinal kN/m³',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Effective unit weight, γ' = ${roundToFourDecimalPlaces(yPrime!)} kN/m³",
+              "Effective unit weight, γ' = $rounded_yPrime kN/m³",
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Surcharge, q = ${roundToFourDecimalPlaces(q!)} kPa",
+              "Surcharge, q = $rounded_q kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1160,7 +1248,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qult = ${roundToFourDecimalPlaces(qUlt!)} kPa",
+              "qult = $rounded_qUlt kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1168,7 +1256,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qa = ${roundToFourDecimalPlaces(qAll!)} kPa",
+              "qa = $rounded_qAll kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1176,11 +1264,11 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qneta = ${roundToFourDecimalPlaces(qNetAll!)} kPa",
+              "qneta = $rounded_qNetAll kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Area of footing, Af = ${roundToFourDecimalPlaces(af!)} m²",
+              "Area of footing, Af = $rounded_af m²",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1188,7 +1276,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Pf = ${roundToFourDecimalPlaces(pf!)} kN",
+              "Pf = $rounded_pf kN",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1196,7 +1284,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Ps = ${roundToFourDecimalPlaces(ps!)} kN",
+              "Ps = $rounded_ps kN",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1204,7 +1292,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "μD = ${roundToFourDecimalPlaces(uD!)} kPa",
+              "μD = $rounded_uD kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1223,15 +1311,15 @@ class _AnalysisPageState extends State<AnalysisPage> {
         child: Column(
           children: [
             Text(
-              'Most critical γ = ${roundToFourDecimalPlaces(yFinal!)} kN/m³',
+              'Most critical γ = $rounded_yFinal kN/m³',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Effective unit weight, γ' = ${roundToFourDecimalPlaces(yPrime!)} kN/m³",
+              "Effective unit weight, γ' = $rounded_yPrime kN/m³",
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Surcharge, q = ${roundToFourDecimalPlaces(q!)} kPa",
+              "Surcharge, q = $rounded_q kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1251,7 +1339,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qult = ${roundToFourDecimalPlaces(qUlt!)} kPa",
+              "qult = $rounded_qUlt kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1259,7 +1347,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qa = ${roundToFourDecimalPlaces(qAll!)} kPa",
+              "qa = $rounded_qAll kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1267,7 +1355,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qneta = ${roundToFourDecimalPlaces(qNetAll!)} kPa",
+              "qneta = $rounded_qNetAll kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1275,7 +1363,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "wf = ${roundToFourDecimalPlaces(pf!)} kN/m",
+              "wf = $rounded_pf kN/m",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1283,7 +1371,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "ws = ${roundToFourDecimalPlaces(ps!)} kN",
+              "ws = $rounded_ps kN/m",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1291,7 +1379,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "μD = ${roundToFourDecimalPlaces(uD!)} kPa",
+              "μD = $rounded_uD kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1310,15 +1398,15 @@ class _AnalysisPageState extends State<AnalysisPage> {
         child: Column(
           children: [
             Text(
-              'Most critical γ = ${roundToFourDecimalPlaces(yFinal!)} kN/m³',
+              'Most critical γ = $rounded_yFinal kN/m³',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Effective unit weight, γ' = ${roundToFourDecimalPlaces(yPrime!)} kN/m³",
+              "Effective unit weight, γ' = $rounded_yPrime kN/m³",
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Surcharge, q = ${roundToFourDecimalPlaces(q!)} kPa",
+              "Surcharge, q = $rounded_q kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1338,7 +1426,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qult = ${roundToFourDecimalPlaces(qUlt!)} kPa",
+              "qult = $rounded_qUlt kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1346,7 +1434,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qa = ${roundToFourDecimalPlaces(qAll!)} kPa",
+              "qa = $rounded_qAll kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1354,7 +1442,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qneta = ${roundToFourDecimalPlaces(qNetAll!)} kPa",
+              "qneta = $rounded_qNetAll kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1374,15 +1462,15 @@ class _AnalysisPageState extends State<AnalysisPage> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(
-              'Most critical γ = ${roundToFourDecimalPlaces(yFinal!)} kN/m³',
+              'Most critical γ = $rounded_yFinal kN/m³',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Effective unit weight, γ' = ${roundToFourDecimalPlaces(yPrime!)} kN/m³",
+              "Effective unit weight, γ' = $rounded_yPrime kN/m³",
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Surcharge, q = ${roundToFourDecimalPlaces(q!)} kPa",
+              "Surcharge, q = $rounded_q kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1402,7 +1490,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qult = ${roundToFourDecimalPlaces(qUlt!)} kPa",
+              "qult = $rounded_qUlt kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1410,7 +1498,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qa = ${roundToFourDecimalPlaces(qAll!)} kPa",
+              "qa = $rounded_qAll kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1418,7 +1506,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "qneta = ${roundToFourDecimalPlaces(qNetAll!)} kPa",
+              "qneta = $rounded_qNetAll kPa",
               style: TextStyle(color: Colors.white),
             ),
             Text(
