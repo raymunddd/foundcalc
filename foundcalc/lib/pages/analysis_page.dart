@@ -1075,10 +1075,14 @@ class _AnalysisPageState extends State<AnalysisPage> {
                           row12bAngleDetOff(),
                         ]
                       ),
-                      row13yWaterDet(),
-                      row14yWaterDetOn(),
-                      row15yConcreteDet(),
-                      row16yConcreteDetOn(),
+                      row13yConcreteDet(),
+                      row14yConcreteDetOn(),
+                    
+                      if (widget.state.soilProp)
+                        row15yWaterDet(),
+                      if (widget.state.soilProp)
+                        row16yWaterDetOn(),
+                      
                       SizedBox(height: 10),
                       clearButton(),
                       SizedBox(height: 10),
@@ -2957,147 +2961,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
     );
   }
 
-  Widget row13yWaterDet() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        constraints: BoxConstraints(maxWidth: 500),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-          children: [
-            Flexible(
-              child: Container(
-                width: 120,
-                child: Text(
-                  'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
-                  style: TextStyle(color: Colors.white),
-                ),
-              )
-            ),
-            Container(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
-                ),
-                child: SizedBox(
-                  height: 40, // Adjust height as needed
-                  child: Switch(
-                    value: widget.state.waterDet,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        widget.state.waterDet = newValue;
-                        widget.onStateChanged(widget.state);
-                      });
-                    },
-                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
-                    inactiveThumbColor: Colors.white,
-                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
-                  )
-                )
-              )
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-  Widget row14yWaterDetOn() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 15),
-      child: Visibility(
-        visible: widget.state.waterDet,
-        child: Container(
-          width: MediaQuery.of(context).size.width * 0.9,
-          constraints: BoxConstraints(maxWidth: 500),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(25),
-            color: const Color.fromARGB(255, 10, 131, 14),
-          ),
-          alignment: Alignment.center,
-          child: Padding(
-            padding: const EdgeInsets.all(20.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                row14ayWater(),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-  Widget row14ayWater() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-        children: [
-          Flexible(
-            child: Container(
-              width: 120,
-              child: Text(
-                'Unit weight of water, γw (in kN/m³):',
-                style: TextStyle(color: Colors.white),
-              ),
-            )
-          ),
-          Container(
-            width: 179,
-            child: TextSelectionTheme(
-              data: TextSelectionThemeData(
-                cursorColor: Colors.white,
-              ),
-              child: SizedBox(
-                height: 40, // Adjust height as needed
-                child: TextField(
-                  controller: inputUnitWeightWater,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
-                    hintText: "Input required",
-                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
-                    ),
-                    filled: true,
-                    fillColor: Color.fromARGB(255, 51, 149, 53),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25),
-                      borderSide: BorderSide(color: Colors.white),
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        Icons.clear, 
-                        color: Colors.white54,
-                      ),
-                      iconSize: 17,
-                      onPressed: () {
-                        // Clear the text field
-                        inputUnitWeightWater.clear();
-                      },
-                    ),
-                  ),
-                ),
-              )
-            )
-          ),
-        ],
-      ),
-    );
-  }
-  
-  Widget row15yConcreteDet() {
+  Widget row13yConcreteDet() {
     return Padding(
       padding: EdgeInsets.only(top: 10),
       child: Container(
@@ -3143,7 +3007,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
       ),
     );
   }
-  Widget row16yConcreteDetOn() {
+  Widget row14yConcreteDetOn() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Visibility(
@@ -3161,7 +3025,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                row16ayConcrete(),
+                row14ayConcrete(),
               ],
             ),
           ),
@@ -3169,7 +3033,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
       ),
     );
   }
-  Widget row16ayConcrete() {
+  Widget row14ayConcrete() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Row(
@@ -3237,6 +3101,147 @@ class _AnalysisPageState extends State<AnalysisPage> {
     );
   }
 
+  Widget row15yWaterDet() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.waterDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.waterDet = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  Widget row16yWaterDetOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.waterDet,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                row16ayWater(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+  Widget row16ayWater() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Unit weight of water, γw (in kN/m³):',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputUnitWeightWater,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputUnitWeightWater.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  }
+  
+  
 
 
   @override

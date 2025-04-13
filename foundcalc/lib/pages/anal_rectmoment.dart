@@ -41,14 +41,19 @@ if (widget.title.startsWith('RectMoment')) {
 
   late ScrollController _scrollController;
 
-  late TextEditingController inputNumberOne;
-  late TextEditingController inputNumberTwo;
-  late TextEditingController inputNumberThree;
+  late TextEditingController inputDcc;
+  late TextEditingController inputB;
+  late TextEditingController inputL;
+  late TextEditingController inputDf;
+  late TextEditingController inputDw;
 
-  double? one;
-  double? two;
-  double? three;
+  double? dcc;
+  double? b;
+  double? l;
+  double? df;
+  double? dw;
 
+  // solvar (solution variables)
   double? sum;
 
   bool showResults = false;
@@ -66,73 +71,60 @@ if (widget.title.startsWith('RectMoment')) {
     
     _scrollController = ScrollController();
 
-    inputNumberOne = TextEditingController(text: widget.state.inputNumberOne);
-    inputNumberTwo = TextEditingController(text: widget.state.inputNumberTwo);
-    inputNumberThree = TextEditingController(text: widget.state.inputNumberThree);
+    inputDcc = TextEditingController(text: widget.state.inputDcc);
+    inputB = TextEditingController(text: widget.state.inputB);
+    inputL = TextEditingController(text: widget.state.inputL);
+    inputDf = TextEditingController(text: widget.state.inputDf);
+    inputDw = TextEditingController(text: widget.state.inputDw);
 
     // listeners
 
-    inputNumberOne.addListener(_updateState);
-    inputNumberTwo.addListener(_updateState);
-    inputNumberThree.addListener(_updateState);
+    inputDcc.addListener(_updateState);
+    inputB.addListener(_updateState);
+    inputL.addListener(_updateState);
+    inputDf.addListener(_updateState);
+    inputDw.addListener(_updateState);
   }
 
   void _updateState() {
     setState(() {
-      widget.state.inputNumberOne = inputNumberOne.text;
-      widget.state.inputNumberTwo = inputNumberTwo.text;
-      widget.state.inputNumberThree = inputNumberThree.text;
+      widget.state.inputDcc = inputDcc.text;
+      widget.state.inputB = inputB.text;
+      widget.state.inputL = inputL.text;
+      widget.state.inputDf = inputDf.text;
+      widget.state.inputDw = inputDw.text;
 
       widget.onStateChanged(widget.state);
 
     });
   }
 
+  @override
+  void dispose() {
+    _scrollController.dispose();
+
+    inputDcc.dispose();
+    inputB.dispose();
+    inputL.dispose();
+    inputDf.dispose();
+    inputDw.dispose();
+
+    super.dispose();
+  }
+
   void addNumbers() {
-    one = double.tryParse(inputNumberOne.text);
-    two = double.tryParse(inputNumberTwo.text);
-    three = double.tryParse(inputNumberThree.text);
-
-    // Check if all numbers are entered
-    if (one == null || two == null || three == null) {
-      setState(() {
-        showResults = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please enter all numbers before proceeding.'),
-          backgroundColor: Colors.red,
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return; // Stop execution if any number is missing
-    }
-
-    // Perform the calculation
-    if (selectedOperation == 'Addition') {
-      sum = one! + two! + three!;
-      lastSelectedOperation = 'Addition';
-    } else if (selectedOperation == 'Multiplication') {
-      sum = one! * two! * three!;
-      lastSelectedOperation = 'Multiplication';
-    } else {
-      setState(() {
-        showResults = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Please select an operation before proceeding.'),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 2),
-        ),
-      );
-      return; // Stop execution if no operation is selected
-    }
+    dcc = double.tryParse(inputDcc.text);
+    b = double.tryParse(inputB.text);
+    l = double.tryParse(inputL.text);
+    df = double.tryParse(inputDf.text);
+    dw = double.tryParse(inputDw.text);
 
     // Only show the result if all inputs are valid and an operation is selected
+    /*
     setState(() {
       showResults = true;
     });
+    */
   }
  // addNumbers
 
@@ -171,16 +163,13 @@ if (widget.title.startsWith('RectMoment')) {
                     mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
                     // row managerrrr
                     children: [
-                      row1(),
-                      row2(),
-                      row3(),
-                      row4(),
-                      submitButton(),
-                      if (showResults)
-                      Text(
-                        '${lastSelectedOperation == "Multiplication" ? "Product" : "Sum"} = $sum',
-                        style: TextStyle(color: Colors.white),
-                      ),
+                      entryDcc(),
+                      entryB(),
+                      entryL(),
+                      entryT(),
+                      entryDf(),
+                      entryDw(),
+                      switchP(),
                     ],
                   ),
                 ),
@@ -203,7 +192,7 @@ if (widget.title.startsWith('RectMoment')) {
       child: Text('Add numbers'),
     );
   }
-  Widget row1() {
+  Widget entryDcc() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -216,7 +205,7 @@ if (widget.title.startsWith('RectMoment')) {
               child: Container(
                 width: 150,
                 child: Text(
-                  '1st number to be added:',
+                  'Distance of center of column to center of footing (in m)',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -230,7 +219,7 @@ if (widget.title.startsWith('RectMoment')) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputNumberOne, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    controller: inputDcc, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
                     keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
@@ -256,7 +245,7 @@ if (widget.title.startsWith('RectMoment')) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputNumberOne.clear();
+                          inputDcc.clear();
                         },
                       ),
                     ),
@@ -268,8 +257,8 @@ if (widget.title.startsWith('RectMoment')) {
         ),
       ),        
     );
-  } // row 1
-  Widget row2() {
+  } // entryDcc
+  Widget entryB() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -282,7 +271,7 @@ if (widget.title.startsWith('RectMoment')) {
               child: Container(
                 width: 150,
                 child: Text(
-                  '2nd number to be added:',
+                  'Longitudinal dimension of footing, B (in m)',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -296,7 +285,7 @@ if (widget.title.startsWith('RectMoment')) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputNumberTwo, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    controller: inputB, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
                     keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
@@ -322,7 +311,7 @@ if (widget.title.startsWith('RectMoment')) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputNumberTwo.clear();
+                          inputB.clear();
                         },
                       ),
                     ),
@@ -334,8 +323,8 @@ if (widget.title.startsWith('RectMoment')) {
         ),
       ),        
     );
-  } // row 2
-  Widget row3() {
+  } // entryB
+  Widget entryL() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -348,7 +337,7 @@ if (widget.title.startsWith('RectMoment')) {
               child: Container(
                 width: 150,
                 child: Text(
-                  '3rd number to be added:',
+                  'Transverse dimension of footing, L (in m)',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -362,7 +351,7 @@ if (widget.title.startsWith('RectMoment')) {
                 child: SizedBox(
                   height: 40, // Adjust height as needed
                   child: TextField(
-                    controller: inputNumberThree, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    controller: inputL, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
                     keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
@@ -388,7 +377,7 @@ if (widget.title.startsWith('RectMoment')) {
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputNumberThree.clear();
+                          inputL.clear();
                         },
                       ),
                     ),
@@ -400,8 +389,253 @@ if (widget.title.startsWith('RectMoment')) {
         ),
       ),        
     );
-  } // row 3
-  Widget row4() {
+  } // entryL
+  Widget entryT() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Thickness of footing, T (in m)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputL, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputL.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryT
+  Widget entryDf() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Depth of foundation, Df (in m)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputL, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputL.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryDf
+  Widget entryDw() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Depth of the water table from ground level, Dw (in m)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputL, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputL.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryDw
+  Widget switchP() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Load combination for P',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: !widget.state.toggleP,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.toggleP = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  
+  Widget dropdown() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
