@@ -53,6 +53,13 @@ if (widget.title.startsWith('RectMoment')) {
 
   bool showResults = false;
 
+  String? selectedOperation;
+  String? lastSelectedOperation; // New variable to store the last selected operation
+  final List<String> operations = [
+    'Addition',
+    'Multiplication',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -88,6 +95,9 @@ if (widget.title.startsWith('RectMoment')) {
 
     // Check if all numbers are entered
     if (one == null || two == null || three == null) {
+      setState(() {
+        showResults = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please enter all numbers before proceeding.'),
@@ -98,8 +108,17 @@ if (widget.title.startsWith('RectMoment')) {
       return; // Stop execution if any number is missing
     }
 
-    // Check if an operation is selected
-    if (selectedOperation == null) {
+    // Perform the calculation
+    if (selectedOperation == 'Addition') {
+      sum = one! + two! + three!;
+      lastSelectedOperation = 'Addition';
+    } else if (selectedOperation == 'Multiplication') {
+      sum = one! * two! * three!;
+      lastSelectedOperation = 'Multiplication';
+    } else {
+      setState(() {
+        showResults = false;
+      });
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Please select an operation before proceeding.'),
@@ -110,25 +129,12 @@ if (widget.title.startsWith('RectMoment')) {
       return; // Stop execution if no operation is selected
     }
 
-    // Perform the calculation
-    if (selectedOperation == 'Addition') {
-      sum = one! + two! + three!;
-    } else {
-      sum = one! * two! * three!;
-    }
-
     // Only show the result if all inputs are valid and an operation is selected
     setState(() {
       showResults = true;
     });
   }
  // addNumbers
-
-  String? selectedOperation;
-  final List<String> operations = [
-    'Addition',
-    'Multiplication',
-  ];
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +178,7 @@ if (widget.title.startsWith('RectMoment')) {
                       submitButton(),
                       if (showResults)
                       Text(
-                        '${selectedOperation == "Multiplication" ? "Product" : "Sum"} = $sum',
+                        '${lastSelectedOperation == "Multiplication" ? "Product" : "Sum"} = $sum',
                         style: TextStyle(color: Colors.white),
                       ),
                     ],
@@ -189,9 +195,6 @@ if (widget.title.startsWith('RectMoment')) {
     return ElevatedButton(
       onPressed: () {
         addNumbers();
-        setState(() {
-          showResults = true;
-        });
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),

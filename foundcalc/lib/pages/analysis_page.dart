@@ -286,12 +286,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
         inputFactUnitWeight.addListener(_updateState);
           inputUnitWeightWater.addListener(_updateState);
           inputUnitWeightConcrete.addListener(_updateState);
-          
-    if (widget.state.selectedFootingType == 'Strip or continuous') {
-      isItStrip = true;
-    } else {
-      isItStrip = false;
-    }
+
   }
 
 //Update function
@@ -745,10 +740,13 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
         if (selectedFootingType == 'Square') {
           af = fDim!*fDim!;
+          isItStrip = false;
         } else if (selectedFootingType == 'Circular') {
           af = 0.25*pi*fDim!*fDim!;
-        } else {
+          isItStrip = false;
+        } else { // Strip is selected
           af = null;
+          isItStrip = true;
         }
 
         if (af != null) {
@@ -1092,10 +1090,8 @@ class _AnalysisPageState extends State<AnalysisPage> {
                         style: TextStyle(color: Colors.white),
                       ),
                       */
-                      if (widget.state.showResults && selectedFootingType == 'Strip or continuous')
-                        resultStrip(),
-                      if (widget.state.showResults && (selectedFootingType == 'Square' || selectedFootingType == 'Circular'))
-                        resultNotStrip(),
+                      if (widget.state.showResults)
+                        resultText(),
                       SizedBox(height: 10),
                       if (widget.state.showResults)
                         solutionButton(),
@@ -1518,11 +1514,12 @@ class _AnalysisPageState extends State<AnalysisPage> {
       )
     );
   }
-  Widget resultStrip() {
+  
+  Widget resultText() {
     return Visibility(
     visible: widget.state.showResults,
     child: Text(
-      "w = ${widget.state.finalAnswerUdl} kN/m",
+      '${isItStrip ? "w" : "P"} = ${isItStrip ? (widget.state.finalAnswerUdl) : (widget.state.finalAnswerP)} ${isItStrip ? "kN/m" : "kN"}',
       style: TextStyle(
         color: Colors.white,
         fontWeight: FontWeight.bold, 
@@ -1530,19 +1527,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
     ),
   );
   }
-
-  Widget resultNotStrip() {
-    return Visibility(
-      visible: widget.state.showResults,
-      child: Text(
-        "P = ${widget.state.finalAnswerP}  kN",
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-    );
-  }
+  
   Widget row1ShearFailure() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -2575,7 +2560,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
       ),
     );
   }
-
 
   Widget row11AngleDet() {
     return Padding(
