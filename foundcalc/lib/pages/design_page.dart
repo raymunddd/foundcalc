@@ -182,6 +182,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputColBase = TextEditingController(text: widget.state.inputColBase);
     inputCc = TextEditingController(text: widget.state.inputCc);
 
+    // for dropdowns
+
     colClass = widget.state.colClass;
 
     modFactor = "Normal-lightweight"; // Set default value here
@@ -189,6 +191,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     material = "Concrete"; // Set default value here
     widget.state.material = material; // Update the state
+
+    // listeners
 
     inputQAll.addListener(_updateState);
     inputQUlt.addListener(_updateState);
@@ -242,8 +246,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.inputOtherUnitWeight = inputOtherUnitWeight.text;
       widget.state.inputColBase = inputColBase.text;
       widget.state.inputCc = inputCc.text;
-
-
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -373,26 +375,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       return 'View solution';
     }
   }
-
-  ////////////
-
-  String get boolOWS {
-    if (widget.state.showResultsOWSFirst) {
-      return 'solution OWS = true';
-    } else {
-      return 'solution OWS = false';
-    }
-  }
-
-  String get boolTWS {
-    if (showSolutionOWS) {
-      return 'solution TWS = true';
-    } else {
-      return 'solution TWS = false';
-    }
-  }
-
-  ////////////
 
   double roundUpToNearest25(double value) {
     return (value / 25).ceil() * 25;
@@ -1662,7 +1644,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  "Compressive strength of concrete, fc' (in kPa):",
+                  "Compressive strength of concrete, fc' (in MPa):",
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -1777,7 +1759,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           children: [
             Expanded(
               child: Text(
-                'Modification factor for concrete:',
+                'Modification factor for concrete, λ:',
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -2471,6 +2453,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       ),
     );
   }
+  
   Widget containerSoilPropOn() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
@@ -2701,6 +2684,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       ),
     );
   }
+  
   Widget containerSoilPropOff() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
