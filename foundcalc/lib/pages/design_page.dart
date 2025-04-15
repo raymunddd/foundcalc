@@ -137,6 +137,22 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? min2;
   double? new_vucTWS;
   double? bo2;
+  double? roundedQn;
+  double? roundedQall;
+  double? roundedQnu;
+  double? roundedVuows;
+  double? roundedVucows;
+  double? roundedVutws;
+ 
+
+  double? roundedVc1;
+  double? roundedVc2;
+  double? roundedVc3;
+  double? roundedVuctws;
+
+  double? roundedNewVc1;
+  double? roundedNewVc2;
+  double? roundedNewVc3;
 
   double beta = 1;
   int? bRound;
@@ -150,6 +166,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   bool showSolution = false;
   bool showSolutionOWS = false;
   bool showSolutionTWS = false;
+
+  bool showQUltText = false;
+  bool showFSText = false;
 
   void initState() {
     super.initState();
@@ -440,21 +459,39 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       lambda = 1;
     } else if (widget.state.modFactor == "Sand-lightweight") {
       lambda = 0.85;
-    } else { // All-lightweight
+    } else if (widget.state.modFactor == "All-lightweight") {
       lambda = 0.75;
+    } else {
+      lambda = null;
     }
 
     if (widget.state.qToggle) { //using qall
+      setState(() {
+          showQUltText = false;
+          showFSText = false;
+      });
       if (qa != null) {
         qall = qa!;
+        roundedQall = roundToFourDecimalPlaces(qall!);
       } else {
         qall = null;
+        roundedQall = null;
       } 
     } else { // using qult
       if (qult != null) {
         qall = qult!/fs!;
+        roundedQall = roundToFourDecimalPlaces(qall!);
+        setState(() {
+          showQUltText = true;
+          showFSText = true;
+        });
       } else {
         qall = null;
+        roundedQall = null;
+        setState(() {
+          showQUltText = false;
+          showFSText = false;
+        });
       }     
     } 
     
@@ -507,14 +544,17 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }
       if (qall != null && fLoad != null && yMat != null && fThick != null && qo != null) {
         qn = qall! - fLoad! - yMat!*(fThick!/1000) - qo!;
+        roundedQn = roundToFourDecimalPlaces(qn!);
       } else {
         qn = null;
       }
     } else { // no weight pressures
       if (qall != null && qo != null) {
         qn = qall! - qo!;
+        roundedQn = roundToFourDecimalPlaces(qn!);
       } else {
         qn = 2;
+        roundedQn = null;
       }     
     }
 
@@ -530,7 +570,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       b = ((sqrt(sumP!/qn!))/0.025);
       
       if (b != null) {
-        bRound = b!.ceil();  
+        bRound = (b!).ceil();  
       } else {
         bRound = null;
       }
@@ -548,11 +588,14 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     if (pu != null) {
       if (b != null) {
         qnu = pu!/(b!*b!); 
+        roundedQnu = roundToFourDecimalPlaces(qnu!);
       } else {
         qnu = null;
+        roundedQnu = null;
       }
     } else {
       qnu = null;
+      roundedQnu = null;
     }
 
     if (t != null) {
@@ -568,37 +611,88 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         x = null;
       }
     } else if (colClass == "Edge") {
-      x = null;
-    } else { // Corner
-      x = 3;
+      if (b != null && C != null && depth != null) {
+        x = b! - C! - (depth!/1000);
+      } else {
+        x = 0.02;
+      }
+    } else if (colClass == "Corner") { // Corner
+      if (b != null && C != null && depth != null) {
+        x = b! - C! - (depth!/1000);
+      } else {
+        x = 0.03;
+      }
+    } else {
+      x = 0.04;
     }
 
     if (qnu != null && b != null && x != null) {
       vuOWS = qnu!*b!*x!;
+      roundedVuows = roundToFourDecimalPlaces(vuOWS!);
     } else {
       vuOWS = null;
+      roundedVuows = null;
     }
 
-    if (fc != null && b != null && depth != null) {
+    if (fc != null && b != null && depth != null && lambda != null) {
       vucOWS = 0.1275*lambda!*sqrt(fc!)*b!*depth!;
+      roundedVucows = roundToFourDecimalPlaces(vucOWS!);
     } else {
       vucOWS = null;
+      roundedVucows = null;
     }
 
     if (vuOWS != null && vucOWS != null) {
-      if (vuOWS! > vucOWS!) {
-        safetyOWS = 1; // OWS unsafe
-        if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
-          newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.1275*lambda!*sqrt(fc!)));
-        } else {
-          newDepthOWS = null;
-          widget.state.finalAnswerD = null;
-        }
-      } else { // vuOWS ≤ vuCOWS
-        newDepthOWS = depth;
-        widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
-        widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
-        safetyOWS = 2; // OWS safe
+      if (colClass == 'Interior') {
+        if (vuOWS! > vucOWS!) {
+          safetyOWS = 1; // OWS unsafe
+          if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
+            newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.1275*lambda!*sqrt(fc!)));
+          } else {
+            newDepthOWS = null;
+            widget.state.finalAnswerD = null;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthOWS = depth;
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
+          widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
+          safetyOWS = 2; // OWS safe
+        }  
+      } else if (colClass == 'Edge') {
+        if (vuOWS! > vucOWS!) {
+          safetyOWS = 1; // OWS unsafe
+          if (qnu != null && b != null && C != null && fc != null && lambda != null) {
+            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.1275*lambda!*sqrt(fc!)+0.001*qnu!));
+          } else {
+            newDepthOWS = null;
+            widget.state.finalAnswerD = null;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthOWS = depth;
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
+          widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
+          safetyOWS = 2; // OWS safe
+        } 
+      } else if (colClass == 'Corner') {
+        if (vuOWS! > vucOWS!) {
+          safetyOWS = 1; // OWS unsafe
+          if (qnu != null && b != null && C != null && fc != null && lambda != null) {
+            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.1275*lambda!*sqrt(fc!)+0.001*qnu!));
+          } else {
+            newDepthOWS = null;
+            widget.state.finalAnswerD = null;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthOWS = depth;
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
+          widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
+          safetyOWS = 2; // OWS safe
+        } 
+      } else {
+        newDepthOWS = null;
+        widget.state.finalAnswerVuows = null;
+        widget.state.finalAnswerVucows = null;
+        safetyOWS = null; // OWS safe
       }
     } else {
       newDepthOWS = 2;
@@ -610,21 +704,48 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       newtOWS = null;
     }
 
-    if (qnu != null && b != null && newDepthOWS != null) {
-      new_vuOWS = qnu!*b!*(0.5*(b!-C!)-0.001*newDepthOWS!);
-      widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
+    if (safetyOWS == 1) {
+      if (colClass == 'Interior') {
+        if (qnu != null && b != null && C != null && newDepthOWS != null) {
+          new_vuOWS = qnu!*b!*(0.5*(b!-C!)-0.001*newDepthOWS!);
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
+        } else {
+          new_vuOWS = null;
+          widget.state.finalAnswerVuows = null;
+        }  
+      } else if (colClass == 'Edge') {
+        if (qnu != null && b != null && C != null && newDepthOWS != null) {
+          new_vuOWS = qnu!*b!*(b!-C!-0.001*newDepthOWS!);
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
+        } else {
+          new_vuOWS = null;
+          widget.state.finalAnswerVuows = null;
+        } 
+      } else if (colClass == 'Corner') {
+        if (qnu != null && b != null && C != null && newDepthOWS != null) {
+          new_vuOWS = qnu!*b!*(b!-C!-0.001*newDepthOWS!);
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
+        } else {
+          new_vuOWS = null;
+          widget.state.finalAnswerVuows = null;
+        } 
+      } else {
+        new_vuOWS = null;
+        widget.state.finalAnswerVuows = null;
+      }
+
+      if (fc != null && b != null && newDepthOWS != null && lambda != null) {
+        new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
+        widget.state.finalAnswerVucows = roundToFourDecimalPlaces(new_vucOWS!);
+      } else {
+        new_vucOWS = null;
+        widget.state.finalAnswerVucows = null;
+      }
     } else {
       new_vuOWS = null;
-      widget.state.finalAnswerVuows = null;
+      new_vucOWS = null;
     }
 
-    if (fc != null && b != null && newDepthOWS != null) {
-      new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
-      widget.state.finalAnswerVucows = roundToFourDecimalPlaces(new_vucOWS!);
-    } else {
-      new_vucOWS = null;
-      widget.state.finalAnswerVucows = null;
-    }
 
     // tws solution
 
@@ -633,77 +754,145 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         bo = 4*(C!+(newDepthOWS!/1000));
         ao = (C!+(newDepthOWS!/1000))*(C!+(newDepthOWS!/1000));
       } else {
-        bo = 1;
-        ao = 1;
+        bo = 0.01;
+        ao = 0.01;
       }
     } else if (colClass == "Edge") {
-      bo = 2;
-      ao = 2;
-    } else { // Corner
-      bo = 3;
-      ao = 3;
+      if (C != null && newDepthOWS != null) {
+        bo = (3*C!+2*(newDepthOWS!/1000));
+        ao = (C!+(newDepthOWS!/1000))*(C!+(newDepthOWS!/2000));
+      } else {
+        bo = 0.02;
+        ao = 0.02;
+      }
+    } else if (colClass == "Corner") {
+      if (C != null && newDepthOWS != null) {
+        bo = (2*C!+(newDepthOWS!/1000));
+        ao = (C!+(newDepthOWS!/2000))*(C!+(newDepthOWS!/2000));
+      } else {
+        bo = 0.03;
+        ao = 0.03;
+      }
+    } else {
+      bo = 0.04;
+      ao = 0.04;
     }
 
     if (qnu != null && b != null && ao != null) {
       vuTWS = qnu!*((b!*b!)-ao!);
+      roundedVutws = roundToFourDecimalPlaces(vuTWS!);
     } else {
       vuTWS = null;
+      roundedVutws = null;
     }
 
-    if (fc != null && bo != null && newDepthOWS != null) {
+    if (fc != null && bo != null && newDepthOWS != null && lambda != null) {
       fcbod = 0.75*lambda!*sqrt(fc!)*bo!*newDepthOWS!;
       vc1 = 0.75*0.33*lambda!*sqrt(fc!)*bo!*newDepthOWS!;
+      roundedVc1 = roundToFourDecimalPlaces(vc1!);
     } else {
       fcbod = null;
       vc1 = null;
+      roundedVc1 = null;
     }
 
     if (fcbod != null) {
       vc2 = 0.17*(1+(2/beta))*fcbod!;
+      roundedVc2 = roundToFourDecimalPlaces(vc2!);
     } else {
       vc2 = null;
+      roundedVc2 = null;
     }
 
-    if (colClass == 'Interior') {
+    if (colClass == 'Interior') { // as
       as = 40;
     } else if (colClass == 'Edge') {
       as = 30;
-    } else { // Corner column
+    } else if (colClass == 'Corner') {// Corner column
       as = 20;
+    } else {
+      as = null;
     }
 
     if (as != null && newDepthOWS != null && bo != null && fcbod != null) {
       vc3 = 0.083*(2+((as!*newDepthOWS!)/(bo!*1000)))*fcbod!;
+      roundedVc3 = roundToFourDecimalPlaces(vc3!);
     } else {
       vc3 = null;
+      roundedVc3 = null;
     }
 
     if (vc1 != null && vc2 != null && vc3 != null) {
       min1 = min(vc1!, vc2!);
       vucTWS = min(min1!, vc3!);
+      roundedVuctws = roundToFourDecimalPlaces(vucTWS!);
     } else {
       min1 = null;
       vucTWS = null;
+      roundedVuctws = null;
     }
 
     if (vuTWS != null && vucTWS != null) {
-      if (vuTWS! > vucTWS!) {
-        safetyTWS = 1; // TWS unsafe
-        if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
-          a_quad = 990*sqrt(fc!) + qnu!;
-          b_quad = 990000*sqrt(fc!)*C!+2000*qnu!*C!;
-          c_quad = -1000000*qnu!*(b!*b!-C!*C!);
-          // quadratic formula
-          newDepthTWS = roundUpToNearest25((-(b_quad!)+sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
-        } else {
-          newDepthTWS = 1;
-        }
-      } else { // vuTWS ≤ vuCTWS
-        newDepthTWS = depth;
-        widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
-        widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
-        safetyTWS = 2; // TWS safe
-      }
+      if (colClass == 'Interior') {
+        if (vuTWS! > vucTWS!) {
+          safetyTWS = 1; // TWS unsafe
+          if (qnu != null && b != null && C != null && fc != null && lambda != null) { // && lambda != null
+            a_quad = 990*sqrt(fc!)*lambda! + qnu!;
+            b_quad = 990000*sqrt(fc!)*C!*lambda!+2000*qnu!*C!;
+            c_quad = -1000000*qnu!*(b!*b!-C!*C!);
+            // quadratic formula
+            newDepthTWS = roundUpToNearest25((-(b_quad!)+sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+          } else {
+            newDepthTWS = 1;
+          }
+        } else { // vuTWS ≤ vuCTWS
+          newDepthTWS = newDepthOWS;
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
+          widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
+          safetyTWS = 2; // TWS safe
+        }  
+      } else if (colClass == 'Edge') {
+        if (vuTWS! > vucTWS!) {
+          safetyTWS = 1; // TWS unsafe
+          if (qnu != null && b != null && C != null && fc != null && lambda != null) { // && lambda != null
+            a_quad = -(qnu!/2000) - (0.495*lambda!*sqrt(fc!));
+            b_quad = (-(3*qnu!*C!)/2) - (742.5*lambda!*sqrt(fc!)*C!);
+            c_quad = 1000*qnu!*((b!*b!)-(C!*C!));
+            // quadratic formula
+            newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+          } else {
+            newDepthTWS = 2;
+          }
+        } else { // vuTWS ≤ vuCTWS
+          newDepthTWS = depth;
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
+          widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
+          safetyTWS = 2; // TWS safe
+        } 
+      } else if (colClass == 'Corner') {
+        if (vuTWS! > vucTWS!) {
+          safetyTWS = 1; // TWS unsafe
+          if (qnu != null && b != null && C != null && fc != null && lambda != null) { // && lambda != null
+            a_quad = -(qnu! + 990*lambda!*sqrt(fc!));
+            b_quad = -(4000*qnu!*C! + 1980000*lambda!*sqrt(fc!)*C!);
+            c_quad = 4000000*qnu!*((b!*b!)-(C!*C!));
+            // quadratic formula
+            newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+          } else {
+            newDepthTWS = 2;
+          }
+        } else { // vuTWS ≤ vuCTWS
+          newDepthTWS = depth;
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
+          widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
+          safetyTWS = 2; // TWS safe
+        } 
+      } else {
+        newDepthTWS = null;
+        widget.state.finalAnswerVutws = null;
+        widget.state.finalAnswerVuctws = null;
+        safetyTWS = null;
+      }  
     } else {
       newDepthTWS = 2;
     }
@@ -714,54 +903,104 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       newtTWS = null;
     }
 
-    if (qnu != null && b != null && C != null && newDepthTWS != null) {
-      new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/1000)));
-      widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
+    // new Vutws
+    if (safetyTWS == 1) {
+      if (colClass == 'Interior') {
+        if (qnu != null && b != null && C != null && newDepthTWS != null) {
+          new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/1000)));
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
+        } else {
+          new_vuTWS = null;
+          widget.state.finalAnswerVutws = null;
+        }  
+      } else if (colClass == 'Edge') {
+        if (qnu != null && b != null && C != null && newDepthTWS != null) {
+          new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/2000)));
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
+        } else {
+          new_vuTWS = null;
+          widget.state.finalAnswerVutws = null;
+        } 
+      } else if (colClass == 'Corner') {
+        if (qnu != null && b != null && C != null && newDepthTWS != null) {
+          new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/2000))*(C!+(newDepthTWS!/2000)));
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
+        } else {
+          new_vuTWS = null;
+          widget.state.finalAnswerVutws = null;
+        } 
+      } else {
+        new_vuTWS = 1;
+        widget.state.finalAnswerVutws = null;  
+      }
+      
+      // new bo
+      if (colClass == "Interior") {
+        if (C != null && depth != null) {
+          bo2 = 4*(C!+(newDepthTWS!/1000));
+        } else {
+          bo2 = 0.01;
+        }
+      } else if (colClass == "Edge") {
+        if (C != null && depth != null) {
+          bo2 = (3*C!+2*(newDepthTWS!/1000));
+        } else {
+          bo2 = 0.02;
+        }
+      } else if (colClass == 'Corner') { // Corner
+        if (C != null && depth != null) {
+          bo2 = (2*C!+(newDepthTWS!/1000));
+        } else {
+          bo2 = 0.03;
+        }
+      } else {
+        bo2 = 0.04;
+      }
+
+      if (fc != null && bo2 != null && depth != null) {
+        fcbod2 = 0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+        vc1_new = 0.33*0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+        roundedNewVc1 = roundToFourDecimalPlaces(vc1_new!);
+      } else {
+        fcbod2 = null;
+        vc1_new = null;
+        roundedNewVc1 = null;
+      }
+
+      if (fcbod2 != null) {
+        vc2_new = 0.17*(1+(2/beta))*fcbod2!;
+        roundedNewVc2 = roundToFourDecimalPlaces(vc2_new!);
+      } else {
+        vc2_new = null;
+        roundedNewVc2 = null;
+      }
+
+      if (as != null && newDepthTWS != null && bo2 != null && fcbod2 != null) {
+        vc3_new = 0.083*(2+((as!*newDepthTWS!)/(bo2!*1000)))*fcbod2!;
+        roundedNewVc3 = roundToFourDecimalPlaces(vc3_new!);
+      } else {
+        vc3_new = null;
+        roundedNewVc3 = null;
+      }
+
+      if (vc1_new != null && vc2_new != null && vc3_new != null) {
+        min2 = min(vc1_new!, vc2_new!);
+        new_vucTWS = min(min2!, vc3_new!);
+        widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(new_vucTWS!);
+      } else {
+        min2 = null;
+        new_vucTWS = null;
+        widget.state.finalAnswerVuctws = null;
+      }
     } else {
       new_vuTWS = null;
-      widget.state.finalAnswerVutws = null;
-    }
-
-    if (colClass == "Interior") {
-      if (C != null && depth != null) {
-        bo2 = 4*(C!+(newDepthTWS!/1000));
-      } else {
-        bo2 = 1;
-      }
-    } else if (colClass == "Edge") {
-      bo2 = 2;
-    } else { // Corner
-      bo2 = 3;
-    }
-
-    if (fc != null && bo2 != null && depth != null) {
-      fcbod2 = 0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
-      vc1_new = 0.33*0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
-    } else {
+      bo2 = null;
       fcbod2 = null;
       vc1_new = null;
-    }
-
-    if (fcbod2 != null) {
-      vc2_new = 0.17*(1+(2/beta))*fcbod2!;
-    } else {
       vc2_new = null;
-    }
-
-    if (as != null && newDepthTWS != null && bo2 != null && fcbod2 != null) {
-      vc3_new = 0.083*(2+((as!*newDepthTWS!)/(bo2!*1000)))*fcbod2!;
-    } else {
       vc3_new = null;
-    }
-
-    if (vc1_new != null && vc2_new != null && vc3_new != null) {
-      min2 = min(vc1_new!, vc2_new!);
-      new_vucTWS = min(min2!, vc3_new!);
-      widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(new_vucTWS!);
-    } else {
       min2 = null;
       new_vucTWS = null;
-      widget.state.finalAnswerVuctws = null;
     }
 
     if (newDepthOWS != null && newDepthTWS != null) {
@@ -795,8 +1034,10 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     print("OWS: VUows = $vuOWS, VUcows = $vucOWS, new d = $newDepthOWS, new T = $newtOWS, new VUows = $new_vuOWS, new VUcows = $new_vucOWS");
     print("TWS: bo = $bo, VUtws = $vuTWS, VUctws = $vucTWS, new d = $newDepthTWS, new T = $newtTWS, new bo = $bo2, new VUtws = $new_vuTWS, new VUctws = $new_vucTWS");
     print("vc1 = $vc1, vc2 = $vc2, vc3 = $vc3");
-    print("new vc1 = $vc1_new, new vc2 = $vc2_new, new vc3 = $vc3_new");
-    print('fcbod = $fcbod, as = $as');
+    print("new vc1 = $vc1_new, new vc2 = $vc2_new, new vc3 = $vc3_new, safetyTWS = $safetyTWS");
+    print(
+      "final B = ${widget.state.finalAnswerB}, final T = ${widget.state.finalAnswerT}, final d = ${widget.state.finalAnswerD}, final Vuows = ${widget.state.finalAnswerVuows}, final Vucows = ${widget.state.finalAnswerVucows}, final Vutws = ${widget.state.finalAnswerVutws}, final Vuctws = ${widget.state.finalAnswerVuctws}"
+      );
   }
 
   void calculateTWS() {
@@ -851,23 +1092,41 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       lambda = 1;
     } else if (widget.state.modFactor == "Sand-lightweight") {
       lambda = 0.85;
-    } else { // All-lightweight
+    } else if (widget.state.modFactor == "All-lightweight") {
       lambda = 0.75;
+    } else {
+      lambda = null;
     }
 
     if (widget.state.qToggle) { //using qall
+      setState(() {
+          showQUltText = false;
+          showFSText = false;
+      });
       if (qa != null) {
         qall = qa!;
+        roundedQall = roundToFourDecimalPlaces(qall!);
       } else {
         qall = null;
+        roundedQall = null;
       } 
     } else { // using qult
       if (qult != null) {
         qall = qult!/fs!;
+        roundedQall = roundToFourDecimalPlaces(qall!);
+        setState(() {
+          showQUltText = true;
+          showFSText = true;
+        });
       } else {
         qall = null;
+        roundedQall = null;
+        setState(() {
+          showQUltText = false;
+          showFSText = false;
+        });
       }     
-    } 
+    }  
     
     if (widget.state.soilProp) {
       if (gs != null && e != null && w != null) {
@@ -918,14 +1177,17 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }
       if (qall != null && fLoad != null && yMat != null && fThick != null && qo != null) {
         qn = qall! - fLoad! - yMat!*(fThick!/1000) - qo!;
+        roundedQn = roundToFourDecimalPlaces(qn!);
       } else {
-        qn = 3;
+        qn = null;
       }
     } else { // no weight pressures
       if (qall != null && qo != null) {
         qn = qall! - qo!;
+        roundedQn = roundToFourDecimalPlaces(qn!);
       } else {
         qn = 2;
+        roundedQn = null;
       }     
     }
 
@@ -960,11 +1222,14 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     if (pu != null) {
       if (b != null) {
         qnu = pu!/(b!*b!); 
+        roundedQnu = roundToFourDecimalPlaces(qnu!);
       } else {
         qnu = null;
+        roundedQnu = null;
       }
     } else {
       qnu = null;
+      roundedQnu = null;
     }
 
     if (t != null) {
@@ -977,210 +1242,397 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       depth = null;
     }
 
+    // tws bo
     if (colClass == "Interior") {
       if (C != null && depth != null) {
         bo = 4*(C!+(depth!/1000));
         ao = (C!+(depth!/1000))*(C!+(depth!/1000));
       } else {
-        bo = 1;
-        ao = 1;
+        bo = 0.01;
+        ao = 0.01;
       }
     } else if (colClass == "Edge") {
-      bo = 2;
-      ao = 2;
-    } else { // Corner
-      bo = 3;
-      ao = 3;
+      if (C != null && depth != null) {
+        bo = (3*C!+2*(depth!/1000));
+        ao = (C!+(depth!/1000))*(C!+(depth!/2000));
+      } else {
+        bo = 0.02;
+        ao = 0.02;
+      }
+    } else if (colClass == "Corner") {
+      if (C != null && depth != null) {
+        bo = (2*C!+(depth!/1000));
+        ao = (C!+(depth!/2000))*(C!+(depth!/2000));
+      } else {
+        bo = 0.03;
+        ao = 0.03;
+      }
+    } else {
+      bo = 0.04;
+      ao = 0.04;
     }
 
     if (qnu != null && b != null && ao != null) {
       vuTWS = qnu!*((b!*b!)-ao!);
+      roundedVutws = roundToFourDecimalPlaces(vuTWS!);
     } else {
       vuTWS = null;
+      roundedVutws= null;
     }
 
-    if (fc != null && bo != null && depth != null) {
+    if (fc != null && bo != null && depth != null && lambda != null) {
       fcbod = 0.75*lambda!*sqrt(fc!)*bo!*depth!;
       vc1 = 0.75*0.33*lambda!*sqrt(fc!)*bo!*depth!;
+      roundedVc1 = roundToFourDecimalPlaces(vc1!);
     } else {
       fcbod = null;
       vc1 = null;
+      roundedVc1 = null;
     }
 
     if (fcbod != null) {
       vc2 = 0.17*(1+(2/beta))*fcbod!;
+      roundedVc2 = roundToFourDecimalPlaces(vc2!);
     } else {
       vc2 = null;
+      roundedVc2 = null;
     }
 
-    if (colClass == 'Interior') {
+    if (colClass == 'Interior') { // as
       as = 40;
     } else if (colClass == 'Edge') {
       as = 30;
-    } else { // Corner column
+    } else if (colClass == 'Corner') {
       as = 20;
+    } else {
+      as = null;
     }
 
     if (as != null && depth != null && bo != null && fcbod != null) {
       vc3 = 0.083*(2+((as!*depth!)/(bo!*1000)))*fcbod!;
+      roundedVc3 = roundToFourDecimalPlaces(vc3!);
     } else {
       vc3 = null;
+      roundedVc3 = null;
     }
 
     if (vc1 != null && vc2 != null && vc3 != null) {
       min1 = min(vc1!, vc2!);
       vucTWS = min(min1!, vc3!);
+      roundedVuctws = roundToFourDecimalPlaces(vucTWS!);
     } else {
       min1 = null;
       vucTWS = null;
+      roundedVuctws = null;
     }
 
+    // TWS newDepthTWS
     if (vuTWS != null && vucTWS != null) {
-      if (vuTWS! > vucTWS!) {
-        safetyTWS = 1; // TWS unsafe
-        if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
-          a_quad = 990*sqrt(fc!) + qnu!;
-          b_quad = 990000*sqrt(fc!)*C!+2000*qnu!*C!;
-          c_quad = -1000000*qnu!*(b!*b!-C!*C!);
-          // quadratic formula
-          newDepthTWS = roundUpToNearest25((-(b_quad!)+sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
-        } else {
-          newDepthTWS = null;
+      if (colClass == 'Interior') {
+        if (vuTWS! > vucTWS!) {
+          safetyTWS = 1; // TWS unsafe
+          if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
+            a_quad = 990*sqrt(fc!) + qnu!;
+            b_quad = 990000*sqrt(fc!)*C!+2000*qnu!*C!;
+            c_quad = -1000000*qnu!*(b!*b!-C!*C!);
+            // quadratic formula
+            newDepthTWS = roundUpToNearest25((-(b_quad!)+sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+          } else {
+            newDepthTWS = null;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthTWS = depth;
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
+          widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
+          safetyTWS = 2; // TWS safe
         }
-      } else { // vuOWS ≤ vuCOWS
-        newDepthTWS = depth;
-        widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
-        widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
-        safetyTWS = 2; // TWS safe
+      } else if (colClass == 'Edge') {
+        if (vuTWS! > vucTWS!) {
+          safetyTWS = 1; // TWS unsafe
+          if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
+            a_quad = -(qnu!/2000) - (0.495*lambda!*sqrt(fc!));
+            b_quad = (-(3*qnu!*C!)/2) - (742.5*lambda!*sqrt(fc!)*C!);
+            c_quad = 1000*qnu!*((b!*b!)-(C!*C!));
+            // quadratic formula
+            newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+          } else {
+            newDepthTWS = null;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthTWS = depth;
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
+          widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
+          safetyTWS = 2; // TWS safe
+        }
+      } else if (colClass == 'Corner') {
+        if (vuTWS! > vucTWS!) {
+          safetyTWS = 1; // TWS unsafe
+          if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
+            a_quad = -(qnu! + 990*lambda!*sqrt(fc!));
+            b_quad = -(4000*qnu!*C! + 1980000*lambda!*sqrt(fc!)*C!);
+            c_quad = 4000000*qnu!*((b!*b!)-(C!*C!));
+            // quadratic formula
+            newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+          } else {
+            newDepthTWS = null;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthTWS = depth;
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(vuTWS!);
+          widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
+          safetyTWS = 3; // TWS safe
+        }
       }
     } else {
       newDepthTWS = 2;
     }
     
     if (newDepthTWS != null) {
-      newtTWS = newDepthTWS! + cc! + dbot! + 0.5*dtop!;
+      newtTWS = newDepthTWS! + cc! + 0.75*dbot! + 0.25*dtop!;
     } else {
       newtTWS = null;
     }
 
-    if (qnu != null && b != null && C != null && newDepthTWS != null) {
-      new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/1000)));
-      widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
+    if (safetyTWS == 1) {
+      // TWS new_vuTWS
+      if (colClass == 'Interior') {
+        if (qnu != null && b != null && C != null && newDepthTWS != null) {
+          new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/1000))*(C!+(newDepthTWS!/1000)));
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
+        } else {
+          new_vuTWS = null;
+          widget.state.finalAnswerVutws = null;
+        }  
+      } else if (colClass == 'Edge') {
+        if (qnu != null && b != null && C != null && newDepthTWS != null) {
+          new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/2000))*(C!+(newDepthTWS!/1000)));
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
+        } else {
+          new_vuTWS = null;
+          widget.state.finalAnswerVutws = null;
+        } 
+      } else if (colClass == 'Corner') {
+        if (qnu != null && b != null && C != null && newDepthTWS != null) {
+          new_vuTWS = qnu!*(b!*b!-(C!+(newDepthTWS!/2000))*(C!+(newDepthTWS!/2000)));
+          widget.state.finalAnswerVutws = roundToFourDecimalPlaces(new_vuTWS!);
+        } else {
+          new_vuTWS = null;
+          widget.state.finalAnswerVutws = null;
+        } 
+      } else {
+        new_vuTWS = null;
+        widget.state.finalAnswerVutws = null;
+      }
+      
+
+      // TWS bo2
+      if (colClass == "Interior") {
+        if (C != null && depth != null) {
+          bo2 = 4*(C!+(newDepthTWS!/1000));
+        } else {
+          bo2 = 0.01;
+        }
+      } else if (colClass == "Edge") {
+        if (C != null && depth != null) {
+          bo2 = (3*C!+2*(newDepthTWS!/1000));
+        } else {
+          bo2 = 0.02;
+        }
+      } else if (colClass == "Corner") {
+        if (C != null && depth != null) {
+          bo2 = (2*C!+(newDepthTWS!/1000));
+        } else {
+          bo2 = 0.03;
+        }
+      } else {
+        bo2 = 0.04;
+      }
+
+      if (fc != null && bo2 != null && depth != null) {
+        fcbod2 = 0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+        vc1_new = 0.33*0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+      } else {
+        fcbod2 = null;
+        vc1_new = null;
+      }
+
+      if (fcbod2 != null) {
+        vc2_new = 0.17*(1+(2/beta))*fcbod2!;
+      } else {
+        vc2_new = null;
+      }
+
+      if (as != null && newDepthTWS != null && bo2 != null && fcbod2 != null) {
+        vc3_new = 0.083*(2+((as!*newDepthTWS!)/(bo2!*1000)))*fcbod2!;
+      } else {
+        vc3_new = null;
+      }
+
+      if (vc1_new != null && vc2_new != null && vc3_new != null) {
+        min2 = min(vc1_new!, vc2_new!);
+        new_vucTWS = min(min2!, vc3_new!);
+        widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(new_vucTWS!);
+      } else {
+        min2 = null;
+        new_vucTWS = null;
+        widget.state.finalAnswerVuctws = null;
+      }
     } else {
       new_vuTWS = null;
-      widget.state.finalAnswerVutws = null;
-    }
-
-    if (colClass == "Interior") {
-      if (C != null && depth != null) {
-        bo2 = 4*(C!+(newDepthTWS!/1000));
-      } else {
-        bo2 = 1;
-      }
-    } else if (colClass == "Edge") {
-      bo2 = 2;
-    } else { // Corner
-      bo2 = 3;
-    }
-
-    if (fc != null && bo2 != null && depth != null) {
-      fcbod2 = 0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
-      vc1_new = 0.33*0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
-    } else {
+      bo2 = null;
       fcbod2 = null;
       vc1_new = null;
-    }
-
-    if (fcbod2 != null) {
-      vc2_new = 0.17*(1+(2/beta))*fcbod2!;
-    } else {
       vc2_new = null;
-    }
-
-    if (as != null && newDepthTWS != null && bo2 != null && fcbod2 != null) {
-      vc3_new = 0.083*(2+((as!*newDepthTWS!)/(bo2!*1000)))*fcbod2!;
-    } else {
       vc3_new = null;
-    }
-
-    if (vc1_new != null && vc2_new != null && vc3_new != null) {
-      min2 = min(vc1_new!, vc2_new!);
-      new_vucTWS = min(min2!, vc3_new!);
-      widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(new_vucTWS!);
-    } else {
       min2 = null;
       new_vucTWS = null;
-      widget.state.finalAnswerVuctws = null;
     }
-
     // OWS solution
 
+    // TWS x
     if (colClass == "Interior") {
       if (b != null && C != null && newDepthTWS != null) {
         x = (b!/2) - (C!/2) - (newDepthTWS!/1000);
       } else {
-        x = 1;
+        x = 0.01;
       }
     } else if (colClass == "Edge") {
-      x = 2;
-    } else { // Corner
-      x = 3;
+      if (b != null && C != null && newDepthTWS != null) {
+        x = b! - C! - (newDepthTWS!/1000);
+      } else {
+        x = 0.02;
+      }
+    } else if (colClass == "Corner") { // Corner
+      if (b != null && C != null && depth != null) {
+        x = b! - C! - (newDepthTWS!/1000);
+      } else {
+        x = 0.03;
+      }
+    } else {
+      x = 0.04;
     }
 
     if (qnu != null && b != null && x != null) {
       vuOWS = qnu!*b!*x!;
+      roundedVuows = roundToFourDecimalPlaces(vuOWS!);
     } else {
       vuOWS = null;
+      roundedVuows = null;
     }
 
-    if (fc != null && b != null && newDepthTWS != null) {
+    if (fc != null && b != null && newDepthTWS != null && lambda != null) {
       vucOWS = 0.1275*lambda!*sqrt(fc!)*b!*newDepthTWS!;
+      roundedVucows = roundToFourDecimalPlaces(vucOWS!);
     } else {
       vucOWS = null;
+      roundedVucows = null;
     }
 
-    if (vuOWS != null && vucOWS != null) {
-      if (vuOWS! > vucOWS!) {
-        safetyOWS = 1; // OWS unsafe
-        if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
-          newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.1275*lambda!*sqrt(fc!)));
-        } else {
-          newDepthOWS = 1;
+    // TWS newDepthOWS
+    if (colClass == "Interior") {
+      if (vuOWS != null && vucOWS != null) {
+        if (vuOWS! > vucOWS!) {
+          safetyOWS = 1; // OWS unsafe
+          if (qnu != null && b != null && C != null && fc != null && lambda != null) { // 
+            newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.1275*lambda!*sqrt(fc!)));
+          } else {
+            newDepthOWS = 1;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthOWS = newDepthTWS;
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
+          widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
+          safetyOWS = 2; // OWS safe
         }
-      } else { // vuOWS ≤ vuCOWS
-        newDepthOWS = newDepthTWS;
-        widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
-        widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
-        safetyOWS = 2; // OWS safe
-      }
-    } else {
-      newDepthOWS = 2;
+      } else {
+        newDepthOWS = 2;
+      }  
+    } else if (colClass == "Edge") {
+      if (vuOWS != null && vucOWS != null) {
+        if (vuOWS! > vucOWS!) {
+          safetyOWS = 1; // OWS unsafe
+          if (qnu != null && b != null && C != null && fc != null && lambda != null) {
+            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.1275*lambda!*sqrt(fc!)+0.001*qnu!));
+          } else {
+            newDepthOWS = 3;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthOWS = newDepthTWS;
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
+          widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
+          safetyOWS = 2; // OWS safe
+        }
+      } else {
+        newDepthOWS = 4;
+      }  
+    } else if (colClass == "Corner") {
+      if (vuOWS != null && vucOWS != null) {
+        if (vuOWS! > vucOWS!) {
+          safetyOWS = 1; // OWS unsafe
+          if (qnu != null && b != null && C != null && fc != null && lambda != null) {
+            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.1275*lambda!*sqrt(fc!)+0.001*qnu!));
+          } else {
+            newDepthOWS = 5;
+          }
+        } else { // vuOWS ≤ vuCOWS
+          newDepthOWS = newDepthTWS;
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(vuOWS!);
+          widget.state.finalAnswerVucows = roundToFourDecimalPlaces(vucOWS!);
+          safetyOWS = 2; // OWS safe
+        }
+      } else {
+        newDepthOWS = 6;
+      } 
     }
+    
 
     if (newDepthOWS != null) {
-      newtOWS = newDepthOWS! + cc! + dbot! + 0.5*dtop!;
+      newtOWS = newDepthOWS! + cc! + 0.75*dbot! + 0.25*dtop!;
     } else {
       newtOWS = null;
     }
 
-    if (qnu != null && b != null && newDepthOWS != null) {
-      new_vuOWS = qnu!*b!*(0.5*(b!-C!)-0.001*newDepthOWS!);
-      widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
+    if (safetyOWS == 1) {
+      // TWS new_vuOWS
+      if (colClass == 'Interior') {
+        if (qnu != null && b != null && C != null && newDepthOWS != null) {
+          new_vuOWS = qnu!*b!*(0.5*(b!-C!)-0.001*newDepthOWS!);
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
+        } else {
+          new_vuOWS = null;
+          widget.state.finalAnswerVuows = null;
+        }  
+      } else if (colClass == 'Edge') {
+        if (qnu != null && b != null && C != null && newDepthOWS != null) {
+          new_vuOWS = qnu!*b!*(b!-C!-0.001*newDepthOWS!);
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
+        } else {
+          new_vuOWS = null;
+          widget.state.finalAnswerVuows = null;
+        } 
+      } else if (colClass == 'Corner') {
+        if (qnu != null && b != null && C != null && newDepthOWS != null) {
+          new_vuOWS = qnu!*b!*(b!-C!-0.001*newDepthOWS!);
+          widget.state.finalAnswerVuows = roundToFourDecimalPlaces(new_vuOWS!);
+        } else {
+          new_vuOWS = null;
+          widget.state.finalAnswerVuows = null;
+        } 
+      } else {
+        new_vuOWS = null;
+        widget.state.finalAnswerVuows = null;
+      }
+      
+      if (fc != null && b != null && newDepthOWS != null && lambda != null) {
+        new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
+        widget.state.finalAnswerVucows = roundToFourDecimalPlaces(new_vucOWS!);
+      } else {
+        new_vucOWS = null;
+        widget.state.finalAnswerVucows = null;
+      }
     } else {
       new_vuOWS = null;
-      widget.state.finalAnswerVuows = null;
-    }
-
-    if (fc != null && b != null && newDepthOWS != null) {
-      new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
-      widget.state.finalAnswerVucows = roundToFourDecimalPlaces(new_vucOWS!);
-      setState(() {
-        widget.state.showResultsTWSFirst = true;
-        widget.state.showResultsOWSFirst = false;
-      });
-    } else {
       new_vucOWS = null;
-      widget.state.finalAnswerVucows = null;
     }
 
     if (newDepthOWS != null && newDepthTWS != null) {
@@ -4011,6 +4463,118 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               'safe OWS, safe TWS',
               style: TextStyle(color: Colors.white),
             ),
+            if (showQUltText)
+            Text(
+              'qult = $qult kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showFSText)
+            Text(
+              'F.S. = $fs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qa = $roundedQall kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qn = $roundedQn kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'B ≥ $b m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = 1.2PDL + 1.6PLL (governing case)',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = $pu kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnu = $roundedQnu kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $depth mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for one-way shear (wide-beam shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'x = $x m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = ${widget.state.finalAnswerVuows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = ${widget.state.finalAnswerVucows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows ≤ Vucows, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for two-way shear (punching shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'as = $as',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'β = $beta',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = ${widget.state.finalAnswerVutws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = ${widget.state.finalAnswerVuctws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws ≤ Vuctws, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe d = ${widget.state.finalAnswerD}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe T = ${widget.state.finalAnswerT}',
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         )
       )
@@ -4024,6 +4588,142 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           children: [
             Text(
               'unsafe OWS, safe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showQUltText)
+            Text(
+              'qult = $qult kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showFSText)
+            Text(
+              'F.S. = $fs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qa = $roundedQall kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qn = $roundedQn kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'B ≥ $b m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = 1.2PDL + 1.6PLL (governing case)',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = $pu kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnu = $roundedQnu kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $depth mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for one-way shear (wide-beam shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'x = $x m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = $roundedVuows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = $roundedVucows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows > Vucows, inadequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Recalculated values:',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $newDepthOWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'T = $newtOWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = ${widget.state.finalAnswerVuows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = ${widget.state.finalAnswerVucows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows ≤ Vucows, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for two-way shear (punching shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'as = $as',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'β = $beta',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = $bo kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = $roundedVuctws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws ≤ Vuctws, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe d = ${widget.state.finalAnswerD}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe T = ${widget.state.finalAnswerT}',
               style: TextStyle(color: Colors.white),
             ),
           ],
@@ -4041,6 +4741,158 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               'safe OWS, unsafe TWS',
               style: TextStyle(color: Colors.white),
             ),
+            if (showQUltText)
+            Text(
+              'qult = $qult kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showFSText)
+            Text(
+              'F.S. = $fs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qa = $roundedQall kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qn = $roundedQn kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'B ≥ $b m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = 1.2PDL + 1.6PLL (governing case)',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = $pu kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnu = $roundedQnu kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $depth mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for one-way shear (wide-beam shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'x = $x m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = ${widget.state.finalAnswerVuows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = ${widget.state.finalAnswerVucows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows ≤ Vucows, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for two-way shear (punching shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'as = $as',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'β = $beta',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = $roundedVutws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = $roundedVuctws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws > Vuctws, inadequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Recalculated values:',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $newDepthTWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'T = $newtTWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = ${widget.state.finalAnswerVutws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo2 m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedNewVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedNewVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedNewVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = ${widget.state.finalAnswerVuctws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws ≤ Vuctws, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe d = ${widget.state.finalAnswerD}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe T = ${widget.state.finalAnswerT}',
+              style: TextStyle(color: Colors.white),
+            ),
           ],
         )
       )
@@ -4054,6 +4906,182 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           children: [
             Text(
               'unsafe OWS, unsafe TWS',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showQUltText)
+            Text(
+              'qult = $qult kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showFSText)
+            Text(
+              'F.S. = $fs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qa = $roundedQall kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qn = $roundedQn kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'B ≥ $b m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = 1.2PDL + 1.6PLL (governing case)',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = $pu kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnu = $roundedQnu kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $depth mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for one-way shear (wide-beam shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'x = $x m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = $roundedVuows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = $roundedVucows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows > Vucows, inadequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Recalculated values:',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $newDepthOWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'T = $newtOWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = ${widget.state.finalAnswerVuows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = ${widget.state.finalAnswerVucows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows ≤ Vucows, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for two-way shear (punching shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'as = $as',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'β = $beta',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = $roundedVutws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = $roundedVuctws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws > Vuctws, inadequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Recalculated values:',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $newDepthTWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'T = $newtTWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = ${widget.state.finalAnswerVutws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo2 m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedNewVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedNewVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedNewVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = ${widget.state.finalAnswerVuctws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws ≤ Vuctws, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe d = ${widget.state.finalAnswerD}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe T = ${widget.state.finalAnswerT}',
               style: TextStyle(color: Colors.white),
             ),
           ],
@@ -4080,27 +5108,147 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
             children: [
 // Solution Manager
             if (safetyOWS == 2 && safetyTWS == 2)
-              safeOWSsafeTWS_tws(),
+              safeTWSsafeOWS_tws(),
             if (safetyOWS == 1 && safetyTWS == 2)
-              unsafeOWSsafeTWS_tws(),
+              unsafeTWSsafeOWS_tws(),
             if (safetyOWS == 2 && safetyTWS == 1)
-              safeOWSunsafeTWS_tws(),
+              safeTWSunsafeOWS_tws(),
             if (safetyOWS == 1 && safetyTWS == 1)
-              unsafeOWSunsafeTWS_tws(),
+              unsafeTWSunsafeOWS_tws(),
             ],
           ),
         ),
       ),
     );
   }
-  Widget safeOWSsafeTWS_tws() { // Under
+  Widget safeTWSsafeOWS_tws() { // Under
     return Flexible(
       child: Container(
         width: 445,
         child: Column(
           children: [
             Text(
-              'safe OWS, safe TWS',
+              'safe TWS, safe OWS',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showQUltText)
+            Text(
+              'qult = $qult kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showFSText)
+            Text(
+              'F.S. = $fs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qa = $roundedQall kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qn = $roundedQn kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'B ≥ $b m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = 1.2PDL + 1.6PLL (governing case)',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = $pu kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnu = $roundedQnu kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd1 = $depth1 mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd2 = $depth2 mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $depth mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for two-way shear (punching shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'as = $as',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'β = $beta',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = ${widget.state.finalAnswerVutws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = ${widget.state.finalAnswerVuctws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws ≤ Vuctws, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for one-way shear (wide-beam shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'x = $x m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = ${widget.state.finalAnswerVuows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = ${widget.state.finalAnswerVucows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows ≤ Vucows, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe d = ${widget.state.finalAnswerD}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe T = ${widget.state.finalAnswerT}',
               style: TextStyle(color: Colors.white),
             ),
           ],
@@ -4108,14 +5256,174 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       )
     );
   }
-  Widget unsafeOWSsafeTWS_tws() { // Under
+  Widget unsafeTWSsafeOWS_tws() { // Under
     return Flexible(
       child: Container(
         width: 445,
         child: Column(
           children: [
             Text(
-              'unsafe OWS, safe TWS',
+              'unsafe TWS, safe OWS',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showQUltText)
+            Text(
+              'qult = $qult kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showFSText)
+            Text(
+              'F.S. = $fs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qa = $roundedQall kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qn = $roundedQn kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'B ≥ $b m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = 1.2PDL + 1.6PLL (governing case)',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = $pu kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnu = $roundedQnu kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd1 = $depth1 mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd2 = $depth2 mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $depth mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for two-way shear (punching shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'as = $as',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'β = $beta',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = $roundedVutws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = $roundedVuctws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws > Vuctws, inadequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Recalculated values:',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $newDepthTWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'T = $newtTWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = ${widget.state.finalAnswerVutws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo2 m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedNewVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedNewVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedNewVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = ${widget.state.finalAnswerVuctws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws ≤ Vuctws, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for one-way shear (wide-beam shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'x = $x m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = $roundedVuows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = $roundedVucows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows ≤ Vucows, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe d = ${widget.state.finalAnswerD}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe T = ${widget.state.finalAnswerT}',
               style: TextStyle(color: Colors.white),
             ),
           ],
@@ -4123,14 +5431,158 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       )
     );
   }
-  Widget safeOWSunsafeTWS_tws() { // Under
+  Widget safeTWSunsafeOWS_tws() { // Under
     return Flexible(
       child: Container(
         width: 445,
         child: Column(
           children: [
             Text(
-              'safe OWS, unsafe TWS',
+              'safe TWS, unsafe OWS',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showQUltText)
+            Text(
+              'qult = $qult kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showFSText)
+            Text(
+              'F.S. = $fs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qa = $roundedQall kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qn = $roundedQn kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'B ≥ $b m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = 1.2PDL + 1.6PLL (governing case)',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = $pu kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnu = $roundedQnu kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd1 = $depth1 mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd2 = $depth2 mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $depth mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for two-way shear (punching shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'as = $as',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'β = $beta',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = ${widget.state.finalAnswerVutws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = ${widget.state.finalAnswerVuctws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws ≤ Vuctws, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for one-way shear (wide-beam shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'x = $x m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = $roundedVuows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = $roundedVucows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows > Vucows, inadequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Recalculated values:',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $newDepthOWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'T = $newtOWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = ${widget.state.finalAnswerVuows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = ${widget.state.finalAnswerVucows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows ≤ Vucows, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe d = ${widget.state.finalAnswerD}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe T = ${widget.state.finalAnswerT}',
               style: TextStyle(color: Colors.white),
             ),
           ],
@@ -4138,14 +5590,198 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       )
     );
   }
-  Widget unsafeOWSunsafeTWS_tws() { // Under
+  Widget unsafeTWSunsafeOWS_tws() { // Under
     return Flexible(
       child: Container(
         width: 445,
         child: Column(
           children: [
             Text(
-              'unsafe OWS, unsafe TWS',
+              'unsafe TWS, unsafe OWS',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showQUltText)
+            Text(
+              'qult = $qult kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (showFSText)
+            Text(
+              'F.S. = $fs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qa = $roundedQall kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qn = $roundedQn kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'B ≥ $b m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = 1.2PDL + 1.6PLL (governing case)',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pu = $pu kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnu = $roundedQnu kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd1 = $depth1 mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd2 = $depth2 mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $depth mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for two-way shear (punching shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'as = $as',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'β = $beta',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = $roundedVutws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = $roundedVuctws kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws > Vuctws, inadequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Recalculated values:',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $newDepthTWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'T = $newtTWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws = ${widget.state.finalAnswerVutws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'bo = $bo2 m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc1 = $roundedNewVc1 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc2 = $roundedNewVc2 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vc3 = $roundedNewVc3 kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuctws = ${widget.state.finalAnswerVuctws} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vutws ≤ Vuctws, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Check for one-way shear (wide-beam shear):',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'x = $x m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = $roundedVuows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = $roundedVucows kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows > Vucows, inadequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Recalculated values:',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'd = $newDepthOWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'T = $newtOWS mm',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows = ${widget.state.finalAnswerVuows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vucows = ${widget.state.finalAnswerVucows} kN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Vuows ≤ Vucows, adequate',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe d = ${widget.state.finalAnswerD}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'safe T = ${widget.state.finalAnswerT}',
               style: TextStyle(color: Colors.white),
             ),
           ],

@@ -41,14 +41,15 @@ class AnalysisState {
     bool isGammaMoistEnabled = true;
     bool showResults = false;
     bool scrollToTop = false;
+    bool solutionToggle = true;
+    bool showSolution = false;
+    bool isItStrip = true;
 
 //Final answer, No erasures
     double? finalAnswerP;
     double? finalAnswerUdl;
 
-//syempre, yun tab name hahaaha
+// Tab name
   final String title;
   AnalysisState({required this.title});
 }
-
-//Copy paste mo yan lahat then iadjust nalang kung magbabagong calc

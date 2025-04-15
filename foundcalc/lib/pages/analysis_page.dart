@@ -31,7 +31,12 @@ class AnalysisPage extends StatefulWidget {
   _AnalysisPageState createState() => _AnalysisPageState();
 }
 
-class _AnalysisPageState extends State<AnalysisPage> {
+class _AnalysisPageState extends State<AnalysisPage> 
+with AutomaticKeepAliveClientMixin<AnalysisPage>{
+
+  @override
+  bool get wantKeepAlive => true; 
+
   late ScrollController _scrollController;
 
   late TextEditingController inputDepthFoundation;
@@ -116,10 +121,6 @@ class _AnalysisPageState extends State<AnalysisPage> {
   double? rounded_pf;
   double? rounded_ps;
   double? rounded_uD;
-  
-  bool solutionToggle = true;
-  bool showSolution = false;
-  bool isItStrip = true;
 
   String get displayTitle {
   if (widget.title.startsWith('Analysis')) {
@@ -438,7 +439,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
   }
 
   String get solutionButtonLabel {
-    if (showSolution) {
+    if (widget.state.showSolution) {
       return 'Hide solution';
     } else {
       return 'View solution';
@@ -740,13 +741,13 @@ class _AnalysisPageState extends State<AnalysisPage> {
 
         if (selectedFootingType == 'Square') {
           af = fDim!*fDim!;
-          isItStrip = false;
+          widget.state.isItStrip = false;
         } else if (selectedFootingType == 'Circular') {
           af = 0.25*pi*fDim!*fDim!;
-          isItStrip = false;
+          widget.state.isItStrip = false;
         } else { // Strip is selected
           af = null;
-          isItStrip = true;
+          widget.state.isItStrip = true;
         }
 
         if (af != null) {
@@ -1099,7 +1100,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
                       SizedBox(height: 10),
                       if (widget.state.showResults)
                         solutionButton(),
-                      if (showSolution)
+                      if (widget.state.showSolution)
                         solutionContainer(),
                     ],
                   ),
@@ -1137,7 +1138,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
         inputUnitWeightConcrete.clear();
         setState(() {
           widget.state.showResults = false;
-          showSolution = false;
+          widget.state.showSolution = false;
         });
       },
       style: ElevatedButton.styleFrom(
@@ -1161,13 +1162,13 @@ class _AnalysisPageState extends State<AnalysisPage> {
   }
 
   void toggleSolution() {
-    if (solutionToggle) {
-      showSolution = true;
+    if (widget.state.solutionToggle) {
+      widget.state.showSolution = true;
     } else {
-      showSolution = false;
+      widget.state.showSolution = false;
     }
     setState(() {
-      solutionToggle = !solutionToggle; // Toggle between functions
+      widget.state.solutionToggle = !widget.state.solutionToggle; // Toggle between functions
     });
   }
 
@@ -1523,7 +1524,7 @@ class _AnalysisPageState extends State<AnalysisPage> {
     return Visibility(
     visible: widget.state.showResults,
     child: Text(
-      '${isItStrip ? "w" : "P"} = ${isItStrip ? (widget.state.finalAnswerUdl) : (widget.state.finalAnswerP)} ${isItStrip ? "kN/m" : "kN"}',
+      '${widget.state.isItStrip ? "w" : "P"} = ${widget.state.isItStrip ? (widget.state.finalAnswerUdl) : (widget.state.finalAnswerP)} ${widget.state.isItStrip ? "kN/m" : "kN"}',
       style: TextStyle(
         color: Colors.white,
         fontWeight: FontWeight.bold, 

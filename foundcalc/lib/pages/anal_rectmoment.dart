@@ -104,6 +104,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   // solvar (solution variables)
   double? sum;
 
+  double? q;
+
   // toggles
   bool showResults = false;
 
@@ -367,6 +369,19 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       showResults = true;
     });
     */
+  
+    double q = 325.4927;
+    double col = 0.5;
+    double F = sqrt(24);
+    double L = 1;
+    double B = 3.575;
+
+    double a = -(q + 990*L*F);
+    double b_quad = -(4000*q*col + 1980000*L*F*col);
+    double c = 4000000*q*((B*B)-(col*col));
+
+    double d = (-b_quad - sqrt((b_quad*b_quad)-(4*a*c)))/(2*a);
+    print('d = $d');
   }  // calcQ
 
 
