@@ -16,9 +16,21 @@ class AnalRectMomentState {
   String inputGammaSat = '';
 
   // Toggles for unit weights
-  bool isGammaSatEnabled = true;
+  bool isGammaSatEnabled = false;
   bool isGammaDryEnabled = true;
   bool isGammaMoistEnabled = true;
+
+  // Concentrated Load
+  String inputPU = '';
+  String inputPDL = '';
+  String inputPLL = '';
+  bool pLoadCombi = false;
+
+  // Moment
+  String inputMU = '';
+  String inputMDL = '';
+  String inputMLL = '';
+  bool mLoadCombi = false;
 
   AnalRectMomentState({
     required this.title,

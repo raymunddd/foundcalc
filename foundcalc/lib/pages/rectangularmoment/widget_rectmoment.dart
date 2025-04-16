@@ -511,7 +511,7 @@ class RectMomentWidgets {
       ),
     );
   }
-
+  
   // Row 1 widget
   static Widget row1({
     required BuildContext context,
@@ -582,7 +582,7 @@ class RectMomentWidgets {
     );
   }
 
-  // Row 1 widget
+  // Row 2 widget
   static Widget row2({
     required BuildContext context,
     required TextEditingController inputNumberTwo,
@@ -599,7 +599,7 @@ class RectMomentWidgets {
               child: SizedBox(
                 width: 150,
                 child: Text(
-                  '1st number to be added:',
+                  '2nd number to be added:',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -650,10 +650,9 @@ class RectMomentWidgets {
         ),
       ),        
     );
+  }
 
-}
-
-// Row 1 widget
+  // Row 3 widget
   static Widget row3({
     required BuildContext context,
     required TextEditingController inputNumberThree,
@@ -670,7 +669,7 @@ class RectMomentWidgets {
               child: SizedBox(
                 width: 150,
                 child: Text(
-                  '1st number to be added:',
+                  '3rd number to be added:',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -721,76 +720,6 @@ class RectMomentWidgets {
         ),
       ),        
     );
-}
-
-// Row 1 widget
-  static Widget row4({
-    required BuildContext context,
-    required TextEditingController inputNumberFour,
-  }) {
-    return Padding(
-      padding: EdgeInsets.only(top: 20),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        constraints: BoxConstraints(maxWidth: 500),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Flexible(
-              child: SizedBox(
-                width: 150,
-                child: Text(
-                  '1st number to be added:',
-                  style: TextStyle(color: Colors.white),
-                ),
-              )
-            ),
-            SizedBox(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
-                ),
-                child: SizedBox(
-                  height: 40,
-                  child: TextField(
-                    controller: inputNumberFour,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')),
-                    ],
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Input required",
-                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[800],
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          Icons.clear, 
-                          color: Colors.white54,
-                        ),
-                        iconSize: 17,
-                        onPressed: () {
-                          inputNumberFour.clear();
-                        },
-                      ),
-                    ),
-                  )
-                )
-              ),
-            ),
-          ],
-        ),
-      ),        
-    );
-}
+  }
 }
 

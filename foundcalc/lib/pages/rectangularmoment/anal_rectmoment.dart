@@ -5,7 +5,8 @@ import 'package:flutter/material.dart';
 import '../../settings/anal_rectmoment_state.dart';
 import 'package:flutter/services.dart';
 import 'dart:math';
-import 'widget_rectmoment.dart';
+import 'package:foundcalc/pages/rectangularmoment/widget_rectmoment.dart';
+import 'package:foundcalc/pages/rectangularmoment/widget_rectmoment_loads.dart';
 
 //Widget class
   class AnalRectMomentPage extends StatefulWidget {
@@ -59,6 +60,18 @@ import 'widget_rectmoment.dart';
   late TextEditingController inputGammaMoist;
   late TextEditingController inputGammaSat;
 
+  // Concentrated Load Controllers
+  late TextEditingController inputPU;
+  late TextEditingController inputPDL;
+  late TextEditingController inputPLL;
+  bool pLoadCombi = false;
+
+  // Moment Controllers
+  late TextEditingController inputMU;
+  late TextEditingController inputMDL;
+  late TextEditingController inputMLL;
+  bool mLoadCombi = false;
+
   double? one;
   double? two;
   double? three;
@@ -88,6 +101,18 @@ import 'widget_rectmoment.dart';
       inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
       inputGammaSat = TextEditingController(text: widget.state.inputGammaSat);
 
+      // Concentrated Load Controllers
+      inputPU = TextEditingController(text: widget.state.inputPU);
+      inputPDL = TextEditingController(text: widget.state.inputPDL);
+      inputPLL = TextEditingController(text: widget.state.inputPLL);
+      pLoadCombi = widget.state.pLoadCombi;
+
+      // Moment Controllers
+      inputMU = TextEditingController(text: widget.state.inputMU);
+      inputMDL = TextEditingController(text: widget.state.inputMDL);
+      inputMLL = TextEditingController(text: widget.state.inputMLL);
+      mLoadCombi = widget.state.mLoadCombi;
+
       // listeners
       inputNumberOne.addListener(_updateState);
       inputNumberTwo.addListener(_updateState);
@@ -98,6 +123,12 @@ import 'widget_rectmoment.dart';
       inputGammaDry.addListener(_updateState);
       inputGammaMoist.addListener(_updateState);
       inputGammaSat.addListener(_updateState);
+      inputPU.addListener(_updateState);
+      inputPDL.addListener(_updateLoadCombination);
+      inputPLL.addListener(_updateLoadCombination);
+      inputMU.addListener(_updateState);
+      inputMDL.addListener(_updateMomentLoadCombination);
+      inputMLL.addListener(_updateMomentLoadCombination);
     }
 
   //Updating
@@ -128,7 +159,7 @@ import 'widget_rectmoment.dart';
         widget.state.inputNumberOne = inputNumberOne.text;
         widget.state.inputNumberTwo = inputNumberTwo.text;
         widget.state.inputNumberThree = inputNumberThree.text;
-        widget.state.soilProp = soilProp; // Update soil properties state
+        widget.state.soilProp = soilProp;
 
         // Update soil properties state
         widget.state.inputSpecificGravity = inputSpecificGravity.text;
@@ -138,28 +169,67 @@ import 'widget_rectmoment.dart';
         widget.state.inputGammaMoist = inputGammaMoist.text;
         widget.state.inputGammaSat = inputGammaSat.text;
 
-        // Update unit weight toggles
-        if (inputGammaMoist.text.isNotEmpty) {
-          widget.state.isGammaDryEnabled = false;
-        } else {
-          widget.state.isGammaDryEnabled = true;
-        }
+        // Update concentrated load state
+        widget.state.inputPU = inputPU.text;
+        widget.state.inputPDL = inputPDL.text;
+        widget.state.inputPLL = inputPLL.text;
+        widget.state.pLoadCombi = pLoadCombi;
 
+        // Update moment state
+        widget.state.inputMU = inputMU.text;
+        widget.state.inputMDL = inputMDL.text;
+        widget.state.inputMLL = inputMLL.text;
+        widget.state.mLoadCombi = mLoadCombi;
+
+        // Handle mutual exclusivity between GammaDry and GammaMoist
         if (inputGammaDry.text.isNotEmpty) {
+          widget.state.isGammaDryEnabled = true;
           widget.state.isGammaMoistEnabled = false;
+          inputGammaMoist.clear(); // Clear GammaMoist if GammaDry has input
+        } else if (inputGammaMoist.text.isNotEmpty) {
+          widget.state.isGammaDryEnabled = false;
+          widget.state.isGammaMoistEnabled = true;
+          inputGammaDry.clear(); // Clear GammaDry if GammaMoist has input
         } else {
+          // If both are empty, both are enabled
+          widget.state.isGammaDryEnabled = true;
           widget.state.isGammaMoistEnabled = true;
         }
 
-        if (inputGammaSat.text.isNotEmpty) {
-          widget.state.isGammaSatEnabled = false;
-        } else {
-          widget.state.isGammaSatEnabled = true;
-        }
+        // GammaSat is always disabled
+        widget.state.isGammaSatEnabled = false;
 
         widget.onStateChanged(widget.state);
       });
     }
+
+  // Update load combination
+  void _updateLoadCombination() {
+    if (pLoadCombi) {
+      double? pdl = double.tryParse(inputPDL.text);
+      double? pll = double.tryParse(inputPLL.text);
+      
+      if (pdl != null && pll != null) {
+        double pu = 1.2 * pdl + 1.6 * pll;
+        inputPU.text = pu.toStringAsFixed(2);
+      }
+    }
+    _updateState();
+  }
+
+  // Update moment load combination
+  void _updateMomentLoadCombination() {
+    if (mLoadCombi) {
+      double? mdl = double.tryParse(inputMDL.text);
+      double? mll = double.tryParse(inputMLL.text);
+      
+      if (mdl != null && mll != null) {
+        double mu = 1.2 * mdl + 1.6 * mll;
+        inputMU.text = mu.toStringAsFixed(2);
+      }
+    }
+    _updateState();
+  }
 
   //Calculation Functions
   void addNumbers() {
@@ -282,6 +352,50 @@ import 'widget_rectmoment.dart';
                           isGammaSatEnabled: widget.state.isGammaSatEnabled,
                         ),
                       ),
+                      RectMomentLoadWidgets.concentratedLoad(
+                        context: context,
+                        inputPU: inputPU,
+                        pLoadCombi: pLoadCombi,
+                        onPLoadCombiChanged: (value) {
+                          setState(() {
+                            pLoadCombi = value;
+                            if (value) {
+                              inputPU.clear();
+                            }
+                            _updateState();
+                          });
+                        },
+                      ),
+                      Visibility(
+                        visible: pLoadCombi,
+                        child: RectMomentLoadWidgets.ploadCombination(
+                          context: context,
+                          inputPDL: inputPDL,
+                          inputPLL: inputPLL,
+                        ),
+                      ),
+                      RectMomentLoadWidgets.momentLoad(
+                        context: context,
+                        inputMU: inputMU,
+                        mLoadCombi: mLoadCombi,
+                        onMLoadCombiChanged: (value) {
+                          setState(() {
+                            mLoadCombi = value;
+                            if (value) {
+                              inputMU.clear();
+                            }
+                            _updateState();
+                          });
+                        },
+                      ),
+                      Visibility(
+                        visible: mLoadCombi,
+                        child: RectMomentLoadWidgets.momentLoadCombination(
+                          context: context,
+                          inputMDL: inputMDL,
+                          inputMLL: inputMLL,
+                        ),
+                      ),
                       RectMomentWidgets.row1(
                         context: context,
                         inputNumberOne: inputNumberOne,
@@ -337,6 +451,16 @@ void dispose() {
   inputGammaDry.dispose();
   inputGammaMoist.dispose();
   inputGammaSat.dispose();
+  
+  // Clean up concentrated load controllers
+  inputPU.dispose();
+  inputPDL.dispose();
+  inputPLL.dispose();
+  
+  // Clean up moment controllers
+  inputMU.dispose();
+  inputMDL.dispose();
+  inputMLL.dispose();
   
   // Always call super.dispose() last
     super.dispose();
