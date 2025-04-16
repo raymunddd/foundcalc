@@ -8,6 +8,8 @@ import 'settings/design_state.dart';   // Import DesignState
 import 'settings/anal_rectmoment_state.dart'; // Import AnalRectMomentState
 
 class TabbedHomePage extends StatefulWidget {
+  const TabbedHomePage({super.key});
+
   @override
   _TabbedHomePageState createState() => _TabbedHomePageState();
 }
@@ -16,7 +18,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     with TickerProviderStateMixin { // For TabController
 
   late TabController _tabController;
-  List<String> _tabs = ['Home']; // Initial tabs - Removed Analysis 1 and Design 1 from here
+  final List<String> _tabs = ['Home']; // Initial tabs - Removed Analysis 1 and Design 1 from here
   int _tabCounter = 1; // Start counter at 1 (Home is already tab 0)
   List<String> analysisItems = []; // Initialize empty
   List<String> designItems = [];   // Initialize empty
@@ -470,7 +472,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                 ],
               );
             }
-          }).toList(),
+          }),
         ],
       ),
     );

@@ -21,7 +21,7 @@ class AnalysisPage extends StatefulWidget {
   final AnalysisState state;
   final Function(AnalysisState) onStateChanged;
 
-  AnalysisPage({
+  const AnalysisPage({super.key, 
     required this.title,
     required this.state,
     required this.onStateChanged,
@@ -1130,7 +1130,7 @@ String? selectedFootingType = 'Square';
   }
   Widget solution1() {
     return Flexible(
-      child: Container(
+      child: SizedBox(
         width: 445,
         child: Column(
           children: [
@@ -1221,7 +1221,7 @@ String? selectedFootingType = 'Square';
   }
   Widget solution2() {
     return Flexible(
-      child: Container(
+      child: SizedBox(
         width: 445,
         child: Column(
           children: [
@@ -1308,7 +1308,7 @@ String? selectedFootingType = 'Square';
   }
   Widget solution3() {
     return Flexible(
-      child: Container(
+      child: SizedBox(
         width: 445,
         child: Column(
           children: [
@@ -1371,7 +1371,7 @@ String? selectedFootingType = 'Square';
   }
   Widget solution4() {
     return Flexible(
-      child: Container(
+      child: SizedBox(
         width: 445,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -1570,7 +1570,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 150,
                 child: Text(
                   'Depth of foundation, Df (in m):',
@@ -1578,7 +1578,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -1636,7 +1636,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 150,
                 child: Text(
                   footingDetLabel,
@@ -1644,7 +1644,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -1702,7 +1702,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 150,
                 child: Text(
                   'Cohesion, c (in kPa):',
@@ -1710,7 +1710,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -1768,7 +1768,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 150,
                 child: Text(
                   'Depth of the water table from ground level, Dw (in m):',
@@ -1776,7 +1776,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -1834,7 +1834,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 150,
                 child: Text(
                   'Footing thickness, t (in m):',
@@ -1842,7 +1842,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -1900,7 +1900,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 150,
                 child: Text(
                   'Factor of safety:',
@@ -1908,7 +1908,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -1967,7 +1967,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 150,
                 child: Text(
                   'Soil properties',
@@ -1975,7 +1975,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -2040,7 +2040,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Specific gravity of soil solids, Gs:',
@@ -2048,7 +2048,7 @@ String? selectedFootingType = 'Square';
               ),
             )
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2107,7 +2107,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Void ratio, e:',
@@ -2115,7 +2115,7 @@ String? selectedFootingType = 'Square';
               ),
             )
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2174,7 +2174,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Water content, ω (%):',
@@ -2182,7 +2182,7 @@ String? selectedFootingType = 'Square';
               ),
             )
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2293,7 +2293,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Dry/bulk unit weight, γdry (in kN/m³):',
@@ -2301,7 +2301,7 @@ String? selectedFootingType = 'Square';
               ),
             ),
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2361,7 +2361,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Moist unit weight, γ (in kN/m³):',
@@ -2369,7 +2369,7 @@ String? selectedFootingType = 'Square';
               ),
             ),
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2429,7 +2429,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Saturated unit weight, γsat (in kN/m³):',
@@ -2437,7 +2437,7 @@ String? selectedFootingType = 'Square';
               ),
             ),
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2502,7 +2502,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 120,
                 child: Text(
                   'Angle of internal friction',
@@ -2510,7 +2510,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -2594,7 +2594,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Angle of internal friction, θ (in degrees):',
@@ -2602,7 +2602,7 @@ String? selectedFootingType = 'Square';
               ),
             )
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2693,7 +2693,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Cohesion factor, Nc:',
@@ -2701,7 +2701,7 @@ String? selectedFootingType = 'Square';
               ),
             ),
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2760,7 +2760,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Overburden factor, Nq:',
@@ -2768,7 +2768,7 @@ String? selectedFootingType = 'Square';
               ),
             ),
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2827,7 +2827,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Unit weight factor, Nγ:',
@@ -2835,7 +2835,7 @@ String? selectedFootingType = 'Square';
               ),
             ),
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -2898,7 +2898,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 120,
                 child: Text(
                   'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
@@ -2906,7 +2906,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -2967,7 +2967,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Unit weight of water, γw (in kN/m³):',
@@ -2975,7 +2975,7 @@ String? selectedFootingType = 'Square';
               ),
             )
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(
@@ -3038,7 +3038,7 @@ String? selectedFootingType = 'Square';
           mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
             Flexible(
-              child: Container(
+              child: SizedBox(
                 width: 120,
                 child: Text(
                   'Unit weight of concrete (assumed as 24 kN/m³ if not given)',
@@ -3046,7 +3046,7 @@ String? selectedFootingType = 'Square';
                 ),
               )
             ),
-            Container(
+            SizedBox(
               width: 179,
               child: TextSelectionTheme(
                 data: TextSelectionThemeData(
@@ -3107,7 +3107,7 @@ String? selectedFootingType = 'Square';
         mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
         children: [
           Flexible(
-            child: Container(
+            child: SizedBox(
               width: 120,
               child: Text(
                 'Unit weight of concrete, γconc. (in kN/m³):',
@@ -3115,7 +3115,7 @@ String? selectedFootingType = 'Square';
               ),
             )
           ),
-          Container(
+          SizedBox(
             width: 179,
             child: TextSelectionTheme(
               data: TextSelectionThemeData(

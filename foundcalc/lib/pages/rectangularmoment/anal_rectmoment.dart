@@ -13,7 +13,7 @@ import 'widget_rectmoment.dart';
     final AnalRectMomentState state;
     final Function(AnalRectMomentState) onStateChanged;
 
-    AnalRectMomentPage({
+    const AnalRectMomentPage({super.key, 
       required this.title,
       required this.state,
       required this.onStateChanged,
@@ -51,11 +51,20 @@ import 'widget_rectmoment.dart';
   late TextEditingController inputNumberTwo;
   late TextEditingController inputNumberThree;
 
+  // Soil Properties Controllers
+  late TextEditingController inputSpecificGravity;
+  late TextEditingController inputWaterContent;
+  late TextEditingController inputVoidRatio;
+  late TextEditingController inputGammaDry;
+  late TextEditingController inputGammaMoist;
+  late TextEditingController inputGammaSat;
+
   double? one;
   double? two;
   double? three;
 
   double? sum;
+  bool soilProp = false; // Add soil properties state
 
   bool showResults = false;
 
@@ -69,11 +78,26 @@ import 'widget_rectmoment.dart';
       inputNumberOne = TextEditingController(text: widget.state.inputNumberOne);
       inputNumberTwo = TextEditingController(text: widget.state.inputNumberTwo);
       inputNumberThree = TextEditingController(text: widget.state.inputNumberThree);
+      soilProp = widget.state.soilProp; // Initialize soil properties state
+
+      // Soil Properties Controllers
+      inputSpecificGravity = TextEditingController(text: widget.state.inputSpecificGravity);
+      inputWaterContent = TextEditingController(text: widget.state.inputWaterContent);
+      inputVoidRatio = TextEditingController(text: widget.state.inputVoidRatio);
+      inputGammaDry = TextEditingController(text: widget.state.inputGammaDry);
+      inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
+      inputGammaSat = TextEditingController(text: widget.state.inputGammaSat);
 
       // listeners
       inputNumberOne.addListener(_updateState);
       inputNumberTwo.addListener(_updateState);
       inputNumberThree.addListener(_updateState);
+      inputSpecificGravity.addListener(_updateState);
+      inputWaterContent.addListener(_updateState);
+      inputVoidRatio.addListener(_updateState);
+      inputGammaDry.addListener(_updateState);
+      inputGammaMoist.addListener(_updateState);
+      inputGammaSat.addListener(_updateState);
     }
 
   //Updating
@@ -104,9 +128,36 @@ import 'widget_rectmoment.dart';
         widget.state.inputNumberOne = inputNumberOne.text;
         widget.state.inputNumberTwo = inputNumberTwo.text;
         widget.state.inputNumberThree = inputNumberThree.text;
+        widget.state.soilProp = soilProp; // Update soil properties state
+
+        // Update soil properties state
+        widget.state.inputSpecificGravity = inputSpecificGravity.text;
+        widget.state.inputWaterContent = inputWaterContent.text;
+        widget.state.inputVoidRatio = inputVoidRatio.text;
+        widget.state.inputGammaDry = inputGammaDry.text;
+        widget.state.inputGammaMoist = inputGammaMoist.text;
+        widget.state.inputGammaSat = inputGammaSat.text;
+
+        // Update unit weight toggles
+        if (inputGammaMoist.text.isNotEmpty) {
+          widget.state.isGammaDryEnabled = false;
+        } else {
+          widget.state.isGammaDryEnabled = true;
+        }
+
+        if (inputGammaDry.text.isNotEmpty) {
+          widget.state.isGammaMoistEnabled = false;
+        } else {
+          widget.state.isGammaMoistEnabled = true;
+        }
+
+        if (inputGammaSat.text.isNotEmpty) {
+          widget.state.isGammaSatEnabled = false;
+        } else {
+          widget.state.isGammaSatEnabled = true;
+        }
 
         widget.onStateChanged(widget.state);
-
       });
     }
 
@@ -200,6 +251,37 @@ import 'widget_rectmoment.dart';
 
                 //Dito ko na ilagay mga widgets (imported from widget_rectmoment.dart)
                     children: [
+                      RectMomentWidgets.soilProperties(
+                        context: context,
+                        soilProp: soilProp,
+                        onSoilPropChanged: (value) {
+                          setState(() {
+                            soilProp = value;
+                            _updateState();
+                          });
+                        },
+                      ),
+                      Visibility(
+                        visible: soilProp,
+                        child: RectMomentWidgets.soilPropertiesOn(
+                          context: context,
+                          inputSpecificGravity: inputSpecificGravity,
+                          inputVoidRatio: inputVoidRatio,
+                          inputWaterContent: inputWaterContent,
+                        ),
+                      ),
+                      Visibility(
+                        visible: !soilProp,
+                        child: RectMomentWidgets.soilPropertiesOff(
+                          context: context,
+                          inputGammaDry: inputGammaDry,
+                          inputGammaMoist: inputGammaMoist,
+                          inputGammaSat: inputGammaSat,
+                          isGammaDryEnabled: widget.state.isGammaDryEnabled,
+                          isGammaMoistEnabled: widget.state.isGammaMoistEnabled,
+                          isGammaSatEnabled: widget.state.isGammaSatEnabled,
+                        ),
+                      ),
                       RectMomentWidgets.row1(
                         context: context,
                         inputNumberOne: inputNumberOne,
@@ -212,16 +294,7 @@ import 'widget_rectmoment.dart';
                         context: context,
                         inputNumberThree: inputNumberThree,
                       ),
-                      RectMomentWidgets.row4(
-                        context: context,
-                        selectedOperation: selectedOperation,
-                        operations: operations,
-                        onOperationChanged: (newValue) {
-                          setState(() {
-                            selectedOperation = newValue;
-                          });
-                        },
-                      ),
+
                       RectMomentWidgets.submitButton(
                         addNumbers: addNumbers,
                         updateShowResults: (value) {
@@ -256,6 +329,14 @@ void dispose() {
   inputNumberTwo.dispose();
   inputNumberThree.dispose();
   _scrollController.dispose();
+  
+  // Clean up soil properties controllers
+  inputSpecificGravity.dispose();
+  inputWaterContent.dispose();
+  inputVoidRatio.dispose();
+  inputGammaDry.dispose();
+  inputGammaMoist.dispose();
+  inputGammaSat.dispose();
   
   // Always call super.dispose() last
     super.dispose();

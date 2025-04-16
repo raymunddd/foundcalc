@@ -6,7 +6,7 @@ class DesignPage extends StatefulWidget {
   final DesignState state;
   final Function(DesignState) onStateChanged;
 
-  DesignPage({
+  const DesignPage({super.key, 
     required this.title,
     required this.state,
     required this.onStateChanged,
