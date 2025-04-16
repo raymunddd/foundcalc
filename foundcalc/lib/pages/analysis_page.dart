@@ -381,7 +381,6 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
     super.dispose();
   }
 
-
   String get gammaSatHint {
     if (widget.state.isGammaSatEnabled) {
       return 'Input required';
