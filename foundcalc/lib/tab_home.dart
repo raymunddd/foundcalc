@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'pages/analysis_page.dart'; // Import AnalysisPage
-import 'pages/design_page.dart';   // Import DesignPage
+import 'pages/design_page.dart' as design;   // Import DesignPage with alias
 import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'pages/about_page.dart';    // Import AboutPage
+import 'pages/combined_footing.dart' as combined; // Import combined footing with alias
 import 'settings/analysis_state.dart'; // Import AnalysisState
 import 'settings/design_state.dart';   // Import DesignState
+import 'settings/combined_footing_state.dart'; // Import CombinedFootingState
 import 'settings/anal_rectmoment_state.dart'; // Import AnalRectMomentState
 
 class TabbedHomePage extends StatefulWidget {
@@ -21,9 +23,11 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   List<String> analysisItems = []; // Initialize empty
   List<String> designItems = [];   // Initialize empty
   List<String> analRectMomentItems = []; // Initialize empty for RectMoment
+  List<String> combinedFootingItems = []; // Initialize empty for Combined Footing
   Map<String, AnalysisState> analysisStates = {};
   Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize empty
   Map<String, DesignState> designStates = {};
+  Map<String, CombinedFootingState> combinedFootingStates = {}; // Changed to CombinedFootingState
 
 
 
@@ -152,6 +156,43 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     });
   }
 
+//COMBINED FOOTING
+  void _addCombinedFootingItem() {
+    setState(() {
+      int nextNumber = _getNextNumber(combinedFootingItems, "Combined");
+      String newItem = 'Combined $nextNumber';
+      combinedFootingItems.add(newItem);
+      combinedFootingStates[newItem] = CombinedFootingState(title: newItem); // Create state using CombinedFootingState
+
+      _tabs.add(newItem); // Add to tabs list for display
+      _tabController = TabController(length: _tabs.length, vsync: this);
+      _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
+      _tabCounter++;
+    });
+  }
+
+  void _removeCombinedFootingItem(int index) {
+    setState(() {
+      String tabToRemove = _tabs[index];
+      int combinedIndex = combinedFootingItems.indexOf(tabToRemove);
+      
+      if (combinedIndex != -1) {
+        // Remove from combinedFootingItems and states
+        String removedTab = combinedFootingItems.removeAt(combinedIndex);
+        combinedFootingStates.remove(removedTab);
+
+        // Remove from tabs
+        _tabs.removeAt(index);
+        
+        // UPDATE
+        _tabController = TabController(length: _tabs.length, vsync: this);
+        if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
+          _tabController.animateTo(_tabs.length - 1);
+        }
+      }
+    });
+  }
+
 
   /*TEMPLATE KUNG LALAGAY NG IBA PANG CALC
         
@@ -246,6 +287,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                               _removeDesignItem(index);
                             } else if (title.startsWith('RectMoment')) {
                               _removeAnalRectMomentItem(index);
+                            } else if (title.startsWith('Combined')) {
+                              _removeCombinedFootingItem(index);
                             }
                           });
                         },
@@ -350,6 +393,31 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     },
                   ),
               ],
+              if (combinedFootingItems.isNotEmpty) ...[
+                ListTile(
+                  tileColor: Color(0xFF414141),
+                  title: Text(
+                    'Combined Footing',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                for (int i = 0; i < combinedFootingItems.length; i++)
+                  ListTile(
+                    tileColor: Color(0xFF414141),
+                    title: Text(
+                      combinedFootingItems[i],
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.white),
+                      onPressed: () => _removeCombinedFootingItem(analysisItems.length + designItems.length + analRectMomentItems.length + i + 1),
+                    ),
+                    onTap: () {
+                      _tabController.animateTo(analysisItems.length + designItems.length + analRectMomentItems.length + i + 1);
+                      Navigator.of(context).pop(); // Close the drawer
+                    },
+                  ),
+              ],
               
               /*
               if (<[NameNgCalc]>Items.isNotEmpty) ...[
@@ -411,7 +479,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Welcome to Block B’s Footing Calculator!",
+                      "Welcome to Block B's Footing Calculator!",
                       style: TextStyle(
                         fontSize: 24,
                         color: Colors.white,
@@ -454,6 +522,15 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       ),
                       onPressed: _addAnalRectMomentItem,
                       child: Text("Analysis of Rectangular Footings with Moment"),
+                    ),
+                    SizedBox(height: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF1F538D),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: _addCombinedFootingItem,
+                      child: Text("Combined Footing"),
                     ),
                   ],
                 ),
@@ -523,10 +600,38 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                 ],
               );
             }
+            else if (title.startsWith('Combined')) {
+              return Stack(
+                children: [
+                  combined.DesignPage(
+                    title: title,
+                    state: combinedFootingStates[title]!,
+                    onStateChanged: (newState) {
+                      combinedFootingStates[title] = newState;
+                    },
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: Color(0xFF1F538D),
+                      mini: true,
+                      child: Icon(Icons.arrow_upward, color: Colors.white),
+                      onPressed: () {
+                        if (title.startsWith('Combined')) {
+                          combinedFootingStates[title]!.scrollToTop = true;
+                          setState(() {}); // Trigger rebuild to pass the message
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }
             else {
               return Stack(
                 children: [
-                  DesignPage(
+                  design.DesignPage(
                     title: title,
                     state: designStates[title]!,
                     onStateChanged: (newState) {

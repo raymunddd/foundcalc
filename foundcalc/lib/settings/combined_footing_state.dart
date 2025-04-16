@@ -1,4 +1,4 @@
-class DesignState {
+class CombinedFootingState {
 
   // Dropdowns
   String? colClass;
@@ -64,5 +64,5 @@ class DesignState {
     double? finalAnswerVutws;
     double? finalAnswerVuctws;
 
-  DesignState({required this.title});
+  CombinedFootingState({required this.title});
 }
