@@ -55,14 +55,10 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   late TextEditingController inputFactorMoment;
 
   late TextEditingController inputOtherDia;
-  
-  /*
-  late TextEditingController inputDf;
-  late TextEditingController inputDw;
-  late TextEditingController inputGammaDry;
-  late TextEditingController inputGammaMoist;
-  */
 
+  late TextEditingController inputFc;
+  late TextEditingController inputFy;
+  
   // solvar (solution variables)
 
   double? length_a;
@@ -81,12 +77,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
   double? otherDia;
 
-  /*
-  double? df; 
-  double? dw; 
-  double? y; 
-  double? yDry; 
-  */
+  double? fc;
+  double? fy;
 
   // toggles
   bool showSolution = false;
@@ -111,40 +103,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     'Left side (within Column A)',
     'Right side (within Column B)',
   ];
-
-  /*
-  String get soilPropOffHeaderrr {
-    if (widget.state.isGammaSatEnabled) {
-      return 'Input only two (2)';
-    } else {
-      return 'Input only one (1)';
-    }
-  }
-
-  String get gammaDryHint {
-    if (widget.state.isGammaDryEnabled) {
-      return '';
-    } else {
-      return 'Input not required';
-    }
-  }
-
-  String get gammaMoistHint {
-    if (widget.state.isGammaMoistEnabled) {
-      return '';
-    } else {
-      return 'Input not required';
-    }
-  }
-
-  String get gammaSatHint {
-    if (widget.state.isGammaSatEnabled) {
-      return 'Input required';
-    } else {
-      return 'Input not required';
-    }
-  }
-  */
 
   String get solutionButtonLabel {
     if (widget.state.showSolution) {
@@ -179,13 +137,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     inputOtherDia = TextEditingController(text: widget.state.inputOtherDia);
 
-    /*
-    inputDf = TextEditingController(text: widget.state.inputDf);
-    inputDw = TextEditingController(text: widget.state.inputDw);
-    inputGammaDry = TextEditingController(text: widget.state.inputGammaDry);
-    inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
-    */
-    
+    inputFc = TextEditingController(text: widget.state.inputFc);
+    inputFy = TextEditingController(text: widget.state.inputFy);
 
     // for dropdowns
 
@@ -211,6 +164,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputFactorMoment.addListener(_updateState);
 
     inputOtherDia.addListener(_updateState);
+
+    inputFc.addListener(_updateState);
+    inputFy.addListener(_updateState);
   }
 
   void _updateState() {
@@ -232,6 +188,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.inputFactorMoment = inputFactorMoment.text;
 
       widget.state.inputOtherDia = inputOtherDia.text;
+
+      widget.state.inputFc = inputOtherDia.text;
+      widget.state.inputFy = inputOtherDia.text;
 
       //calculate();
 
@@ -262,6 +221,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputFactorMoment.dispose();
 
     inputOtherDia.dispose();
+
+    inputFc.dispose();
+    inputFy.dispose();
   }
 
   double roundUpToNearest25(double value) {
@@ -289,6 +251,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     shear_h = double.tryParse(inputShear_h.text);
     shear_i = double.tryParse(inputShear_i.text);
 
+    factorShear = double.tryParse(inputFactorShear.text);
+    factorMoment = double.tryParse(inputFactorMoment.text);
+
+    otherDia = double.tryParse(inputOtherDia.text);
+
+    fc = double.tryParse(inputFc.text);
+    fy = double.tryParse(inputFy.text);
+
+    // pang-test ko lang ng submit button ’to, palitan mo na lang
     if (length_a != null) {
       setState(() {
         widget.state.showResults = true;
@@ -364,6 +335,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                       if (barDia == 'Others')
                         entryOtherDia(),
                       dropdownSide(),
+                      entryFc(),
+                      entryFy(),
 
                       SizedBox(height: 10),
                       buttonSubmit(),
@@ -1387,6 +1360,138 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       ),
     );
   } // dropdownSide
+  Widget entryFc() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  "Compressive strength of concrete, fc' (in MPa):",
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputFc,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputFc.clear();
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // entryFc
+  Widget entryFy() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  "Yield strength of steel, fy (in MPa):",
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputFy,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputFy.clear();
+                        },
+                      ),
+                    ),
+                  ),
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // entryFy
 
   Widget buttonSubmit() {
     return ElevatedButton(
