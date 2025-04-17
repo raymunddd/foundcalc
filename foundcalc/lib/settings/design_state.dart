@@ -40,9 +40,6 @@ class DesignState {
   bool botToggle = false;
   bool soilProp = true;
   bool weightPressures = false;
-  bool ccToggle = false;
-  bool concreteToggle = false;
-  bool waterToggle = false;
   bool concreteDet = false;
   bool waterDet = false;
   bool otherMat = false;

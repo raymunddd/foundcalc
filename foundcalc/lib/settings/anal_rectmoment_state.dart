@@ -14,6 +14,7 @@ class AnalRectMomentState {
   String inputC2 = '';
   String inputT = '';
   String inputDf = '';
+  String inputHf = '';
   String inputDw = '';
 
   String inputPDL = '';
@@ -75,6 +76,18 @@ class AnalRectMomentState {
   bool isGammaMoistEnabled = true;
 
   bool scrollToTop = false;
+
+  bool showResultsAnalysis = false;
+  bool solutionToggleAnalysis = true;
+  bool showSolutionAnalysis = false;
+  
+  bool showResultsDesign = false;
+  bool solutionToggleDesign = true;
+  bool showSolutionDesign = false;
+
+  // final answer
+  double? finalQgmin;
+  double? finalQgmax;
 
   AnalRectMomentState({required this.title});
 }

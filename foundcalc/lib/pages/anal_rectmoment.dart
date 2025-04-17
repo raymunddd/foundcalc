@@ -48,6 +48,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   late TextEditingController inputC2;
   late TextEditingController inputT;
   late TextEditingController inputDf;
+  late TextEditingController inputHf;
   late TextEditingController inputDw;
 
   late TextEditingController inputPDL;
@@ -89,6 +90,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? c2;
   double? t;
   double? df;
+  double? hf;
   double? dw;
 
   double? pdl;
@@ -111,6 +113,10 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? y; 
   double? ySat;
 
+  double? fLoad;
+  double? fThick;
+  double? yMatInput;
+
   double? yc;
   double? yw;
 
@@ -123,9 +129,50 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? p;
   double? m;
   double? h;
+  double? mf;
+  double? hMomentArm;
+  double? ecc;
+  double? eUplift;
+  bool? uplift;
+
+  double? pOverBL;
+  double? sixMfOverBL2;
+  double? qmin;
+  double? qmax;
+  double? qgmin;
+  double? qgmax;
+  double? yMat;
+  double? qy;
+  double? qn;
+  double? qo;
+  
+  // soldesign
+  double? depth1;
+  double? depth2;
+  double? dp;
+  double? x3;
+  double? q3;
+
+  // for solution container
+  double? roundedEcc;
+  double? rounded_eUplift;
+  double? roundedPoverbl;
+  double? roundedSixMfOverBL2;
+  double? roundedQmin;
+  double? roundedQmax;
+  double? roundedQo;
+  double? roundedQgmin;
+  double? roundedQgmax;
+
+  // for rounding up
+  double roundToFourDecimalPlaces(double value) {
+    return (value * 10000).round() / 10000;
+  }
 
   // toggles
-  bool showResults = false;
+  bool isThereUplift = false;
+
+  bool showSolution = false;
 
   // string getters
   String? loadingCase;
@@ -192,15 +239,13 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     }
   }
 
-  /*
-  String get solutionButtonLabel {
-    if (showSolution) {
+  String get solutionButtonLabelAnalysis {
+    if (widget.state.showSolutionAnalysis) {
       return 'Hide solution';
     } else {
       return 'View solution';
     }
   }
-  */
 
   @override
   void initState() {
@@ -215,6 +260,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     inputC2 = TextEditingController(text: widget.state.inputC2);
     inputT = TextEditingController(text: widget.state.inputT);
     inputDf = TextEditingController(text: widget.state.inputDf);
+    inputHf = TextEditingController(text: widget.state.inputHf);
     inputDw = TextEditingController(text: widget.state.inputDw);
 
     inputPDL = TextEditingController(text: widget.state.inputPDL);
@@ -267,6 +313,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     inputC2.addListener(_updateState);
     inputT.addListener(_updateState);
     inputDf.addListener(_updateState);
+    inputHf.addListener(_updateState);
     inputDw.addListener(_updateState);
 
     inputPDL.addListener(_updateState);
@@ -311,6 +358,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       widget.state.inputC2 = inputC2.text;
       widget.state.inputT = inputT.text;
       widget.state.inputDf = inputDf.text;
+      widget.state.inputHf = inputHf.text;
       widget.state.inputDw = inputDw.text;
 
       widget.state.inputPDL = inputPDL.text;
@@ -377,7 +425,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         widget.state.isGammaDryEnabled = true;
       }
 
-      calcQ();
+      //calcQ();
 
       widget.onStateChanged(widget.state);
     });
@@ -427,13 +475,14 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     super.dispose();
   }
 
-  void calcQ() {
+  void calcAnalysis() {
     ete = double.tryParse(inputEte.text);
     b = double.tryParse(inputB.text);
     l = double.tryParse(inputL.text);
     c1 = double.tryParse(inputC1.text);
     c2 = double.tryParse(inputC2.text);
     df = double.tryParse(inputDf.text);
+    hf = double.tryParse(inputHf.text);
     dw = double.tryParse(inputDw.text);
     t = double.tryParse(inputT.text);
 
@@ -448,7 +497,17 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     hdl = double.tryParse(inputHDL.text);
     hll = double.tryParse(inputHLL.text);
     hUlt = double.tryParse(inputHUlt.text);
+
+    yMatInput = double.tryParse(inputOtherUnitWeight.text);
+    fLoad = double.tryParse(inputFloorLoading.text);
+    fThick = double.tryParse(inputFloorThickness.text);
+
+      // Default values
+    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
+    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
+    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
     
+    // moment arm of P
     if (ete != null && l != null && c2 != null) {
       dcc = 0.5*l!-ete!-0.5*c2!;
     } else {
@@ -525,15 +584,223 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       }
     }
 
-    if (loadingCase == 'Axial vertical load (P) only') {
+    if (p != null && dcc != null) {
+      if (loadingCase == 'Axial vertical load (P) only') {
+        mf = p!*dcc!;
+      } else if (loadingCase == 'Axial vertical load (P) and moment (M)') {
+        if (m != null) {
+          if (mDirection == 'Clockwise') {
+            mf = (m! - p!*dcc!).abs();
+          } else if (mDirection == 'Counterclockwise') {
+            mf = m! + p!*dcc!;
+          } else { // null
+            mf = null;
+          }
+        } else {
+          mf = null;
+        }
+      } else if (loadingCase == 'Axial vertical load (P) and lateral force (H)') {
+        // computation of moment arm of H
+        if (hf != null && t != null) {
+          hMomentArm = hf! - t!;
+        } else {
+          hMomentArm = null;
+        }
+
+        if (hMomentArm != null && h != null) {
+          if (hDirection == 'To the left') {
+            mf = p! + h!*hMomentArm!;
+          } else if (hDirection == 'To the right') {
+            mf = (p! - h!*hMomentArm!).abs();
+          } else { // null
+            mf = null;
+          }  
+        }
+      }  
+    } else {
+      mf = null;
+    }
     
-    } else if (loadingCase == 'Axial vertical load (P) and moment (M)') {
-      
-    } else if (loadingCase == 'Axial vertical load (P) and lateral force (H)') {
-      
+    // eccentricity
+    if (mf != null && p != null) {
+      ecc = mf!/p!;
+      roundedEcc = roundToFourDecimalPlaces(ecc!);
+    } else {
+      ecc = null;
+      roundedEcc = null;
     }
 
-    print('dcc = $dcc, P = $p, M = $m, H = $h');
+    // to check for uplift
+    if (l != null) {
+      eUplift = l!/6;
+      rounded_eUplift = roundToFourDecimalPlaces(eUplift!);
+    } else {
+      eUplift = null;
+      rounded_eUplift = null;
+    }
+
+    if (ecc != null && eUplift != null) {
+      if (ecc! < eUplift!) { // no uplift, continue solution
+        uplift = false;
+        setState(() {
+          isThereUplift = false;
+        });
+      } else { // stop solution
+        uplift = true;
+        setState(() {
+          isThereUplift = true;
+        });
+      }
+    } else {
+      uplift = null;
+    }
+
+    // q1 and q2
+    if (uplift == false) {
+      if (p != null && b != null && l != null && mf!= null) {
+        pOverBL = (p!/(l!*b!));
+        sixMfOverBL2 = (6*mf!)/(b!*l!*l!);
+
+        roundedPoverbl = roundToFourDecimalPlaces(pOverBL!);
+        roundedSixMfOverBL2 = roundToFourDecimalPlaces(sixMfOverBL2!);
+
+        qmin = (p!/(l!*b!)) - (6*mf!)/(b!*l!*l!);
+        qmax = (p!/(l!*b!)) + (6*mf!)/(b!*l!*l!);
+
+        roundedQmin = roundToFourDecimalPlaces(qmin!);
+        roundedQmax = roundToFourDecimalPlaces(qmax!);
+      } else {
+        qmin = null;
+        qmax = null;
+
+        roundedPoverbl = null;
+        roundedSixMfOverBL2 = null;
+
+        roundedQmin = null;
+        roundedQmax = null;
+      }
+    }
+
+    if (widget.state.soilProp) { // Soil Prop is ON
+      if (gs != null && e != null && w != null) {
+        y = ((gs!*yw!)*(1+w!))/(1+e!);
+      } else if (gs != null && e != null) {
+        y = (gs!*yw!)/(1+e!);
+      } else {
+        y = null;
+      }
+    } else { // Soil Prop is OFF
+      if (y != null && yDry == null) {
+        y = y;
+      } else if (y == null && yDry != null) {
+        y = yDry;
+      } else {
+        y = null;
+      }
+    }
+
+    // pressure due to soil
+    if (df != null && t != null && y != null) {
+      if (dw != null) {
+        if (dw! < df!) {
+          if (ySat != null) {
+            qy = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+          } else {
+            qy = null;
+          }
+        } else {
+          qy = yc!*t!+y!*(df!-t!);
+        }
+      } else {
+        qy = yc!*t!+y!*(df!-t!);
+      }
+    } else {
+      qy = null;
+    }
+
+    // qo
+    if (widget.state.weightPressures) { // pressure due to other weight pressures
+      if (widget.state.material == 'Concrete') {
+        yMat = yc!;
+      } else { // others
+        if (yMatInput != null) {
+          yMat = yMatInput!;
+        } else {
+          yMat = null;
+        }
+      }
+      if (fLoad != null && yMat != null && fThick != null && qy != null) {
+        qo = fLoad! + yMat!*(fThick!/1000) + qy!;
+        roundedQo = roundToFourDecimalPlaces(qo!);
+      } else {
+        qo = null;
+        roundedQo = null;
+      }
+    } else { // no weight pressures
+      if (qy != null) {
+        qo = qy!;
+        roundedQo = roundToFourDecimalPlaces(qo!);
+      } else {
+        qo = null;
+        roundedQo = null;
+      }     
+    }
+    
+    if (qmin != null && qmax != null && qo != null) {
+      qgmin = qmin! + qo!;
+      qgmax = qmax! + qo!;
+
+      roundedQgmin = roundToFourDecimalPlaces(qgmin!);
+      roundedQgmax = roundToFourDecimalPlaces(qgmax!);
+
+      widget.state.finalQgmin = roundedQgmin;
+      widget.state.finalQgmax = roundedQgmax;
+    } else {
+      qgmin = null;
+      qgmax = null;
+      roundedQgmin = null;
+      roundedQgmax = null;
+      widget.state.finalQgmin = null;
+      widget.state.finalQgmax = null;
+    }
+
+    if (uplift == false) {
+      if (widget.state.finalQgmin != null && widget.state.finalQgmax != null) {
+        setState(() {
+          widget.state.showResultsAnalysis = true;
+        });
+      } else {
+        setState(() {
+          widget.state.showResultsAnalysis = false;
+        });
+      }
+    } else if (uplift == true) {
+      setState(() {
+          widget.state.showResultsAnalysis = true;
+      });
+    } else { // uplift = null
+      setState(() {
+        widget.state.showResultsAnalysis = false;
+      });
+    }
+
+    print('''
+      dcc = $dcc,
+      P = $p,
+      M = $m,
+      H = $h,
+      mf = $mf,
+      ecc = $ecc,
+      eUplift = $eUplift,
+      uplift = $uplift,
+      qmin = $qmin,
+      qmax = $qmax,
+      qy = $qy,
+      qn = $qn,
+      qo = $qo,
+      qgmin = $qgmin,
+      qgmax = $qgmax,
+    ''');
 
     // Only show the result if all inputs are valid and an operation is selected
     /*
@@ -555,9 +822,370 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     double d = (-b_quad - sqrt((b_quad*b_quad)-(4*a*c)))/(2*a);
     print('d = $d');
     */
-  }  // calcQ
+  }  // calcAnalysis
+  void calcDesign() {
+    ete = double.tryParse(inputEte.text);
+    b = double.tryParse(inputB.text);
+    l = double.tryParse(inputL.text);
+    c1 = double.tryParse(inputC1.text);
+    c2 = double.tryParse(inputC2.text);
+    df = double.tryParse(inputDf.text);
+    hf = double.tryParse(inputHf.text);
+    dw = double.tryParse(inputDw.text);
+    t = double.tryParse(inputT.text);
 
+    pdl = double.tryParse(inputPDL.text);
+    pll = double.tryParse(inputPLL.text);
+    pUlt = double.tryParse(inputPUlt.text);
+    
+    mdl = double.tryParse(inputMDL.text);
+    mll = double.tryParse(inputMLL.text);
+    mUlt = double.tryParse(inputMUlt.text);
 
+    hdl = double.tryParse(inputHDL.text);
+    hll = double.tryParse(inputHLL.text);
+    hUlt = double.tryParse(inputHUlt.text);
+
+    yMatInput = double.tryParse(inputOtherUnitWeight.text);
+    fLoad = double.tryParse(inputFloorLoading.text);
+    fThick = double.tryParse(inputFloorThickness.text);
+
+    dtop = double.tryParse(inputTop.text);
+    dbot = double.tryParse(inputBot.text);
+
+      // Default values
+    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
+    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
+    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
+    
+    // moment arm of P
+    if (ete != null && l != null && c2 != null) {
+      dcc = 0.5*l!-ete!-0.5*c2!;
+    } else {
+      dcc = null;
+    }
+    
+    if (loadingCase == 'Axial vertical load (P) only') {
+      if (widget.state.toggleP) { // load combi
+        if (pdl != null && pll != null) {
+          p = 1.2*pdl! + 1.6*pll!;  
+        } else {
+          p = null;
+        }
+      } else { // no load combi
+        if (pUlt != null) {
+          p = pUlt!;  
+        } else {
+          p = null;
+        }
+      }
+    } else if (loadingCase == 'Axial vertical load (P) and moment (M)') {
+      if (widget.state.toggleP) { // load combi
+        if (pdl != null && pll != null) {
+          p = 1.2*pdl! + 1.6*pll!;  
+        } else {
+          p = null;
+        }
+      } else { // no load combi
+        if (pUlt != null) {
+          p = pUlt!;  
+        } else {
+          p = null;
+        }
+      }
+      if (widget.state.toggleM) { // load combi
+        if (mdl != null && mll != null) {
+          m = 1.2*mdl! + 1.6*mll!;  
+        } else {
+          m = null;
+        }
+      } else { // no load combi
+        if (mUlt != null) {
+          m = mUlt!;  
+        } else {
+          m = null;
+        }
+      }
+    } else if (loadingCase == 'Axial vertical load (P) and lateral force (H)') {
+      if (widget.state.toggleP) { // load combi
+        if (pdl != null && pll != null) {
+          p = 1.2*pdl! + 1.6*pll!;  
+        } else {
+          p = null;
+        }
+      } else { // no load combi
+        if (pUlt != null) {
+          p = pUlt!;  
+        } else {
+          p = null;
+        }
+      }
+      if (widget.state.toggleH) { // load combi
+        if (hdl != null && hll != null) {
+          h = 1.2*hdl! + 1.6*hll!;  
+        } else {
+          h = null;
+        }
+      } else { // no load combi
+        if (hUlt != null) {
+          h = hUlt!;  
+        } else {
+          h = null;
+        }
+      }
+    }
+
+    if (p != null && dcc != null) {
+      if (loadingCase == 'Axial vertical load (P) only') {
+        mf = p!*dcc!;
+      } else if (loadingCase == 'Axial vertical load (P) and moment (M)') {
+        if (m != null) {
+          if (mDirection == 'Clockwise') {
+            mf = (m! - p!*dcc!).abs();
+          } else if (mDirection == 'Counterclockwise') {
+            mf = m! + p!*dcc!;
+          } else { // null
+            mf = null;
+          }
+        } else {
+          mf = null;
+        }
+      } else if (loadingCase == 'Axial vertical load (P) and lateral force (H)') {
+        // computation of moment arm of H
+        if (hf != null && t != null) {
+          hMomentArm = hf! - t!;
+        } else {
+          hMomentArm = null;
+        }
+
+        if (hMomentArm != null && h != null) {
+          if (hDirection == 'To the left') {
+            mf = p! + h!*hMomentArm!;
+          } else if (hDirection == 'To the right') {
+            mf = (p! - h!*hMomentArm!).abs();
+          } else { // null
+            mf = null;
+          }  
+        }
+      }  
+    } else {
+      mf = null;
+    }
+    
+    // eccentricity
+    if (mf != null && p != null) {
+      ecc = mf!/p!;
+      roundedEcc = roundToFourDecimalPlaces(ecc!);
+    } else {
+      ecc = null;
+      roundedEcc = null;
+    }
+
+    // to check for uplift
+    if (l != null) {
+      eUplift = l!/6;
+      rounded_eUplift = roundToFourDecimalPlaces(eUplift!);
+    } else {
+      eUplift = null;
+      rounded_eUplift = null;
+    }
+
+    if (ecc != null && eUplift != null) {
+      if (ecc! < eUplift!) { // no uplift, continue solution
+        uplift = false;
+        setState(() {
+          isThereUplift = false;
+        });
+      } else { // stop solution
+        uplift = true;
+        setState(() {
+          isThereUplift = true;
+        });
+      }
+    } else {
+      uplift = null;
+    }
+
+    // q1 and q2
+    if (uplift == false) {
+      if (p != null && b != null && l != null && mf!= null) {
+        pOverBL = (p!/(l!*b!));
+        sixMfOverBL2 = (6*mf!)/(b!*l!*l!);
+
+        roundedPoverbl = roundToFourDecimalPlaces(pOverBL!);
+        roundedSixMfOverBL2 = roundToFourDecimalPlaces(sixMfOverBL2!);
+
+        qmin = (p!/(l!*b!)) - (6*mf!)/(b!*l!*l!);
+        qmax = (p!/(l!*b!)) + (6*mf!)/(b!*l!*l!);
+
+        roundedQmin = roundToFourDecimalPlaces(qmin!);
+        roundedQmax = roundToFourDecimalPlaces(qmax!);
+      } else {
+        qmin = null;
+        qmax = null;
+
+        roundedPoverbl = null;
+        roundedSixMfOverBL2 = null;
+
+        roundedQmin = null;
+        roundedQmax = null;
+      }
+    }
+
+    if (widget.state.soilProp) { // Soil Prop is ON
+      if (gs != null && e != null && w != null) {
+        y = ((gs!*yw!)*(1+w!))/(1+e!);
+      } else if (gs != null && e != null) {
+        y = (gs!*yw!)/(1+e!);
+      } else {
+        y = null;
+      }
+    } else { // Soil Prop is OFF
+      if (y != null && yDry == null) {
+        y = y;
+      } else if (y == null && yDry != null) {
+        y = yDry;
+      } else {
+        y = null;
+      }
+    }
+
+    // pressure due to soil
+    if (df != null && t != null && y != null) {
+      if (dw != null) {
+        if (dw! < df!) {
+          if (ySat != null) {
+            qy = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+          } else {
+            qy = null;
+          }
+        } else {
+          qy = yc!*t!+y!*(df!-t!);
+        }
+      } else {
+        qy = yc!*t!+y!*(df!-t!);
+      }
+    } else {
+      qy = null;
+    }
+
+    // qo
+    if (widget.state.weightPressures) { // pressure due to other weight pressures
+      if (widget.state.material == 'Concrete') {
+        yMat = yc!;
+      } else { // others
+        if (yMatInput != null) {
+          yMat = yMatInput!;
+        } else {
+          yMat = null;
+        }
+      }
+      if (fLoad != null && yMat != null && fThick != null && qy != null) {
+        qo = fLoad! + yMat!*(fThick!/1000) + qy!;
+        roundedQo = roundToFourDecimalPlaces(qo!);
+      } else {
+        qo = null;
+        roundedQo = null;
+      }
+    } else { // no weight pressures
+      if (qy != null) {
+        qo = qy!;
+        roundedQo = roundToFourDecimalPlaces(qo!);
+      } else {
+        qo = null;
+        roundedQo = null;
+      }     
+    }
+    
+    if (qmin != null && qmax != null && qo != null) {
+      qgmin = qmin! + qo!;
+      qgmax = qmax! + qo!;
+
+      roundedQgmin = roundToFourDecimalPlaces(qgmin!);
+      roundedQgmax = roundToFourDecimalPlaces(qgmax!);
+    } else {
+      qgmin = null;
+      qgmax = null;
+
+      roundedQgmin = null;
+      roundedQgmax = null;
+    }
+
+    if (widget.state.topToggle) {
+      dtop = dtop;
+    } else {
+      dtop = 20;
+    }
+
+    if (widget.state.botToggle) {
+      dbot = dbot;
+    } else {
+      dbot = 20;
+    }
+
+    if (t != null) {
+      depth1 = (t!*1000) - cc! - 0.5*dbot!;
+      depth2 = (t!*1000) - cc! - dbot! - 0.5*dtop!;
+      dp = (depth1! + depth2!)/2;
+    } else {
+      depth1 = null;
+      depth2 = null;
+      dp = null;
+    }
+
+    if (l != null && dcc != null) {
+      x3 = 0.5*l! - dcc! + 0.5*c2! + depth1!;
+    } else {
+      x3 = null;
+    }
+
+    if (x3 != null && qmin != null && qmax != null && l != null) {
+      q3 = qmin! + (x3!*(qmax!-qmin!))/l!;
+    } else {
+      q3 = null;
+    }
+
+    /*
+    if (uplift == false) {
+      if (widget.state.finalQgmin != null && widget.state.finalQgmax != null) {
+        setState(() {
+          widget.state.showResultsAnalysis = true;
+        });
+      } else {
+        setState(() {
+          widget.state.showResultsAnalysis = false;
+        });
+      }
+    } else if (uplift == true) {
+      setState(() {
+          widget.state.showResultsAnalysis = true;
+      });
+    } else { // uplift = null
+      setState(() {
+        widget.state.showResultsAnalysis = false;
+      });
+    }
+    */
+
+    print('''
+      dcc = $dcc,
+      P = $p,
+      M = $m,
+      H = $h,
+      mf = $mf,
+      ecc = $ecc,
+      eUplift = $eUplift,
+      uplift = $uplift,
+      qmin = $qmin,
+      qmax = $qmax,
+      qy = $qy,
+      qn = $qn,
+      qo = $qo,
+      qgmin = $qgmin,
+      qgmax = $qgmax,
+    ''');
+  }  // calcAnalysis
+  
   @override
   Widget build(BuildContext context) {
     super.build(context); // Call super.build
@@ -620,10 +1248,11 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                       entryEte(),
                       entryB(),
                       entryL(),
-                      entryC1(),
                       entryC2(),
                       entryT(),
                       entryDf(),
+                      if (loadingCase == 'Axial vertical load (P) and lateral force (H)')
+                        entryHf(),
                       entryDw(),
 
                       if (loadingCase == 'Axial vertical load (P) only' || loadingCase == 'Axial vertical load (P) and moment (M)' || loadingCase == 'Axial vertical load (P) and lateral force (H)')
@@ -680,9 +1309,19 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                         containerWaterOn(),
 
                       buttonAnalysis(),
+                      SizedBox(height: 10),
 
-                      switchDesign(),
+                      if (widget.state.showResultsAnalysis)
+                        resultAnalysis(),
+
+                      SizedBox(height: 10),
+                      if (widget.state.showResultsAnalysis)
+                        solutionButtonAnalysis(),
+                      if (widget.state.showSolutionAnalysis)
+                        solutionContainerAnalysis(),
+
                       // design widgets
+                      switchDesign(),
                       if (widget.state.design)
                         headerDesign(),
                       if (widget.state.design)
@@ -795,7 +1434,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  'Shortest distance between edge of column and edge of footing along the longer axis (in m):',
+                  'Shortest distance between the edge of column and the shorter side of footing (in m):',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -980,6 +1619,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),        
     );
   } // entryL
+  //
   Widget entryC1() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -1046,6 +1686,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),        
     );
   } // entryC1
+  //
   Widget entryC2() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -1244,6 +1885,72 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),        
     );
   } // entryDf
+  Widget entryHf() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Height of foundation (top of column to bottom of footing), hf (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputDf, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputDf.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryHf
   Widget entryDw() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -1753,7 +2460,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
             child: Container(
               width: 120,
               child: Text(
-                'MDL (in kN):',
+                'MDL (in kN-m):',
                 style: TextStyle(color: Colors.white),
               ),
             )
@@ -1820,7 +2527,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
             child: Container(
               width: 120,
               child: Text(
-                'MLL (in kN):',
+                'MLL (in kN-m):',
                 style: TextStyle(color: Colors.white),
               ),
             )
@@ -1916,7 +2623,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
             child: Container(
               width: 120,
               child: Text(
-                'Value of moment, M (in kN):',
+                'Value of moment, M (in kN-m):',
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -3491,9 +4198,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   Widget buttonAnalysis() {
     return ElevatedButton(
       onPressed: () {
-        calcQ();
-        /*
-        if (!widget.state.showResultsOWSFirst && !widget.state.showResultsTWSFirst) {
+        calcAnalysis();
+        if (!widget.state.showResultsAnalysis) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Please provide input for all parameters."),
@@ -3502,7 +4208,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
             ),
           );
         }
-        */
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -3558,8 +4263,148 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),
     );
   } // switchDesign
+  Widget resultAnalysis() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              isThereUplift ? "e ≥ B/6, ∴ uplift occurs" : "e < B/6, ∴ no uplift occurs",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Visibility(
+              visible: !isThereUplift,
+              child: Column(
+                children: [
+                  Text(
+                    "qgmin = ${widget.state.finalQgmin} kPa",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    "qgmax = ${widget.state.finalQgmax} kPa",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+  void toggleSolutionAnalysis() {
+    if (widget.state.solutionToggleAnalysis) {
+      widget.state.showSolutionAnalysis = true;
+    } else {
+      widget.state.showSolutionAnalysis = false;
+    }
+    setState(() {
+      widget.state.solutionToggleAnalysis = !widget.state.solutionToggleAnalysis; // Toggle between functions
+    });
+  }
+  Widget solutionButtonAnalysis() {
+    return ElevatedButton(
+      onPressed: toggleSolutionAnalysis,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text(solutionButtonLabelAnalysis),
+    );
+  }
+  Widget solutionContainerAnalysis() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 450),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          color: const Color(0xFF1F538D),
+        ),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Distance of center of column to center of footing = $dcc',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                'Mf = $mf',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                'e = $roundedEcc',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                'B/6 = $rounded_eUplift',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                isThereUplift ? "e ≥ B/6, ∴ uplift occurs" : "e < B/6, ∴ no uplift occurs",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (!isThereUplift)
+                Text(
+                  'q = $roundedPoverbl ± $roundedSixMfOverBL2',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (!isThereUplift)
+                Text(
+                  'qmin = $roundedQmin',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (!isThereUplift)
+                Text(
+                  'qmax = $roundedQmax',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (!isThereUplift)
+                Text(
+                  'qo = $roundedQo',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (!isThereUplift)
+                Text(
+                  "qgmin = ${widget.state.finalQgmin} kPa",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              if (!isThereUplift)
+                Text(
+                  "qgmax = ${widget.state.finalQgmax} kPa",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
   
-  // design widgets 2
+  // design widgets
 
   Widget headerDesign() {
     return Padding(
@@ -4115,9 +4960,9 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   Widget buttonDesign() {
     return ElevatedButton(
       onPressed: () {
-        calcQ();
+        //calcDesign();
         /*
-        if (!widget.state.showResultsOWSFirst && !widget.state.showResultsTWSFirst) {
+        if (!widget.state.showResultsAnalysis) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Please provide input for all parameters."),

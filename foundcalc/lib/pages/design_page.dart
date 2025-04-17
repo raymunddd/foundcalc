@@ -4092,7 +4092,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   }
   Widget subFloorMaterial() {
     return Padding(
-      padding: const EdgeInsets.only(top: 10),
+      padding: const EdgeInsets.only(top: 10, bottom: 5),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         constraints: BoxConstraints(maxWidth: 500),
@@ -4459,20 +4459,16 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         width: 445,
         child: Column(
           children: [
-            Text(
-              'safe OWS, safe TWS',
-              style: TextStyle(color: Colors.white),
-            ),
             if (showQUltText)
-            Text(
-              'qult = $qult kPa',
-              style: TextStyle(color: Colors.white),
-            ),
+              Text(
+                'qult = $qult kPa',
+                style: TextStyle(color: Colors.white),
+              ),
             if (showFSText)
-            Text(
-              'F.S. = $fs',
-              style: TextStyle(color: Colors.white),
-            ),
+              Text(
+                'F.S. = $fs',
+                style: TextStyle(color: Colors.white),
+              ),
             Text(
               'qa = $roundedQall kPa',
               style: TextStyle(color: Colors.white),
@@ -4586,10 +4582,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         width: 445,
         child: Column(
           children: [
-            Text(
-              'unsafe OWS, safe TWS',
-              style: TextStyle(color: Colors.white),
-            ),
             if (showQUltText)
             Text(
               'qult = $qult kPa',
@@ -4737,10 +4729,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         width: 445,
         child: Column(
           children: [
-            Text(
-              'safe OWS, unsafe TWS',
-              style: TextStyle(color: Colors.white),
-            ),
             if (showQUltText)
             Text(
               'qult = $qult kPa',
@@ -4904,10 +4892,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         width: 445,
         child: Column(
           children: [
-            Text(
-              'unsafe OWS, unsafe TWS',
-              style: TextStyle(color: Colors.white),
-            ),
             if (showQUltText)
             Text(
               'qult = $qult kPa',
@@ -5127,10 +5111,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         width: 445,
         child: Column(
           children: [
-            Text(
-              'safe TWS, safe OWS',
-              style: TextStyle(color: Colors.white),
-            ),
             if (showQUltText)
             Text(
               'qult = $qult kPa',
@@ -5262,10 +5242,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         width: 445,
         child: Column(
           children: [
-            Text(
-              'unsafe TWS, safe OWS',
-              style: TextStyle(color: Colors.white),
-            ),
             if (showQUltText)
             Text(
               'qult = $qult kPa',
@@ -5437,10 +5413,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         width: 445,
         child: Column(
           children: [
-            Text(
-              'safe TWS, unsafe OWS',
-              style: TextStyle(color: Colors.white),
-            ),
             if (showQUltText)
             Text(
               'qult = $qult kPa',
@@ -5596,10 +5568,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         width: 445,
         child: Column(
           children: [
-            Text(
-              'unsafe TWS, unsafe OWS',
-              style: TextStyle(color: Colors.white),
-            ),
             if (showQUltText)
             Text(
               'qult = $qult kPa',
