@@ -1309,16 +1309,20 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                         containerWaterOn(),
 
                       buttonAnalysis(),
-                      SizedBox(height: 10),
 
                       if (widget.state.showResultsAnalysis)
                         resultAnalysis(),
+                      if (widget.state.showResultsAnalysis)
+                        SizedBox(height: 10),
 
-                      SizedBox(height: 10),
                       if (widget.state.showResultsAnalysis)
                         solutionButtonAnalysis(),
                       if (widget.state.showSolutionAnalysis)
                         solutionContainerAnalysis(),
+
+                      SizedBox(height: 10),
+                      clearbuttonAnalysis(),
+                      SizedBox(height: 10),
 
                       // design widgets
                       switchDesign(),
@@ -4195,6 +4199,79 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     );
   } // subYw
   
+  Widget clearbuttonAnalysis() {
+    return ElevatedButton(
+      onPressed: () {        
+        loadingCase = null;
+
+        inputEte.clear();
+        inputB.clear();
+        inputL.clear();
+        inputC1.clear();
+        inputC2.clear();
+        inputT.clear();
+        inputDf.clear();
+        inputHf.clear();
+        inputDw.clear();
+
+        inputPDL.clear();
+        inputPLL.clear();
+        inputPUlt.clear();
+
+        inputMDL.clear();
+        inputMLL.clear();
+        inputMUlt.clear();
+        mDirection = null;
+
+        inputHDL.clear();
+        inputHLL.clear();
+        inputHUlt.clear();
+        hDirection = null;
+
+        inputGs.clear();
+        inputE.clear();
+        inputW.clear();
+
+        inputGammaDry.clear();
+        inputGammaMoist.clear();
+        inputGammaSat.clear();
+
+        inputFloorLoading.clear();
+        inputFloorThickness.clear();
+        inputOtherUnitWeight.clear();
+
+        inputYc.clear();
+        inputYw.clear();
+        inputFc.clear();
+
+        inputTop.clear();
+        inputBot.clear();
+        inputCc.clear();
+
+        setState(() {
+          widget.state.toggleP = false;
+          widget.state.toggleM = false;
+          widget.state.toggleH = false;
+
+          widget.state.weightPressures = false;
+          widget.state.topToggle = false;
+          widget.state.botToggle = false;
+          widget.state.concreteCover = false;
+          widget.state.concreteDet = false;
+          widget.state.waterDet = false;
+
+          widget.state.showResultsAnalysis = false;
+          widget.state.showSolutionAnalysis = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  }
+
   Widget buttonAnalysis() {
     return ElevatedButton(
       onPressed: () {

@@ -1750,8 +1750,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                       if (widget.state.soilProp)
                         containerWaterOn(),
 
-                      clearButton(),
-                      SizedBox(height: 10),
                       buttonOWSFirst(),
                       SizedBox(height: 10),
                       buttonTWSFirst(),
@@ -1762,15 +1760,19 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                       if (widget.state.showResultsTWSFirst)
                         resultTWSFirst(),
 
-                      SizedBox(height: 10),
+                      if (widget.state.showResultsOWSFirst || widget.state.showResultsTWSFirst)
+                        SizedBox(height: 10),
                       if (widget.state.showResultsOWSFirst || widget.state.showResultsTWSFirst)
                         solutionButton(),
-                      SizedBox(height: 10),
-
+                      
+                      if (showSolutionOWS || showSolutionTWS)
+                        SizedBox(height: 10),
                       if (showSolutionOWS)
                         containerSolutionOWS(),
                       if (showSolutionTWS)
                         containerSolutionTWS(),
+
+                      clearButton(),
                     ],
                   ),
                 ),

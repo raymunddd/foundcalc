@@ -1084,23 +1084,25 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
                         row16yWaterDetOn(),
                       
                       SizedBox(height: 10),
-                      clearButton(),
-                      SizedBox(height: 10),
                       submitButton(),
-                      SizedBox(height: 10),
-                      /*
-                      Text(
-                        'showResults = ${widget.state.showResults}',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                      */
+                      
+                      if (widget.state.showResults)
+                        SizedBox(height: 10),
                       if (widget.state.showResults)
                         resultText(),
-                      SizedBox(height: 10),
+
+                      if (widget.state.showResults)
+                        SizedBox(height: 10),
                       if (widget.state.showResults)
                         solutionButton(),
+                        
+                      if (widget.state.showSolution)
+                        SizedBox(height: 10),
                       if (widget.state.showSolution)
                         solutionContainer(),
+
+                      SizedBox(height: 10),
+                      clearButton(),
                     ],
                   ),
                 ),

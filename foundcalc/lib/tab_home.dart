@@ -521,7 +521,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                         foregroundColor: Colors.white,
                       ),
                       onPressed: _addAnalRectMomentItem,
-                      child: Text("Analysis of Rectangular Footings with Moment"),
+                      child: Text("Analysis of Rectangular Footings with Moment 🚧"),
                     ),
                     SizedBox(height: 10),
                     ElevatedButton(
@@ -530,7 +530,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                         foregroundColor: Colors.white,
                       ),
                       onPressed: _addCombinedFootingItem,
-                      child: Text("Combined Footing"),
+                      child: Text("Combined Footing 🚧"),
                     ),
                   ],
                 ),
