@@ -479,7 +479,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      "Welcome to Block B's Footing Calculator!",
+                      "Welcome to Block B’s Footing Calculator!",
                       style: TextStyle(
                         fontSize: 24,
                         color: Colors.white,

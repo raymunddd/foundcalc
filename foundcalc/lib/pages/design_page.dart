@@ -143,7 +143,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? roundedVuows;
   double? roundedVucows;
   double? roundedVutws;
- 
 
   double? roundedVc1;
   double? roundedVc2;

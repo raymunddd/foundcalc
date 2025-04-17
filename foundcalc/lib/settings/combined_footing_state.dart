@@ -1,35 +1,33 @@
 class CombinedFootingState {
 
   // Dropdowns
-  String? colClass;
-  String? material;
-  String? modFactor;
+  String? barDia;
+  String? side;
 
   // TextFields
-  String inputQAll = '';
-  String inputQUlt = '';
-  String inputFS = '';
-  String inputfcPrime = '';
+  String inputLength_a = '';
+  String inputLength_b = '';
+  String inputLength_c = '';
+  String inputLength_e = '';
+  String inputLength_H = '';
+
+  String inputDepth = '';
+
+  String inputShear_f = '';
+  String inputShear_g = '';
+  String inputShear_h = '';
+  String inputShear_i = '';
+
+  String inputFactorShear = '';
+  String inputFactorMoment = '';
+
+  String inputOtherDia = '';
+
   String inputDf = '';
   String inputDw = '';
-  String inputPDL = '';
-  String inputPLL = '';
-  String inputTop = '';
-  String inputBot = '';
-  String inputGs = '';
-  String inputE = '';
-  String inputW = '';
   String inputGammaDry = '';
   String inputGammaMoist = '';
-  String inputGammaSat = '';
-  String inputFloorLoading = '';
-  String inputFloorThickness = '';
-  String inputFootingThickness = '';
-  String inputYw = '';
-  String inputYc = '';
-  String inputOtherUnitWeight = '';
-  String inputColBase = '';
-  String inputCc = '';
+
   final String title;
 
   bool scrollToTop = false;
@@ -52,8 +50,9 @@ class CombinedFootingState {
   bool isGammaDryEnabled = true;
   bool isGammaMoistEnabled = true;
 
-  bool showResultsOWSFirst = false;
-  bool showResultsTWSFirst = false;
+  bool showResults = false;
+  bool solutionToggle = true;
+  bool showSolution = false;
 
   // Final answer, No erasures
     double? finalAnswerB;
