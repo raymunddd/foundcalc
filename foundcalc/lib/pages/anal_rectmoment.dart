@@ -185,6 +185,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   bool? safetyPunch;
 
   // for solution container
+
+  // analysis
   double? roundedEcc;
   double? rounded_eUplift;
   double? roundedPoverbl;
@@ -194,6 +196,19 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? roundedQo;
   double? roundedQgmin;
   double? roundedQgmax;
+  // design
+  double? roundedQ3;
+  double? roundedQuc;
+  double? roundedFu;
+  double? roundedBeta;
+  double? roundedB1;
+  double? roundedB2;
+  double? roundedVc1;
+  double? roundedVc2;
+  double? roundedVc3;
+  double? roundedVcPunch;
+
+
 
   // for rounding up
   double roundToFourDecimalPlaces(double value) {
@@ -1210,8 +1225,10 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
     if (x3 != null && qmin != null && qmax != null && l != null) {
       q3 = qmin! + ((qmax!-qmin!)*(l!-x3!))/l!;
+      roundedQ3 = roundToFourDecimalPlaces(q3!);
     } else {
       q3 = null;
+      roundedQ3 = null;
     }
 
     if (x3 != null && qmin != null && q3 != null && l != null && b != null) {
@@ -1264,18 +1281,28 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       b1 = c1! + (dp!/1000);
       b2 = c2! + (dp!/1000);
       quc = qmin! + ((qmax! - qmin!)*(l! - xc!))/l!;
+
+      roundedB1 = roundToFourDecimalPlaces(b1!);
+      roundedB2 = roundToFourDecimalPlaces(b2!);
+      roundedQuc = roundToFourDecimalPlaces(quc!);
     } else {
       x4 = null;
       x5 = null;
       b1 = null;
       b2 = null;
       quc = null;
+
+      roundedB1 = null;
+      roundedB2 = null;
+      roundedQuc = null;
     }
 
     if (quc != null && b1 != null && b2 != null) {
       fu = quc! * b1! * b2!;
+      roundedFu = roundToFourDecimalPlaces(fu!);
     } else {
       fu = null;
+      roundedFu = null;
     }
 
     if (p != null && fu != null) {
@@ -1307,8 +1334,10 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
     if (cmax != null && cmin != null) {
       beta = cmax!/cmin!;
+      roundedBeta = roundToFourDecimalPlaces(beta!);
     } else {
       beta = null;
+      roundedBeta = null;
     }
 
     if (colClass == 'Interior') { // as
@@ -1337,18 +1366,28 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       vc1 = 0.33*lambdaFc!;
       vc2 = 0.17*(1 + (2/beta!))*lambdaFc!;
       vc3 = 0.083*(2 + (as! * dp!)/(1000*bo!))*lambdaFc!;
+
+      roundedVc1 = roundToFourDecimalPlaces(vc1!);
+      roundedVc2 = roundToFourDecimalPlaces(vc2!);
+      roundedVc3 = roundToFourDecimalPlaces(vc3!);
     } else {
       vc1 = null;
       vc2 = null;
       vc3 = null;
+
+      roundedVc1 = null;
+      roundedVc2 = null;
+      roundedVc3 = null;
     }
 
     if (vc1 != null && vc2 != null && vc3 != null) {
       min1 = min(vc1!, vc2!);
       vcPunch = min(min1!, vc3!);
+      roundedVcPunch = roundToFourDecimalPlaces(vcPunch!);
     } else {
       min1 = null;
       vcPunch = null;
+      roundedVcPunch = null;
     }
 
     if (vcPunch != null) {
@@ -1378,28 +1417,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         widget.state.showResultsDesign = false;
       });
     }
-
-    /*
-    if (uplift == false) {
-      if (widget.state.finalQgmin != null && widget.state.finalQgmax != null) {
-        setState(() {
-          widget.state.showResultsAnalysis = true;
-        });
-      } else {
-        setState(() {
-          widget.state.showResultsAnalysis = false;
-        });
-      }
-    } else if (uplift == true) {
-      setState(() {
-          widget.state.showResultsAnalysis = true;
-      });
-    } else { // uplift = null
-      setState(() {
-        widget.state.showResultsAnalysis = false;
-      });
-    }
-    */
 
     print('''
       dcc = $dcc,
@@ -5716,12 +5733,12 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
             children: [
               if (isThereUplift)
                 Text(
-                  'e = $roundedEcc',
+                  'e = $roundedEcc mm',
                   style: TextStyle(color: Colors.white),
                 ),
               if (isThereUplift)
                 Text(
-                  'B/6 = $rounded_eUplift',
+                  'B/6 = $rounded_eUplift mm',
                   style: TextStyle(color: Colors.white),
                 ),
               if (isThereUplift)
@@ -5761,7 +5778,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "qᵤ₃ = $q3 kPa",
+                "qᵤ₃ = $roundedQ3 kPa",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
@@ -5850,19 +5867,19 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "b₁ = $b1 m",
+                "b₁ = $roundedB1 m",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "b₂ = $b2 m",
+                "b₂ = $roundedB2 m",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "quc = $quc kPa",
+                "quc = $roundedQuc kPa",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "Fu = $quc kN",
+                "Fu = $roundedFu kN",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
@@ -5873,11 +5890,11 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                 ),
               ),
               Text(
-                "β = $beta",
+                "β = $roundedBeta",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "bₒ = $bo",
+                "bₒ = $bo m",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
@@ -5885,19 +5902,19 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "Vc₁ = $vc1",
+                "Vc₁ = $roundedVc1",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "Vc₂ = $vc2",
+                "Vc₂ = $roundedVc2",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "Vc₃ = $vc3",
+                "Vc₃ = $roundedVc3",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "Vc = $vcPunch",
+                "Vc = $roundedVcPunch",
                 style: TextStyle(color: Colors.white),
               ),
               Text(
