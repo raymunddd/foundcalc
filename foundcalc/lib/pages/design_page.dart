@@ -1763,7 +1763,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                         SizedBox(height: 10),
                       if (widget.state.showResultsOWSFirst || widget.state.showResultsTWSFirst)
                         solutionButton(),
-                      
+                      if (widget.state.showResultsOWSFirst || widget.state.showResultsTWSFirst)
+                        SizedBox(height: 10),
+
                       if (showSolutionOWS || showSolutionTWS)
                         SizedBox(height: 10),
                       if (showSolutionOWS)
@@ -4227,6 +4229,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       onPressed: () {
         calculate();
         if (!widget.state.showResultsOWSFirst && !widget.state.showResultsTWSFirst) {
+          setState(() {
+            showSolution = false;
+            showSolutionOWS = false;
+            showSolutionTWS = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Please provide input for all parameters."),
@@ -4249,6 +4256,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       onPressed: () {
         calculateTWS();
         if (!widget.state.showResultsOWSFirst && !widget.state.showResultsTWSFirst) {
+          setState(() {
+            showSolution = false;
+            showSolutionOWS = false;
+            showSolutionTWS = false;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Please provide input for all parameters."),

@@ -6,6 +6,7 @@ class AnalRectMomentState {
   String? hDirection;
   String? modFactor;
   String? colClass;
+  String? edge;
   
   // inputs
   String inputEte = '';

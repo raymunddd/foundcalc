@@ -900,6 +900,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
       );
       setState(() {
         widget.state.showResults = false;
+        widget.state.showSolution = false;
+        widget.state.solutionToggle = true;
       });
       return;
     } else {
@@ -914,6 +916,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
           );
           setState(() {
             widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
           });
           return;
         }
@@ -930,6 +934,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               );
               setState(() {
                 widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
               });
               return;
             }   
@@ -944,6 +950,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               );
               setState(() {
                 widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
               });
               return;
             }
@@ -959,6 +967,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
             );
             setState(() {
               widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
             });
             return;
           }
@@ -968,13 +978,15 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
         if (theta == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Please provide input for all parameters5.'),
+              content: Text('Please provide input for all parameters.'),
               backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
               duration: Duration(seconds: 3),
             ),
           );
           setState(() {
             widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
           });
           return;
         } else {
@@ -988,6 +1000,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
             );
             setState(() {
               widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
             });
             return;
           }
@@ -1003,6 +1017,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
           );
           setState(() {
             widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
           });
           return;
         }

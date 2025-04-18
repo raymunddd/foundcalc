@@ -111,7 +111,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? w;
 
   double? yDry;
-  double? y; 
+  double? yMoist; 
   double? ySat;
 
   double? fLoad;
@@ -145,6 +145,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? qmax;
   double? qgmin;
   double? qgmax;
+  double? y;
   double? yMat;
   double? qy;
   double? qn;
@@ -209,7 +210,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? roundedVcPunch;
 
 
-
   // for rounding up
   double roundToFourDecimalPlaces(double value) {
     return (value * 10000).round() / 10000;
@@ -219,6 +219,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   bool isThereUplift = false;
 
   bool showSolution = false;
+  bool showEte = false;
 
   // string getters
   String? loadingCase;
@@ -259,6 +260,20 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     'Edge',
     'Corner',
   ];
+
+  String? edge;
+  final List<String> edgeOptions = [
+    'Longitudinal dimension, L',
+    'Transverse dimension, B',
+  ];
+
+  String get headerTitle {
+    if (widget.state.design) {
+      return 'Design';
+    } else {
+      return 'Analysis';
+    }
+  }
 
   String get gammaDryHint {
     if (widget.state.isGammaDryEnabled) {
@@ -363,13 +378,14 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     widget.state.material = material;
 
     loadingCase = widget.state.loadingCase;
+    colClass = widget.state.colClass;
+    edge = widget.state.edge;
     mDirection = widget.state.mDirection;
     hDirection = widget.state.hDirection;
 
     modFactor = "Normal-lightweight"; // Set default value here
     widget.state.modFactor = modFactor;
 
-    colClass = widget.state.colClass;
     // listeners
 
     inputEte.addListener(_updateState);
@@ -493,6 +509,22 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         widget.state.isGammaDryEnabled = true;
       }
 
+      if (colClass == 'Interior') {
+        showEte = true;
+      } else if (colClass == 'Edge') {
+        if (edge == 'Longitudinal dimension, L') {
+          showEte = true;
+        } else if (edge == 'Transverse dimension, B') {
+          showEte = false;
+        } else { // null
+          showEte = false;
+        }
+      } else if (colClass == 'Corner') {
+        showEte = false;
+      } else { // null
+        showEte = false;
+      }
+
       //calcQ();
 
       widget.onStateChanged(widget.state);
@@ -565,7 +597,10 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
     hdl = double.tryParse(inputHDL.text);
     hll = double.tryParse(inputHLL.text);
-    hUlt = double.tryParse(inputHUlt.text);
+
+    yDry = double.tryParse(inputGammaDry.text);
+    yMoist = double.tryParse(inputGammaMoist.text);
+    ySat = double.tryParse(inputGammaSat.text);
 
     yMatInput = double.tryParse(inputOtherUnitWeight.text);
     fLoad = double.tryParse(inputFloorLoading.text);
@@ -577,363 +612,28 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
     
     // moment arm of P
-    if (ete != null && l != null && c2 != null) {
-      dcc = 0.5*l!-ete!-0.5*c2!;
-    } else {
-      dcc = null;
-    }
-    
-    if (loadingCase == 'Axial vertical load (P) only') {
-      if (widget.state.toggleP) { // load combi
-        if (pdl != null && pll != null) {
-          p = 1.2*pdl! + 1.6*pll!;  
-        } else {
-          p = null;
-        }
-      } else { // no load combi
-        if (pUlt != null) {
-          p = pUlt!;  
-        } else {
-          p = null;
-        }
-      }
-    } else if (loadingCase == 'Axial vertical load (P) and moment (M)') {
-      if (widget.state.toggleP) { // load combi
-        if (pdl != null && pll != null) {
-          p = 1.2*pdl! + 1.6*pll!;  
-        } else {
-          p = null;
-        }
-      } else { // no load combi
-        if (pUlt != null) {
-          p = pUlt!;  
-        } else {
-          p = null;
-        }
-      }
-      if (widget.state.toggleM) { // load combi
-        if (mdl != null && mll != null) {
-          m = 1.2*mdl! + 1.6*mll!;  
-        } else {
-          m = null;
-        }
-      } else { // no load combi
-        if (mUlt != null) {
-          m = mUlt!;  
-        } else {
-          m = null;
-        }
-      }
-    } else if (loadingCase == 'Axial vertical load (P) and lateral force (H)') {
-      if (widget.state.toggleP) { // load combi
-        if (pdl != null && pll != null) {
-          p = 1.2*pdl! + 1.6*pll!;  
-        } else {
-          p = null;
-        }
-      } else { // no load combi
-        if (pUlt != null) {
-          p = pUlt!;  
-        } else {
-          p = null;
-        }
-      }
-      if (widget.state.toggleH) { // load combi
-        if (hdl != null && hll != null) {
-          h = 1.2*hdl! + 1.6*hll!;  
-        } else {
-          h = null;
-        }
-      } else { // no load combi
-        if (hUlt != null) {
-          h = hUlt!;  
-        } else {
-          h = null;
-        }
-      }
-    }
-
-    if (p != null && dcc != null) {
-      if (loadingCase == 'Axial vertical load (P) only') {
-        mf = p!*dcc!;
-      } else if (loadingCase == 'Axial vertical load (P) and moment (M)') {
-        if (m != null) {
-          if (mDirection == 'Clockwise') {
-            mf = (m! - p!*dcc!).abs();
-          } else if (mDirection == 'Counterclockwise') {
-            mf = m! + p!*dcc!;
-          } else { // null
-            mf = null;
-          }
-        } else {
-          mf = null;
-        }
-      } else if (loadingCase == 'Axial vertical load (P) and lateral force (H)') {
-        // computation of moment arm of H
-        if (hf != null && t != null) {
-          hMomentArm = hf! - t!;
-        } else {
-          hMomentArm = null;
-        }
-
-        if (hMomentArm != null && h != null) {
-          if (hDirection == 'To the left') {
-            mf = p! + h!*hMomentArm!;
-          } else if (hDirection == 'To the right') {
-            mf = (p! - h!*hMomentArm!).abs();
-          } else { // null
-            mf = null;
-          }  
-        }
-      }  
-    } else {
-      mf = null;
-    }
-    
-    // eccentricity
-    if (mf != null && p != null) {
-      ecc = mf!/p!;
-      roundedEcc = roundToFourDecimalPlaces(ecc!);
-    } else {
-      ecc = null;
-      roundedEcc = null;
-    }
-
-    // to check for uplift
-    if (l != null) {
-      eUplift = l!/6;
-      rounded_eUplift = roundToFourDecimalPlaces(eUplift!);
-    } else {
-      eUplift = null;
-      rounded_eUplift = null;
-    }
-
-    if (ecc != null && eUplift != null) {
-      if (ecc! < eUplift!) { // no uplift, continue solution
-        uplift = false;
-        setState(() {
-          isThereUplift = false;
-        });
-      } else { // stop solution
-        uplift = true;
-        setState(() {
-          isThereUplift = true;
-        });
-      }
-    } else {
-      uplift = null;
-    }
-
-    // q1 and q2
-    if (uplift == false) {
-      if (p != null && b != null && l != null && mf!= null) {
-        pOverBL = (p!/(l!*b!));
-        sixMfOverBL2 = (6*mf!)/(b!*l!*l!);
-
-        roundedPoverbl = roundToFourDecimalPlaces(pOverBL!);
-        roundedSixMfOverBL2 = roundToFourDecimalPlaces(sixMfOverBL2!);
-
-        qmin = (p!/(l!*b!)) - (6*mf!)/(b!*l!*l!);
-        qmax = (p!/(l!*b!)) + (6*mf!)/(b!*l!*l!);
-
-        roundedQmin = roundToFourDecimalPlaces(qmin!);
-        roundedQmax = roundToFourDecimalPlaces(qmax!);
+    if (colClass == 'Interior') {
+      if (ete != null && l != null && c2 != null) {
+        dcc = 0.5*l!-ete!-0.5*c2!;
       } else {
-        qmin = null;
-        qmax = null;
-
-        roundedPoverbl = null;
-        roundedSixMfOverBL2 = null;
-
-        roundedQmin = null;
-        roundedQmax = null;
+        dcc = 0.0001;
       }
-    }
-
-    if (widget.state.soilProp) { // Soil Prop is ON
-      if (gs != null && e != null && w != null) {
-        y = ((gs!*yw!)*(1+w!))/(1+e!);
-      } else if (gs != null && e != null) {
-        y = (gs!*yw!)/(1+e!);
+    } else if (colClass == 'Edge') {
+      if (edge == 'Longitudinal dimension, L') {
+        dcc = 0.5*l!-ete!-0.5*c2!;
+      } else if (edge == 'Transverse dimension, B') {
+        dcc = 0.5*l!-0.5*c2!;
       } else {
-        y = null;
+        dcc = 0.002;
       }
-    } else { // Soil Prop is OFF
-      if (y != null && yDry == null) {
-        y = y;
-      } else if (y == null && yDry != null) {
-        y = yDry;
+    } else if (colClass == 'Corner') {
+      if (l != null && c2 != null) {
+        dcc = 0.5*l!-0.5*c2!;
       } else {
-        y = null;
+        dcc = 0.0003;
       }
-    }
-
-    // pressure due to soil
-    if (df != null && t != null && y != null) {
-      if (dw != null) {
-        if (dw! < df!) {
-          if (ySat != null) {
-            qy = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
-          } else {
-            qy = null;
-          }
-        } else {
-          qy = yc!*t!+y!*(df!-t!);
-        }
-      } else {
-        qy = yc!*t!+y!*(df!-t!);
-      }
-    } else {
-      qy = null;
-    }
-
-    // qo
-    if (widget.state.weightPressures) { // pressure due to other weight pressures
-      if (widget.state.material == 'Concrete') {
-        yMat = yc!;
-      } else { // others
-        if (yMatInput != null) {
-          yMat = yMatInput!;
-        } else {
-          yMat = null;
-        }
-      }
-      if (fLoad != null && yMat != null && fThick != null && qy != null) {
-        qo = fLoad! + yMat!*(fThick!/1000) + qy!;
-        roundedQo = roundToFourDecimalPlaces(qo!);
-      } else {
-        qo = null;
-        roundedQo = null;
-      }
-    } else { // no weight pressures
-      if (qy != null) {
-        qo = qy!;
-        roundedQo = roundToFourDecimalPlaces(qo!);
-      } else {
-        qo = null;
-        roundedQo = null;
-      }     
-    }
-    
-    if (qmin != null && qmax != null && qo != null) {
-      qgmin = qmin! + qo!;
-      qgmax = qmax! + qo!;
-
-      roundedQgmin = roundToFourDecimalPlaces(qgmin!);
-      roundedQgmax = roundToFourDecimalPlaces(qgmax!);
-
-      widget.state.finalQgmin = roundedQgmin;
-      widget.state.finalQgmax = roundedQgmax;
-    } else {
-      qgmin = null;
-      qgmax = null;
-      roundedQgmin = null;
-      roundedQgmax = null;
-      widget.state.finalQgmin = null;
-      widget.state.finalQgmax = null;
-    }
-
-    if (uplift == false) {
-      if (widget.state.finalQgmin != null && widget.state.finalQgmax != null) {
-        setState(() {
-          widget.state.showResultsAnalysis = true;
-        });
-      } else {
-        setState(() {
-          widget.state.showResultsAnalysis = false;
-        });
-      }
-    } else if (uplift == true) {
-      setState(() {
-          widget.state.showResultsAnalysis = true;
-      });
-    } else { // uplift = null
-      setState(() {
-        widget.state.showResultsAnalysis = false;
-      });
-    }
-
-    print('''
-      dcc = $dcc,
-      P = $p,
-      M = $m,
-      H = $h,
-      mf = $mf,
-      ecc = $ecc,
-      eUplift = $eUplift,
-      uplift = $uplift,
-      qmin = $qmin,
-      qmax = $qmax,
-      qy = $qy,
-      qn = $qn,
-      qo = $qo,
-      qgmin = $qgmin,
-      qgmax = $qgmax,
-    ''');
-
-    // Only show the result if all inputs are valid and an operation is selected
-    /*
-    setState(() {
-      showResults = true;
-    });
-    */
-    /*
-    double q = 325.4927;
-    double col = 0.5;
-    double F = sqrt(24);
-    double L = 1;
-    double B = 3.575;
-
-    double a = -(q + 990*L*F);
-    double b_quad = -(4000*q*col + 1980000*L*F*col);
-    double c = 4000000*q*((B*B)-(col*col));
-
-    double d = (-b_quad - sqrt((b_quad*b_quad)-(4*a*c)))/(2*a);
-    print('d = $d');
-    */
-  }  // calcAnalysis
-  void calcDesign() {
-    ete = double.tryParse(inputEte.text);
-    b = double.tryParse(inputB.text);
-    l = double.tryParse(inputL.text);
-    c1 = double.tryParse(inputC1.text);
-    c2 = double.tryParse(inputC2.text);
-    df = double.tryParse(inputDf.text);
-    hf = double.tryParse(inputHf.text);
-    dw = double.tryParse(inputDw.text);
-    t = double.tryParse(inputT.text);
-
-    pdl = double.tryParse(inputPDL.text);
-    pll = double.tryParse(inputPLL.text);
-    pUlt = double.tryParse(inputPUlt.text);
-    
-    mdl = double.tryParse(inputMDL.text);
-    mll = double.tryParse(inputMLL.text);
-    mUlt = double.tryParse(inputMUlt.text);
-
-    hdl = double.tryParse(inputHDL.text);
-    hll = double.tryParse(inputHLL.text);
-    hUlt = double.tryParse(inputHUlt.text);
-
-    yMatInput = double.tryParse(inputOtherUnitWeight.text);
-    fLoad = double.tryParse(inputFloorLoading.text);
-    fThick = double.tryParse(inputFloorThickness.text);
-
-    fc = double.tryParse(inputFc.text);
-    dtop = double.tryParse(inputTop.text);
-    dbot = double.tryParse(inputBot.text);
-
-      // Default values
-    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
-    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
-    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
-    phi = double.tryParse(inputCc.text) ?? 0.75; // Default to 0.75 if null
-    
-    // moment arm of P
-    if (ete != null && l != null && c2 != null) {
-      dcc = 0.5*l!-ete!-0.5*c2!;
-    } else {
-      dcc = null;
+    } else { // null
+      dcc = 0.0004;
     }
     
     if (loadingCase == 'Axial vertical load (P) only') {
@@ -1121,9 +821,9 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         y = null;
       }
     } else { // Soil Prop is OFF
-      if (y != null && yDry == null) {
-        y = y;
-      } else if (y == null && yDry != null) {
+      if (yMoist != null && yDry == null) {
+        y = yMoist;
+      } else if (yMoist == null && yDry != null) {
         y = yDry;
       } else {
         y = null;
@@ -1183,12 +883,296 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
       roundedQgmin = roundToFourDecimalPlaces(qgmin!);
       roundedQgmax = roundToFourDecimalPlaces(qgmax!);
+
+      widget.state.finalQgmin = roundedQgmin;
+      widget.state.finalQgmax = roundedQgmax;
     } else {
       qgmin = null;
       qgmax = null;
 
       roundedQgmin = null;
       roundedQgmax = null;
+
+      widget.state.finalQgmin = null;
+      widget.state.finalQgmax = null;
+    }
+
+    // error handling
+    if (uplift == false) {
+      if (widget.state.finalQgmin != null && widget.state.finalQgmax != null) {
+        setState(() {
+          widget.state.showResultsAnalysis = true;
+        });
+      } else {
+        setState(() {
+          widget.state.showResultsAnalysis = false;
+        });
+      }
+    } else if (uplift == true) {
+      setState(() {
+        widget.state.showResultsAnalysis = true;
+      });
+    } else { // uplift = null
+      setState(() {
+        widget.state.showResultsAnalysis = false;
+      });
+    }
+
+    print('''
+      dcc = $dcc,
+      P = $p,
+      M = $m,
+      H = $h,
+      mf = $mf,
+      ecc = $ecc,
+      eUplift = $eUplift,
+      uplift = $uplift,
+      qmin = $qmin,
+      qmax = $qmax,
+      qy = $qy,
+      qn = $qn,
+      qo = $qo,
+      qgmin = $qgmin,
+      qgmax = $qgmax,
+      uplift = $uplift,
+      widget.state.showResultsAnalysis = ${widget.state.showResultsAnalysis},
+    ''');
+
+  }  // calcAnalysis
+  void calcDesign() {
+    ete = double.tryParse(inputEte.text);
+    b = double.tryParse(inputB.text);
+    l = double.tryParse(inputL.text);
+    c1 = double.tryParse(inputC1.text);
+    c2 = double.tryParse(inputC2.text);
+    df = double.tryParse(inputDf.text);
+    hf = double.tryParse(inputHf.text);
+    dw = double.tryParse(inputDw.text);
+    t = double.tryParse(inputT.text);
+
+    pdl = double.tryParse(inputPDL.text);
+    pll = double.tryParse(inputPLL.text);
+    pUlt = double.tryParse(inputPUlt.text);
+    
+    mdl = double.tryParse(inputMDL.text);
+    mll = double.tryParse(inputMLL.text);
+    mUlt = double.tryParse(inputMUlt.text);
+
+    hdl = double.tryParse(inputHDL.text);
+    hll = double.tryParse(inputHLL.text);
+
+    yDry = double.tryParse(inputGammaDry.text);
+    yMoist = double.tryParse(inputGammaMoist.text);
+    ySat = double.tryParse(inputGammaSat.text);
+
+    yMatInput = double.tryParse(inputOtherUnitWeight.text);
+    fLoad = double.tryParse(inputFloorLoading.text);
+    fThick = double.tryParse(inputFloorThickness.text);
+
+      // Default values
+    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
+    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
+    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
+    
+    // moment arm of P
+    if (colClass == 'Interior') {
+      if (ete != null && l != null && c2 != null) {
+        dcc = 0.5*l!-ete!-0.5*c2!;
+      } else {
+        dcc = 0.0001;
+      }
+    } else if (colClass == 'Edge') {
+      if (edge == 'Longitudinal dimension, L') {
+        dcc = 0.5*l!-ete!-0.5*c2!;
+      } else if (edge == 'Transverse dimension, B') {
+        dcc = 0.5*l!-0.5*c2!;
+      } else {
+        dcc = 0.002;
+      }
+    } else if (colClass == 'Corner') {
+      if (l != null && c2 != null) {
+        dcc = 0.5*l!-0.5*c2!;
+      } else {
+        dcc = 0.0003;
+      }
+    } else { // null
+      dcc = 0.0004;
+    }
+    
+    if (loadingCase == 'Axial vertical load (P) only') {
+      if (widget.state.toggleP) { // load combi
+        if (pdl != null && pll != null) {
+          p = 1.2*pdl! + 1.6*pll!;  
+        } else {
+          p = null;
+        }
+      } else { // no load combi
+        if (pUlt != null) {
+          p = pUlt!;  
+        } else {
+          p = null;
+        }
+      }
+    } else if (loadingCase == 'Axial vertical load (P) and moment (M)') {
+      if (widget.state.toggleP) { // load combi
+        if (pdl != null && pll != null) {
+          p = 1.2*pdl! + 1.6*pll!;  
+        } else {
+          p = null;
+        }
+      } else { // no load combi
+        if (pUlt != null) {
+          p = pUlt!;  
+        } else {
+          p = null;
+        }
+      }
+      if (widget.state.toggleM) { // load combi
+        if (mdl != null && mll != null) {
+          m = 1.2*mdl! + 1.6*mll!;  
+        } else {
+          m = null;
+        }
+      } else { // no load combi
+        if (mUlt != null) {
+          m = mUlt!;  
+        } else {
+          m = null;
+        }
+      }
+    } else if (loadingCase == 'Axial vertical load (P) and lateral force (H)') {
+      if (widget.state.toggleP) { // load combi
+        if (pdl != null && pll != null) {
+          p = 1.2*pdl! + 1.6*pll!;  
+        } else {
+          p = null;
+        }
+      } else { // no load combi
+        if (pUlt != null) {
+          p = pUlt!;  
+        } else {
+          p = null;
+        }
+      }
+      if (widget.state.toggleH) { // load combi
+        if (hdl != null && hll != null) {
+          h = 1.2*hdl! + 1.6*hll!;  
+        } else {
+          h = null;
+        }
+      } else { // no load combi
+        if (hUlt != null) {
+          h = hUlt!;  
+        } else {
+          h = null;
+        }
+      }
+    }
+
+    if (p != null && dcc != null) {
+      if (loadingCase == 'Axial vertical load (P) only') {
+        mf = p!*dcc!;
+      } else if (loadingCase == 'Axial vertical load (P) and moment (M)') {
+        if (m != null) {
+          if (mDirection == 'Clockwise') {
+            mf = (m! - p!*dcc!).abs();
+          } else if (mDirection == 'Counterclockwise') {
+            mf = m! + p!*dcc!;
+          } else { // null
+            mf = null;
+          }
+        } else {
+          mf = null;
+        }
+      } else if (loadingCase == 'Axial vertical load (P) and lateral force (H)') {
+        // computation of moment arm of H
+        if (hf != null && t != null) {
+          hMomentArm = hf! - t!;
+        } else {
+          hMomentArm = null;
+        }
+
+        if (hMomentArm != null && h != null) {
+          if (hDirection == 'To the left') {
+            mf = p! + h!*hMomentArm!;
+          } else if (hDirection == 'To the right') {
+            mf = (p! - h!*hMomentArm!).abs();
+          } else { // null
+            mf = null;
+          }  
+        }
+      }  
+    } else {
+      mf = null;
+    }
+    
+    // eccentricity
+    if (mf != null && p != null) {
+      ecc = mf!/p!;
+      roundedEcc = roundToFourDecimalPlaces(ecc!);
+    } else {
+      ecc = null;
+      roundedEcc = null;
+    }
+
+    // to check for uplift
+    if (l != null) {
+      eUplift = l!/6;
+      rounded_eUplift = roundToFourDecimalPlaces(eUplift!);
+    } else {
+      eUplift = null;
+      rounded_eUplift = null;
+    }
+
+    if (ecc != null && eUplift != null) {
+      if (ecc! < eUplift!) { // no uplift, continue solution
+        uplift = false;
+        setState(() {
+          isThereUplift = false;
+        });
+      } else { // stop solution
+        uplift = true;
+        setState(() {
+          isThereUplift = true;
+        });
+      }
+    } else {
+      uplift = null;
+    }
+
+    // q1 and q2
+    if (uplift == false) {
+      if (p != null && b != null && l != null && mf!= null) {
+        pOverBL = (p!/(l!*b!));
+        sixMfOverBL2 = (6*mf!)/(b!*l!*l!);
+
+        roundedPoverbl = roundToFourDecimalPlaces(pOverBL!);
+        roundedSixMfOverBL2 = roundToFourDecimalPlaces(sixMfOverBL2!);
+
+        qmin = (p!/(l!*b!)) - (6*mf!)/(b!*l!*l!);
+        qmax = (p!/(l!*b!)) + (6*mf!)/(b!*l!*l!);
+
+        roundedQmin = roundToFourDecimalPlaces(qmin!);
+        roundedQmax = roundToFourDecimalPlaces(qmax!);
+      } else {
+        qmin = null;
+        qmax = null;
+
+        roundedPoverbl = null;
+        roundedSixMfOverBL2 = null;
+
+        roundedQmin = null;
+        roundedQmax = null;
+      }
+    } else {
+      qmin = null;
+      qmax = null;
+
+      roundedPoverbl = null;
+      roundedSixMfOverBL2 = null;
+
+      roundedQmin = null;
+      roundedQmax = null;
     }
 
     // design parttt
@@ -1218,7 +1202,13 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     }
 
     if (l != null && dcc != null && c2 != null && depth1 != null) {
-      x3 = 0.5*l! - dcc! + 0.5*c2! + (depth1!/1000);
+      if (colClass == 'Interior' || colClass == 'Edge') {
+        x3 = 0.5*l! - dcc! + 0.5*c2! + (depth1!/1000);
+      } else if (colClass == 'Corner') {
+        x3 = c2! + (depth1!/1000);
+      } else { // null
+        x3 = 0.0001;
+      }
     } else {
       x3 = null;
     }
@@ -1278,9 +1268,21 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     if (xc != null && dp != null && c1 != null && c2 != null && qmax != null && qmin != null && l != null) {
       x4 = xc! - 0.5*(c2! + (dp!/1000));
       x5 = xc! + 0.5*(c2! + (dp!/1000));
-      b1 = c1! + (dp!/1000);
-      b2 = c2! + (dp!/1000);
       quc = qmin! + ((qmax! - qmin!)*(l! - xc!))/l!;
+      
+      if (colClass == 'Interior') {
+        b1 = c1! + (dp!/1000);
+        b2 = c2! + (dp!/1000);
+      } else if (colClass == 'Edge') {
+        b1 = c1! + (dp!/2000);
+        b2 = c2! + (dp!/1000);
+      } else if (colClass == 'Corner') {
+        b1 = c1! + (dp!/2000);
+        b2 = c2! + (dp!/2000);
+      } else { // null
+        b1 = null;
+        b2 = null;
+      }
 
       roundedB1 = roundToFourDecimalPlaces(b1!);
       roundedB2 = roundToFourDecimalPlaces(b2!);
@@ -1340,7 +1342,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       roundedBeta = null;
     }
 
-    if (colClass == 'Interior') { // as
+    // as
+    if (colClass == 'Interior') {
       as = 40;
     } else if (colClass == 'Edge') {
       as = 30;
@@ -1351,7 +1354,15 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     }
 
     if (b1 != null && b2 != null) {
-      bo = 2*(b1! + b2!);
+      if (colClass == 'Interior') {
+        bo = 2*(b1! + b2!);
+      } else if (colClass == 'Edge') {
+        bo = 2*b1! + b2!;
+      } else if (colClass == 'Corner') {
+        bo = b1! + b2!;
+      } else { // null
+        bo = 0.05;
+      }
     } else {
       bo = null;
     }
@@ -1408,11 +1419,22 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       safetyPunch = null;
     }
 
-    if (safetyPunch != null) {
+    // error handling
+    if (uplift == false) {
+      if (safetyPunch != null) {
+        setState(() {
+          widget.state.showResultsDesign = true;
+        });
+      } else {
+        setState(() {
+          widget.state.showResultsDesign = false;
+        });
+      }
+    } else if (uplift == true) {
       setState(() {
         widget.state.showResultsDesign = true;
       });
-    } else {
+    } else { // uplift = null
       setState(() {
         widget.state.showResultsDesign = false;
       });
@@ -1512,21 +1534,37 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                     // row managerrrr
                     children: [
                       switchDesign(),
-                      headerAnalysis(),
+                      header(),
                       dropdownColClass(),
+
+                      if (colClass == 'Edge')
+                        dropdownEdge(),
+
                       dropdownLoadingCase(),
-                      
-                      if (colClass == 'Interior' || colClass == 'Edge')
+
+                      if (widget.state.design)
+                        dropdownModFactor(),
+        
+                      if (widget.state.design)
+                        entryFc(),
+
+                      if (showEte)
                         entryEte(),
 
                       entryB(),
                       entryL(),
+
+                      if (widget.state.design)
+                        entryC1(),
+
                       entryC2(),
                       entryT(),
-                      entryDf(),
+                      if (!widget.state.design)
+                        entryDf(),
                       if (loadingCase == 'Axial vertical load (P) and lateral force (H)')
                         entryHf(),
-                      entryDw(),
+                      if (!widget.state.design)
+                        entryDw(),
 
                       if (loadingCase == 'Axial vertical load (P) only' || loadingCase == 'Axial vertical load (P) and moment (M)' || loadingCase == 'Axial vertical load (P) and lateral force (H)')
                         switchP(),
@@ -1562,53 +1600,46 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                           ]
                         ),
 
-                      switchSoilProp(),
-                      Stack(
-                        children: [
-                          containerSoilPropOn(),
-                          containerSoilPropOff(),
-                        ]
-                      ),
+                      if (!widget.state.design)
+                        switchSoilProp(),
+                      if (!widget.state.design)
+                        Stack(
+                          children: [
+                            containerSoilPropOn(),
+                            containerSoilPropOff(),
+                          ]
+                        ),
 
-                      switchWP(),
-                      containerWPOn(),
+                      if (!widget.state.design)
+                        switchWP(),
+                      if (!widget.state.design)
+                        containerWPOn(),
 
-                      switchConcreteDet(),
-                      containerConcreteOn(),
+
+                      if (!widget.state.design)
+                        switchConcreteDet(),
+                      if (!widget.state.design)
+                        containerConcreteOn(),
 
                       if (widget.state.soilProp)
                         switchWaterDet(),
                       if (widget.state.soilProp)
                         containerWaterOn(),
 
-                      buttonAnalysis(),
+                      if (!widget.state.design)
+                        buttonAnalysis(),
 
-                      if (widget.state.showResultsAnalysis)
+                      if (!widget.state.design && widget.state.showResultsAnalysis)
                         SizedBox(height: 10),
-                      if (widget.state.showResultsAnalysis)
+                      if (!widget.state.design && widget.state.showResultsAnalysis)
                         resultAnalysis(),
-                      if (widget.state.showResultsAnalysis)
+                      if (!widget.state.design && widget.state.showResultsAnalysis)
                         SizedBox(height: 10),
 
-                      if (widget.state.showResultsAnalysis)
+                      if (!widget.state.design && widget.state.showResultsAnalysis)
                         solutionButtonAnalysis(),
-                      if (widget.state.showSolutionAnalysis)
+                      if (!widget.state.design && widget.state.showSolutionAnalysis)
                         solutionContainerAnalysis(),
-
-                      SizedBox(height: 10),
-                      clearbuttonAnalysis(),
-                      SizedBox(height: 10),
-
-                      // design widgets
-                
-                      if (widget.state.design)
-                        headerDesign(),
-                      if (widget.state.design)
-                        dropdownModFactor(),
-                      if (widget.state.design)
-                        entryC1(),
-                      if (widget.state.design)
-                        entryFc(),
 
                       if (widget.state.design)
                         switchTop(),
@@ -1647,14 +1678,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                       if (widget.state.design && widget.state.showSolutionDesign)
                         solutionContainerDesign(),                  
 
-                      if (widget.state.design)
-                        SizedBox(height: 10),
-                      if (widget.state.design)
-                        clearbuttonDesign(),
-                      if (widget.state.design)
-                        SizedBox(height: 10),
-                      if (widget.state.design)
-                        clearbuttonAll(),
+                      SizedBox(height: 10),
+                      clearbuttonAll(),
                     ],
                   ),
                 ),
@@ -1665,11 +1690,11 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),
     );
   } // build (main widget)
-  Widget headerAnalysis() {
+  Widget header() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20),
       child: Text(
-        'Analysis',
+        headerTitle,
         style: TextStyle(
           color: Colors.white,
           fontSize: 20,
@@ -1679,6 +1704,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),
     );
   }
+  
   Widget switchDesign() {
     return Padding(
       padding: EdgeInsets.only(top: 10),
@@ -1686,45 +1712,57 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         width: MediaQuery.of(context).size.width * 0.9,
         constraints: BoxConstraints(maxWidth: 500),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Flexible(
               child: Container(
                 width: 120,
                 child: Text(
-                  'Turn on for design',
+                  'Select calculation type:',
                   style: TextStyle(color: Colors.white),
                 ),
-              )
+              ),
             ),
-            Container(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
+            Row(
+              children: [
+                Radio<bool>(
+                  value: false, // Analysis
+                  groupValue: widget.state.design,
+                  onChanged: (bool? newValue) {
+                    setState(() {
+                      widget.state.design = newValue ?? false;
+                      widget.onStateChanged(widget.state);
+                    });
+                  },
+                  activeColor: Color(0xFF1F538D),
                 ),
-                child: SizedBox(
-                  height: 40, // Adjust height as needed
-                  child: Switch(
-                    value: widget.state.design,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        widget.state.design = newValue;
-                        widget.onStateChanged(widget.state);
-                      });
-                    },
-                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
-                    inactiveThumbColor: Colors.white,
-                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
-                  )
-                )
-              )
+                Text(
+                  'Analysis',
+                  style: TextStyle(color: Colors.white),
+                ),
+                SizedBox(width: 20),
+                Radio<bool>(
+                  value: true, // Design
+                  groupValue: widget.state.design,
+                  onChanged: (bool? newValue) {
+                    setState(() {
+                      widget.state.design = newValue ?? false;
+                      widget.onStateChanged(widget.state);
+                    });
+                  },
+                  activeColor: Color(0xFF1F538D),
+                ),
+                Text(
+                  'Design',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ],
             ),
           ],
         ),
       ),
     );
-  } // switchDesign
+  }
   Widget dropdownLoadingCase() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -4487,6 +4525,10 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       onPressed: () {
         calcAnalysis();
         if (!widget.state.showResultsAnalysis) {
+          setState(() {
+            widget.state.showSolutionAnalysis = false;
+            widget.state.solutionToggleAnalysis = true;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Please provide input for all parameters."),
@@ -4509,6 +4551,20 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         width: 445,
         child: Column(
           children: [
+            Text(
+              "e = $roundedEcc mm",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "B/6 = $rounded_eUplift mm",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
             Text(
               isThereUplift ? "e ≥ B/6, ∴ uplift occurs" : "e < B/6, ∴ no uplift occurs",
               style: TextStyle(
@@ -4710,21 +4766,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   } // clearbuttonAnalysis
   
   // design widgets
-
-  Widget headerDesign() {
-    return Padding(
-      padding: EdgeInsets.symmetric(vertical: 20),
-      child: Text(
-        'Design',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-        textAlign: TextAlign.center,
-      ),
-    );
-  } // headerDesign
+  
   Widget dropdownModFactor() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -4812,6 +4854,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                 onChanged: (String? newValue) {
                   setState(() {
                     colClass = newValue;
+                    _updateState();
                     });
                   },
                 items: colClassValues.map((String value) {
@@ -4827,6 +4870,58 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),
     );
   } // dropdownColClass
+  Widget dropdownEdge() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Dimension of footing the column touches:',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 179,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Colors.grey[800],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: edge,
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
+                dropdownColor: Colors.grey[800],
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(color: Colors.white),
+                underline: SizedBox(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    edge = newValue;
+                    _updateState();
+                    });
+                  },
+                items: edgeOptions.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } // dropdownEdge
   Widget entryC1() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -5525,6 +5620,10 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       onPressed: () {
         calcDesign();
         if (!widget.state.showResultsDesign) {
+          setState(() {
+            widget.state.showSolutionDesign = false;
+            widget.state.solutionToggleDesign = true;
+          });
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Please provide input for all parameters."),
@@ -5548,44 +5647,34 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         width: 445,
         child: Column(
           children: [
-            RichText(
-              text: TextSpan(
-                text: "For wide-beam shear:",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
-                  decorationColor: Colors.white,
-                ),
-              ),
-            ),
             Text(
-              "Vu = ${widget.state.finalVuWide} kN",
+              "e = $roundedEcc mm",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              "ΦVc = ${widget.state.finalVcWide} kN",
+              "B/6 = $rounded_eUplift mm",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
               ),
             ),
-            if (safetyWideBeam == true)
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "Vu ≤ ΦVc, ∴ wide-beam shear strength is ",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextSpan(
-                      text: "adequate",
+            Text(
+              isThereUplift ? "e ≥ B/6, ∴ uplift occurs" : "e < B/6, ∴ no uplift occurs",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Visibility(
+              visible: !isThereUplift,
+              child: Column(
+                children: [
+                  RichText(
+                    text: TextSpan(
+                      text: "For wide-beam shear:",
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -5593,93 +5682,70 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                         decorationColor: Colors.white,
                       ),
                     ),
-                  ],
-                ),
-              ),
-            if (safetyWideBeam == false)
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "Vu > ΦVc, ∴ wide-beam shear strength is",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
+                  ),
+                  Text(
+                    "Vu = ${widget.state.finalVuWide} kN",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    "ΦVc = ${widget.state.finalVcWide} kN",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (safetyWideBeam == true)
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Vu ≤ ΦVc, ∴ wide-beam shear strength is ",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: "adequate",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    TextSpan(
-                      text: "inadequate",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.white,
+                  if (safetyWideBeam == false)
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Vu > ΦVc, ∴ wide-beam shear strength is",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: "inadequate",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.white,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            RichText(
-              text: TextSpan(
-                text: "For punching shear:",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  decoration: TextDecoration.underline,
-                  decorationColor: Colors.white,
-                ),
-              ),
-            ),
-            Text(
-              "Vu = ${widget.state.finalVuPunch} kN",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            Text(
-              "ΦVc = ${widget.state.finalVcPunch} kN",
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            if (safetyPunch == true)
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "Vu ≤ ΦVc, ∴ punching shear strength is ",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextSpan(
-                      text: "adequate",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                        decorationColor: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            if (safetyPunch == false)
-              RichText(
-                text: TextSpan(
-                  children: [
-                    TextSpan(
-                      text: "Vu > ΦVc, ∴ wide-beam shear strength is ",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    TextSpan(
-                      text: "inadequate",
+                  RichText(
+                    text: TextSpan(
+                      text: "For punching shear:",
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
@@ -5687,10 +5753,71 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                         decorationColor: Colors.white,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                  Text(
+                    "Vu = ${widget.state.finalVuPunch} kN",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  Text(
+                    "ΦVc = ${widget.state.finalVcPunch} kN",
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  if (safetyPunch == true)
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Vu ≤ ΦVc, ∴ punching shear strength is ",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: "adequate",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (safetyPunch == false)
+                    RichText(
+                      text: TextSpan(
+                        children: [
+                          TextSpan(
+                            text: "Vu > ΦVc, ∴ wide-beam shear strength is ",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextSpan(
+                            text: "inadequate",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              decoration: TextDecoration.underline,
+                              decorationColor: Colors.white,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
               ),
-          ],
+            ),
+          ]
         ),
       ),
     );
@@ -5731,83 +5858,61 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (isThereUplift)
-                Text(
-                  'e = $roundedEcc mm',
-                  style: TextStyle(color: Colors.white),
-                ),
-              if (isThereUplift)
-                Text(
-                  'B/6 = $rounded_eUplift mm',
-                  style: TextStyle(color: Colors.white),
-                ),
-              if (isThereUplift)
-                Text(
-                  "e ≥ B/6, ∴ uplift occurs",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
               Text(
-                "d₁ = $depth1 mm",
+                'Distance of center of column to center of footing = $dcc',
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "d₂ = $depth2 mm",
+                'Mf = $mf',
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "dₚ = $dp mm",
-                style: TextStyle(color: Colors.white),
-              ),
-              SizedBox(height: 10),
-              RichText(
-                text: TextSpan(
-                  text: "For wide-beam shear:",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
-                    decorationColor: Colors.white,
-                  ),
-                ),
-              ),
-              Text(
-                "x₃ = $x3 m",
+                'e = $roundedEcc',
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "qᵤ₃ = $roundedQ3 kPa",
+                'B/6 = $rounded_eUplift',
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                "Vᵤ = ${widget.state.finalVuWide} kN",
+                isThereUplift ? "e ≥ B/6, ∴ uplift occurs" : "e < B/6, ∴ no uplift occurs",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              Text(
-                "ΦVc = ${widget.state.finalVcWide} kN",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (safetyWideBeam == true)
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Vu ≤ ΦVc, ∴ wide-beam shear strength is ",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "adequate",
+              Visibility(
+                visible: !isThereUplift,
+                child: Column(
+                  children: [
+                    Text(
+                        'q = $roundedPoverbl ± $roundedSixMfOverBL2',
+                        style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                        'qmin = $roundedQmin',
+                        style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                        'qmax = $roundedQmax',
+                        style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "d₁ = $depth1 mm",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "d₂ = $depth2 mm",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "dₚ = $dp mm",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    SizedBox(height: 10),
+                    RichText(
+                      text: TextSpan(
+                        text: "For wide-beam shear:",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -5815,128 +5920,80 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                           decorationColor: Colors.white,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              if (safetyWideBeam == false)
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Vu > ΦVc, ∴ wide-beam shear strength is",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                    ),
+                    Text(
+                      "x₃ = $x3 m",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "qᵤ₃ = $roundedQ3 kPa",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "Vᵤ = ${widget.state.finalVuWide} kN",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "ΦVc = ${widget.state.finalVcWide} kN",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (safetyWideBeam == true)
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Vu ≤ ΦVc, ∴ wide-beam shear strength is ",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "adequate",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      TextSpan(
-                        text: "inadequate",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.white,
+                    if (safetyWideBeam == false)
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Vu > ΦVc, ∴ wide-beam shear strength is",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "inadequate",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              SizedBox(height: 10),
+                    SizedBox(height: 10),
 
-              RichText(
-                text: TextSpan(
-                  text: "For punching shear:",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
-                    decorationColor: Colors.white,
-                  ),
-                ),
-              ),
-              Text(
-                "xc = $xc m",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "x₄ = $x4 m",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "x₅ = $x5 m",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "b₁ = $roundedB1 m",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "b₂ = $roundedB2 m",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "quc = $roundedQuc kPa",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "Fu = $roundedFu kN",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "Vu = ${widget.state.finalVuPunch} kN",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              Text(
-                "β = $roundedBeta",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "bₒ = $bo m",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "aₛ = $as",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "Vc₁ = $roundedVc1",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "Vc₂ = $roundedVc2",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "Vc₃ = $roundedVc3",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "Vc = $roundedVcPunch",
-                style: TextStyle(color: Colors.white),
-              ),
-              Text(
-                "ΦVc = ${widget.state.finalVcPunch} kN",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (safetyWideBeam == true)
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Vu ≤ ΦVc, ∴ wide-beam shear strength is ",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      TextSpan(
-                        text: "adequate",
+                    RichText(
+                      text: TextSpan(
+                        text: "For punching shear:",
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
@@ -5944,32 +6001,126 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                           decorationColor: Colors.white,
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              if (safetyWideBeam == false)
-                RichText(
-                  text: TextSpan(
-                    children: [
-                      TextSpan(
-                        text: "Vu > ΦVc, ∴ wide-beam shear strength is",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
+                    ),
+                    Text(
+                      "xc = $xc m",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "x₄ = $x4 m",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "x₅ = $x5 m",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "b₁ = $roundedB1 m",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "b₂ = $roundedB2 m",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "quc = $roundedQuc kPa",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "Fu = $roundedFu kN",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "Vu = ${widget.state.finalVuPunch} kN",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      "β = $roundedBeta",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "bₒ = $bo m",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "aₛ = $as",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "Vc₁ = $roundedVc1",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "Vc₂ = $roundedVc2",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "Vc₃ = $roundedVc3",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "Vc = $roundedVcPunch",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    Text(
+                      "ΦVc = ${widget.state.finalVcPunch} kN",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (safetyPunch == true)
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Vu ≤ ΦVc, ∴ punching shear strength is ",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "adequate",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                      TextSpan(
-                        text: "inadequate",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          decoration: TextDecoration.underline,
-                          decorationColor: Colors.white,
+                    if (safetyPunch == false)
+                      RichText(
+                        text: TextSpan(
+                          children: [
+                            TextSpan(
+                              text: "Vu > ΦVc, ∴ punching shear strength is",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            TextSpan(
+                              text: "inadequate",
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                decoration: TextDecoration.underline,
+                                decorationColor: Colors.white,
+                              ),
+                            ),
+                          ],
                         ),
                       ),
-                    ],
-                  ),
+                  ]
                 ),
+              ),
             ],
           ),
         ),
@@ -6070,6 +6221,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         // design
 
         modFactor = 'Normal-lightweight';
+        colClass = null;
 
         inputC1.clear();
         inputFc.clear();
