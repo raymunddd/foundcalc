@@ -525,7 +525,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       child: SizedBox(
                         width: 250, // 👈 adjust as needed
                         child: Text(
-                          "Analysis and Design of Rectangular Footings with Moment 🚧",
+                          "Analysis and Design of Rectangular Footings with Moment",
                           textAlign: TextAlign.center,
                           softWrap: true,
                           overflow: TextOverflow.visible,
