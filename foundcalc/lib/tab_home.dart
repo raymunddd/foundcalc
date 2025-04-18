@@ -519,9 +519,18 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Color(0xFF1F538D),
                         foregroundColor: Colors.white,
+                        padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0), // Optional: adds spacing inside
                       ),
                       onPressed: _addAnalRectMomentItem,
-                      child: Text("Analysis of Rectangular Footings with Moment 🚧"),
+                      child: SizedBox(
+                        width: 250, // 👈 adjust as needed
+                        child: Text(
+                          "Analysis and Design of Rectangular Footings with Moment 🚧",
+                          textAlign: TextAlign.center,
+                          softWrap: true,
+                          overflow: TextOverflow.visible,
+                        ),
+                      ),
                     ),
                     SizedBox(height: 10),
                     ElevatedButton(

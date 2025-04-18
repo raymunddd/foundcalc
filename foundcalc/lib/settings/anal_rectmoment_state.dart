@@ -1,10 +1,11 @@
 class AnalRectMomentState {
   // dropdowns
-  String? modFactor;
   String? loadingCase;
   String? material;
   String? mDirection;
   String? hDirection;
+  String? modFactor;
+  String? colClass;
   
   // inputs
   String inputEte = '';
@@ -88,8 +89,16 @@ class AnalRectMomentState {
   bool showSolutionDesign = false;
 
   // final answer
+
+  // analysis
   double? finalQgmin;
   double? finalQgmax;
+  // design
+  double? finalVuWide;
+  double? finalVcWide;
+
+  double? finalVuPunch;
+  double? finalVcPunch;
 
   AnalRectMomentState({required this.title});
 }

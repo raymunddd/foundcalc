@@ -121,6 +121,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? yc;
   double? yw;
 
+  double? lambda;
+  double? fc;
   double? dtop;
   double? dbot;
   double? cc;
@@ -149,12 +151,38 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? qo;
   
   // soldesign
+
+  // wide-beam shear
   double? depth1;
   double? depth2;
   double? dp;
   double? x3;
   double? q3;
   double? vu;
+  double? phiVc;
+  bool? safetyWideBeam;
+  // punching shear
+  double? xc;
+  double? x4;
+  double? x5;
+  double? b1;
+  double? b2;
+  double? quc;
+  double? fu;
+  double? vuPunch;
+  double? cmax;
+  double? cmin;
+  double? beta;
+  double? bo;
+  double? as;
+  double? lambdaFc;
+  double? vc1;
+  double? vc2;
+  double? vc3;
+  double? min1;
+  double? vcPunch;
+  double? phiVcPunch;
+  bool? safetyPunch;
 
   // for solution container
   double? roundedEcc;
@@ -210,6 +238,13 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     'Normal-lightweight',
   ];
 
+  String? colClass;
+  final List<String> colClassValues = [
+    'Interior',
+    'Edge',
+    'Corner',
+  ];
+
   String get gammaDryHint {
     if (widget.state.isGammaDryEnabled) {
       return '';
@@ -244,6 +279,14 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
   String get solutionButtonLabelAnalysis {
     if (widget.state.showSolutionAnalysis) {
+      return 'Hide solution';
+    } else {
+      return 'View solution';
+    }
+  }
+
+  String get solutionButtonLabelDesign {
+    if (widget.state.showSolutionDesign) {
       return 'Hide solution';
     } else {
       return 'View solution';
@@ -301,13 +344,17 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
     // for dropdowns
 
-    modFactor = "Normal-lightweight"; // Set default value here
-    widget.state.modFactor = modFactor; // Update the state
+    
+    widget.state.material = material;
 
     loadingCase = widget.state.loadingCase;
     mDirection = widget.state.mDirection;
     hDirection = widget.state.hDirection;
 
+    modFactor = "Normal-lightweight"; // Set default value here
+    widget.state.modFactor = modFactor;
+
+    colClass = widget.state.colClass;
     // listeners
 
     inputEte.addListener(_updateState);
@@ -857,6 +904,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     fLoad = double.tryParse(inputFloorLoading.text);
     fThick = double.tryParse(inputFloorThickness.text);
 
+    fc = double.tryParse(inputFc.text);
     dtop = double.tryParse(inputTop.text);
     dbot = double.tryParse(inputBot.text);
 
@@ -864,6 +912,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
     yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
     cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
+    phi = double.tryParse(inputCc.text) ?? 0.75; // Default to 0.75 if null
     
     // moment arm of P
     if (ete != null && l != null && c2 != null) {
@@ -1141,6 +1190,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       dbot = 20;
     }
 
+    // wide-beam shear strength procedure (wbssp)
+
     if (t != null) {
       depth1 = (t!*1000) - cc! - 0.5*dbot!;
       depth2 = (t!*1000) - cc! - dbot! - 0.5*dtop!;
@@ -1151,25 +1202,182 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       dp = null;
     }
 
-    if (l != null && dcc != null) {
-      x3 = 0.5*l! - dcc! + 0.5*c2! + depth1!;
+    if (l != null && dcc != null && c2 != null && depth1 != null) {
+      x3 = 0.5*l! - dcc! + 0.5*c2! + (depth1!/1000);
     } else {
       x3 = null;
     }
 
     if (x3 != null && qmin != null && qmax != null && l != null) {
-      q3 = qmin! + (x3!*(qmax!-qmin!))/l!;
+      q3 = qmin! + ((qmax!-qmin!)*(l!-x3!))/l!;
     } else {
       q3 = null;
     }
 
     if (x3 != null && qmin != null && q3 != null && l != null && b != null) {
       vu = 0.5*(q3! + qmin!)*(l! - x3!)*b!;
+      widget.state.finalVuWide = roundToFourDecimalPlaces(vu!);
     } else {
       vu = null;
+      widget.state.finalVuWide = null;
     }
 
+    if (widget.state.modFactor == "Normal-lightweight") {
+      lambda = 1;
+    } else if (widget.state.modFactor == "Sand-lightweight") {
+      lambda = 0.85;
+    } else if (widget.state.modFactor == "All-lightweight") {
+      lambda = 0.75;
+    } else {
+      lambda = null;
+    }
 
+    if (phi != null && lambda != null && fc != null && b != null && depth1 != null) {
+      phiVc = phi!*0.17*lambda!*sqrt(fc!)*b!*depth1!;
+      widget.state.finalVcWide = roundToFourDecimalPlaces(phiVc!);
+    } else {
+      phiVc = null;
+      widget.state.finalVcWide = null;
+    }
+
+    if (vu != null && phiVc != null) {
+      if (vu! > phiVc!) {
+        safetyWideBeam = false;
+      } else { // Vu ≤ ΦVc
+        safetyWideBeam = true;
+      }
+    } else {
+      safetyWideBeam = null;
+    }
+
+    // punching shear strength procedure (pssp)
+
+    if (l != null && dcc != null) {
+      xc = 0.5*l! - dcc!;
+    } else {
+      xc = null;
+    }
+
+    if (xc != null && dp != null && c1 != null && c2 != null && qmax != null && qmin != null && l != null) {
+      x4 = xc! - 0.5*(c2! + (dp!/1000));
+      x5 = xc! + 0.5*(c2! + (dp!/1000));
+      b1 = c1! + (dp!/1000);
+      b2 = c2! + (dp!/1000);
+      quc = qmin! + ((qmax! - qmin!)*(l! - xc!))/l!;
+    } else {
+      x4 = null;
+      x5 = null;
+      b1 = null;
+      b2 = null;
+      quc = null;
+    }
+
+    if (quc != null && b1 != null && b2 != null) {
+      fu = quc! * b1! * b2!;
+    } else {
+      fu = null;
+    }
+
+    if (p != null && fu != null) {
+      vuPunch = p! - fu!;
+      widget.state.finalVuPunch = roundToFourDecimalPlaces(vuPunch!);
+    } else {
+      vuPunch = null;
+      widget.state.finalVuPunch = null;
+    }
+
+    if (c1 != null && c2 != null) {
+      if (c1! < c2!) {
+        cmax = c2;
+        cmin = c1;
+      } else if (c1! > c2!) {
+        cmax = c1;
+        cmin = c2;
+      } else if (c1! == c2!) {
+        cmax = c1;
+        cmin = c1;
+      } else {
+        cmax = null;
+        cmin = null;
+      }
+    } else {
+      cmax = null;
+      cmin = null;
+    }
+
+    if (cmax != null && cmin != null) {
+      beta = cmax!/cmin!;
+    } else {
+      beta = null;
+    }
+
+    if (colClass == 'Interior') { // as
+      as = 40;
+    } else if (colClass == 'Edge') {
+      as = 30;
+    } else if (colClass == 'Corner') { // Corner column
+      as = 20;
+    } else {
+      as = null;
+    }
+
+    if (b1 != null && b2 != null) {
+      bo = 2*(b1! + b2!);
+    } else {
+      bo = null;
+    }
+
+    if (lambda != null && fc != null) {
+      lambdaFc = lambda! * sqrt(fc!);
+    } else {
+      lambdaFc = null;
+    }
+
+    if (lambdaFc != null && beta != null && as != null && dp != null && bo != null) {
+      vc1 = 0.33*lambdaFc!;
+      vc2 = 0.17*(1 + (2/beta!))*lambdaFc!;
+      vc3 = 0.083*(2 + (as! * dp!)/(1000*bo!))*lambdaFc!;
+    } else {
+      vc1 = null;
+      vc2 = null;
+      vc3 = null;
+    }
+
+    if (vc1 != null && vc2 != null && vc3 != null) {
+      min1 = min(vc1!, vc2!);
+      vcPunch = min(min1!, vc3!);
+    } else {
+      min1 = null;
+      vcPunch = null;
+    }
+
+    if (vcPunch != null) {
+      phiVcPunch = 0.75*vcPunch!*bo!*dp!;
+      widget.state.finalVcPunch = roundToFourDecimalPlaces(phiVcPunch!);
+    } else {
+      phiVcPunch = null;
+      widget.state.finalVcPunch = null;
+    }
+
+    if (vuPunch != null && phiVcPunch != null) {
+      if (vuPunch! > phiVcPunch!) {
+        safetyPunch = false;
+      } else { // Vu ≤ ΦVc
+        safetyPunch = true;
+      }
+    } else {
+      safetyPunch = null;
+    }
+
+    if (safetyPunch != null) {
+      setState(() {
+        widget.state.showResultsDesign = true;
+      });
+    } else {
+      setState(() {
+        widget.state.showResultsDesign = false;
+      });
+    }
 
     /*
     if (uplift == false) {
@@ -1204,11 +1412,28 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       uplift = $uplift,
       qmin = $qmin,
       qmax = $qmax,
-      qy = $qy,
-      qn = $qn,
-      qo = $qo,
-      qgmin = $qgmin,
-      qgmax = $qgmax,
+      d1 = $depth1,
+      d2 = $depth2,
+      dp = $dp,
+      x3 = $x3,
+      q3 = $q3,
+      wide Vu = $vu,
+      wide Vc = $phiVc,
+      xc = $xc,
+      x4 = $x4,
+      x5 = $x5,
+      quc = $quc,
+      b1 = $b1,
+      b2 = $b2,
+      Fu = $fu,
+      punching Vu = $vu,
+      as = $as,
+      beta = $beta,
+      bo = $bo,
+      vc1 = $vc1,
+      vc2 = $vc2,
+      vc3 = $vc3,
+      punching Vc = $phiVcPunch,
     ''');
   }  // calcAnalysis
   
@@ -1269,9 +1494,14 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                     mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
                     // row managerrrr
                     children: [
+                      switchDesign(),
                       headerAnalysis(),
+                      dropdownColClass(),
                       dropdownLoadingCase(),
-                      entryEte(),
+                      
+                      if (colClass == 'Interior' || colClass == 'Edge')
+                        entryEte(),
+
                       entryB(),
                       entryL(),
                       entryC2(),
@@ -1337,6 +1567,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                       buttonAnalysis(),
 
                       if (widget.state.showResultsAnalysis)
+                        SizedBox(height: 10),
+                      if (widget.state.showResultsAnalysis)
                         resultAnalysis(),
                       if (widget.state.showResultsAnalysis)
                         SizedBox(height: 10),
@@ -1351,11 +1583,13 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                       SizedBox(height: 10),
 
                       // design widgets
-                      switchDesign(),
+                
                       if (widget.state.design)
                         headerDesign(),
                       if (widget.state.design)
                         dropdownModFactor(),
+                      if (widget.state.design)
+                        entryC1(),
                       if (widget.state.design)
                         entryFc(),
 
@@ -1381,6 +1615,29 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
                       if (widget.state.design)
                         buttonDesign(),
+                      
+                      if (widget.state.design && widget.state.showResultsDesign)
+                        SizedBox(height: 10),
+                      if (widget.state.design && widget.state.showResultsDesign)
+                        resultDesign(),
+
+                      if (widget.state.design && widget.state.showResultsDesign)
+                        SizedBox(height: 10),
+                      if (widget.state.design && widget.state.showResultsDesign)
+                        solutionButtonDesign(),
+                      if (widget.state.design && widget.state.showSolutionDesign)
+                        SizedBox(height: 10),
+                      if (widget.state.design && widget.state.showSolutionDesign)
+                        solutionContainerDesign(),                  
+
+                      if (widget.state.design)
+                        SizedBox(height: 10),
+                      if (widget.state.design)
+                        clearbuttonDesign(),
+                      if (widget.state.design)
+                        SizedBox(height: 10),
+                      if (widget.state.design)
+                        clearbuttonAll(),
                     ],
                   ),
                 ),
@@ -1405,6 +1662,52 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),
     );
   }
+  Widget switchDesign() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Turn on for design',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.design,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.design = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchDesign
   Widget dropdownLoadingCase() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -1654,74 +1957,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),        
     );
   } // entryL
-  //
-  Widget entryC1() {
-    return Padding(
-      padding: EdgeInsets.only(top: 20),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        constraints: BoxConstraints(maxWidth: 500),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-          children: [
-            Flexible(
-              child: Container(
-                width: 150,
-                child: Text(
-                  'Dimension of column parallel to B, C1 (in m)',
-                  style: TextStyle(color: Colors.white),
-                ),
-              )
-            ),
-            Container(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
-                ),
-                child: SizedBox(
-                  height: 40, // Adjust height as needed
-                  child: TextField(
-                    controller: inputC1, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
-                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Input required",
-                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[800],
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          Icons.clear, 
-                          color: Colors.white54,
-                        ),
-                        iconSize: 17,
-                        onPressed: () {
-                          // Clear the text field
-                          inputC1.clear();
-                        },
-                      ),
-                    ),
-                  )
-                )
-              ),
-            ),
-          ],
-        ),
-      ),        
-    );
-  } // entryC1
-  //
   Widget entryC2() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -4230,79 +4465,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     );
   } // subYw
   
-  Widget clearbuttonAnalysis() {
-    return ElevatedButton(
-      onPressed: () {        
-        loadingCase = null;
-
-        inputEte.clear();
-        inputB.clear();
-        inputL.clear();
-        inputC1.clear();
-        inputC2.clear();
-        inputT.clear();
-        inputDf.clear();
-        inputHf.clear();
-        inputDw.clear();
-
-        inputPDL.clear();
-        inputPLL.clear();
-        inputPUlt.clear();
-
-        inputMDL.clear();
-        inputMLL.clear();
-        inputMUlt.clear();
-        mDirection = null;
-
-        inputHDL.clear();
-        inputHLL.clear();
-        inputHUlt.clear();
-        hDirection = null;
-
-        inputGs.clear();
-        inputE.clear();
-        inputW.clear();
-
-        inputGammaDry.clear();
-        inputGammaMoist.clear();
-        inputGammaSat.clear();
-
-        inputFloorLoading.clear();
-        inputFloorThickness.clear();
-        inputOtherUnitWeight.clear();
-
-        inputYc.clear();
-        inputYw.clear();
-        inputFc.clear();
-
-        inputTop.clear();
-        inputBot.clear();
-        inputCc.clear();
-
-        setState(() {
-          widget.state.toggleP = false;
-          widget.state.toggleM = false;
-          widget.state.toggleH = false;
-
-          widget.state.weightPressures = false;
-          widget.state.topToggle = false;
-          widget.state.botToggle = false;
-          widget.state.concreteCover = false;
-          widget.state.concreteDet = false;
-          widget.state.waterDet = false;
-
-          widget.state.showResultsAnalysis = false;
-          widget.state.showSolutionAnalysis = false;
-        });
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFF1F538D),
-        foregroundColor: Colors.white,
-      ),
-      child: Text("Clear all values"),
-    );
-  }
-
   Widget buttonAnalysis() {
     return ElevatedButton(
       onPressed: () {
@@ -4324,53 +4486,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       child: Text('Solve qgmin and qgmax'),
     );
   } // buttonAnalysis
-
-  Widget switchDesign() {
-    return Padding(
-      padding: EdgeInsets.only(top: 10),
-      child: Container(
-        width: MediaQuery.of(context).size.width * 0.9,
-        constraints: BoxConstraints(maxWidth: 500),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-          children: [
-            Flexible(
-              child: Container(
-                width: 120,
-                child: Text(
-                  'Design',
-                  style: TextStyle(color: Colors.white),
-                ),
-              )
-            ),
-            Container(
-              width: 179,
-              child: TextSelectionTheme(
-                data: TextSelectionThemeData(
-                  cursorColor: Colors.white,
-                ),
-                child: SizedBox(
-                  height: 40, // Adjust height as needed
-                  child: Switch(
-                    value: widget.state.design,
-                    onChanged: (bool newValue) {
-                      setState(() {
-                        widget.state.design = newValue;
-                        widget.onStateChanged(widget.state);
-                      });
-                    },
-                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
-                    inactiveThumbColor: Colors.white,
-                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
-                  )
-                )
-              )
-            ),
-          ],
-        ),
-      ),
-    );
-  } // switchDesign
   Widget resultAnalysis() {
     return Flexible(
       child: Container(
@@ -4409,7 +4524,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         ),
       ),
     );
-  }
+  } // resultAnalysis
+  
   void toggleSolutionAnalysis() {
     if (widget.state.solutionToggleAnalysis) {
       widget.state.showSolutionAnalysis = true;
@@ -4430,7 +4546,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       child: Text(solutionButtonLabelAnalysis),
     );
   }
-  Widget solutionContainerAnalysis() {
+  Widget solutionContainerAnalysis() {  // sca
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
       child: Container(
@@ -4486,7 +4602,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                 ),
               if (!isThereUplift)
                 Text(
-                  'qo = $roundedQo',
+                  'qₒ = $roundedQo',
                   style: TextStyle(color: Colors.white),
                 ),
               if (!isThereUplift)
@@ -4511,6 +4627,70 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),
     );
   }
+  
+  Widget clearbuttonAnalysis() {
+    return ElevatedButton(
+      onPressed: () {        
+        loadingCase = null;
+
+        inputEte.clear();
+        inputB.clear();
+        inputL.clear();
+        inputC2.clear();
+        inputT.clear();
+        inputDf.clear();
+        inputHf.clear();
+        inputDw.clear();
+
+        inputPDL.clear();
+        inputPLL.clear();
+        inputPUlt.clear();
+
+        inputMDL.clear();
+        inputMLL.clear();
+        inputMUlt.clear();
+        mDirection = null;
+
+        inputHDL.clear();
+        inputHLL.clear();
+        inputHUlt.clear();
+        hDirection = null;
+
+        inputGs.clear();
+        inputE.clear();
+        inputW.clear();
+
+        inputGammaDry.clear();
+        inputGammaMoist.clear();
+        inputGammaSat.clear();
+
+        inputFloorLoading.clear();
+        inputFloorThickness.clear();
+        inputOtherUnitWeight.clear();
+
+        inputYc.clear();
+        inputYw.clear();
+
+        setState(() {
+          widget.state.toggleP = false;
+          widget.state.toggleM = false;
+          widget.state.toggleH = false;
+
+          widget.state.weightPressures = false;
+          widget.state.concreteDet = false;
+          widget.state.waterDet = false;
+
+          widget.state.showResultsAnalysis = false;
+          widget.state.showSolutionAnalysis = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  } // clearbuttonAnalysis
   
   // design widgets
 
@@ -4579,6 +4759,123 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),
     );
   } // dropdownModFactor
+  Widget dropdownColClass() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Classification of column:',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 179,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Colors.grey[800],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: colClass,
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
+                dropdownColor: Colors.grey[800],
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(color: Colors.white),
+                underline: SizedBox(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    colClass = newValue;
+                    });
+                  },
+                items: colClassValues.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } // dropdownColClass
+  Widget entryC1() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Dimension of column parallel to B, C1 (in m)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputC1, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputC1.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryC1
   Widget entryFc() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -4645,6 +4942,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       ),        
     );
   } // entryFc
+  
   Widget switchTop() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -5208,9 +5506,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   Widget buttonDesign() {
     return ElevatedButton(
       onPressed: () {
-        //calcDesign();
-        /*
-        if (!widget.state.showResultsAnalysis) {
+        calcDesign();
+        if (!widget.state.showResultsDesign) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text("Please provide input for all parameters."),
@@ -5219,7 +5516,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
             ),
           );
         }
-        */
+        
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
@@ -5228,6 +5525,560 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       child: Text('Determine shear capacity'),
     );
   } // buttonDesign
+  Widget resultDesign() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            RichText(
+              text: TextSpan(
+                text: "For wide-beam shear:",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.white,
+                ),
+              ),
+            ),
+            Text(
+              "Vu = ${widget.state.finalVuWide} kN",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "ΦVc = ${widget.state.finalVcWide} kN",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (safetyWideBeam == true)
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Vu ≤ ΦVc, ∴ wide-beam shear strength is ",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: "adequate",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (safetyWideBeam == false)
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Vu > ΦVc, ∴ wide-beam shear strength is",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: "inadequate",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            RichText(
+              text: TextSpan(
+                text: "For punching shear:",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  decoration: TextDecoration.underline,
+                  decorationColor: Colors.white,
+                ),
+              ),
+            ),
+            Text(
+              "Vu = ${widget.state.finalVuPunch} kN",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "ΦVc = ${widget.state.finalVcPunch} kN",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (safetyPunch == true)
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Vu ≤ ΦVc, ∴ punching shear strength is ",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: "adequate",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            if (safetyPunch == false)
+              RichText(
+                text: TextSpan(
+                  children: [
+                    TextSpan(
+                      text: "Vu > ΦVc, ∴ wide-beam shear strength is ",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    TextSpan(
+                      text: "inadequate",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                        decorationColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  } // resultDesign
+  void toggleSolutionDesign() {
+    if (widget.state.solutionToggleDesign) {
+      widget.state.showSolutionDesign = true;
+    } else {
+      widget.state.showSolutionDesign = false;
+    }
+    setState(() {
+      widget.state.solutionToggleDesign = !widget.state.solutionToggleDesign; // Toggle between functions
+    });
+  }
+  Widget solutionButtonDesign() {
+    return ElevatedButton(
+      onPressed: toggleSolutionDesign,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text(solutionButtonLabelDesign),
+    );
+  }
+  Widget solutionContainerDesign() { // scd
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 450),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          color: const Color(0xFF1F538D),
+        ),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (isThereUplift)
+                Text(
+                  'e = $roundedEcc',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (isThereUplift)
+                Text(
+                  'B/6 = $rounded_eUplift',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (isThereUplift)
+                Text(
+                  "e ≥ B/6, ∴ uplift occurs",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              Text(
+                "d₁ = $depth1 mm",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "d₂ = $depth2 mm",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "dₚ = $dp mm",
+                style: TextStyle(color: Colors.white),
+              ),
+              SizedBox(height: 10),
+              RichText(
+                text: TextSpan(
+                  text: "For wide-beam shear:",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.white,
+                  ),
+                ),
+              ),
+              Text(
+                "x₃ = $x3 m",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "qᵤ₃ = $q3 kPa",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "Vᵤ = ${widget.state.finalVuWide} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "ΦVc = ${widget.state.finalVcWide} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (safetyWideBeam == true)
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Vu ≤ ΦVc, ∴ wide-beam shear strength is ",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "adequate",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (safetyWideBeam == false)
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Vu > ΦVc, ∴ wide-beam shear strength is",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "inadequate",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              SizedBox(height: 10),
+
+              RichText(
+                text: TextSpan(
+                  text: "For punching shear:",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
+                    decorationColor: Colors.white,
+                  ),
+                ),
+              ),
+              Text(
+                "xc = $xc m",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "x₄ = $x4 m",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "x₅ = $x5 m",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "b₁ = $b1 m",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "b₂ = $b2 m",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "quc = $quc kPa",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "Fu = $quc kN",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "Vu = ${widget.state.finalVuPunch} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "β = $beta",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "bₒ = $bo",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "aₛ = $as",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "Vc₁ = $vc1",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "Vc₂ = $vc2",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "Vc₃ = $vc3",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "Vc = $vcPunch",
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "ΦVc = ${widget.state.finalVcPunch} kN",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (safetyWideBeam == true)
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Vu ≤ ΦVc, ∴ wide-beam shear strength is ",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "adequate",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              if (safetyWideBeam == false)
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: "Vu > ΦVc, ∴ wide-beam shear strength is",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      TextSpan(
+                        text: "inadequate",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          decoration: TextDecoration.underline,
+                          decorationColor: Colors.white,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  } // solutionContainerDesign
+
+  Widget clearbuttonDesign() {
+    return ElevatedButton(
+      onPressed: () {        
+        modFactor = 'Normal-lightweight';
+
+        inputC1.clear();
+        inputFc.clear();
+
+        inputTop.clear();
+        inputBot.clear();
+        inputCc.clear();
+        inputFactorShear.clear();
+
+        setState(() {
+          widget.state.topToggle = false;
+          widget.state.botToggle = false;
+          widget.state.concreteCover = false;
+          widget.state.factorShearToggle = false;
+
+          widget.state.showResultsDesign = false;
+          widget.state.showSolutionDesign = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  }
+
+  Widget clearbuttonAll() {
+    return ElevatedButton(
+      onPressed: () {        
+
+        // analysis
+
+        loadingCase = null;
+
+        inputEte.clear();
+        inputB.clear();
+        inputL.clear();
+        inputC2.clear();
+        inputT.clear();
+        inputDf.clear();
+        inputHf.clear();
+        inputDw.clear();
+
+        inputPDL.clear();
+        inputPLL.clear();
+        inputPUlt.clear();
+
+        inputMDL.clear();
+        inputMLL.clear();
+        inputMUlt.clear();
+        mDirection = null;
+
+        inputHDL.clear();
+        inputHLL.clear();
+        inputHUlt.clear();
+        hDirection = null;
+
+        inputGs.clear();
+        inputE.clear();
+        inputW.clear();
+
+        inputGammaDry.clear();
+        inputGammaMoist.clear();
+        inputGammaSat.clear();
+
+        inputFloorLoading.clear();
+        inputFloorThickness.clear();
+        inputOtherUnitWeight.clear();
+
+        inputYc.clear();
+        inputYw.clear();
+
+        setState(() {
+          widget.state.toggleP = false;
+          widget.state.toggleM = false;
+          widget.state.toggleH = false;
+
+          widget.state.weightPressures = false;
+          widget.state.concreteDet = false;
+          widget.state.waterDet = false;
+
+          widget.state.showResultsAnalysis = false;
+          widget.state.showSolutionAnalysis = false;
+        });
+
+        // design
+
+        modFactor = 'Normal-lightweight';
+
+        inputC1.clear();
+        inputFc.clear();
+
+        inputTop.clear();
+        inputBot.clear();
+        inputCc.clear();
+        inputFactorShear.clear();
+
+        setState(() {
+          widget.state.topToggle = false;
+          widget.state.botToggle = false;
+          widget.state.concreteCover = false;
+          widget.state.factorShearToggle = false;
+
+          widget.state.showResultsDesign = false;
+          widget.state.showSolutionDesign = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  } // clearbuttonAll
 
   @override
   void didUpdateWidget(AnalRectMomentPage oldWidget) {
@@ -5251,5 +6102,4 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
 } // _AnalRectMomentPageState
 
-// testing lang !!
 

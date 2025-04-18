@@ -1286,7 +1286,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Ps = $rounded_ps kN",
+              "Pₛ = $rounded_ps kN",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1373,7 +1373,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "ws = $rounded_ps kN/m",
+              "wₛ = $rounded_ps kN/m",
               style: TextStyle(color: Colors.white),
             ),
             Text(

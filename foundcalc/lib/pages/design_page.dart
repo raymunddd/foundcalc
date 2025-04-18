@@ -2200,7 +2200,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         ),
       ),
     );
-  }
+  } // rowColClass
   Widget rowModFactor() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -4529,7 +4529,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               ),
             ),
             Text(
-              'as = $as',
+              'aₛ = $as',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4537,7 +4537,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'bo = $bo m',
+              'bₒ = $bo m',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4545,15 +4545,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc1 = $roundedVc1 kN',
+              'Vc₁ = $roundedVc1 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc2 = $roundedVc2 kN',
+              'Vc₂ = $roundedVc2 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc3 = $roundedVc3 kN',
+              'Vc₃ = $roundedVc3 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4676,7 +4676,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               ),
             ),
             Text(
-              'as = $as',
+              'aₛ = $as',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4684,7 +4684,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'bo = $bo m',
+              'bₒ = $bo m',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4692,15 +4692,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc1 = $roundedVc1 kN',
+              'Vc₁ = $roundedVc1 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc2 = $roundedVc2 kN',
+              'Vc₂ = $roundedVc2 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc3 = $roundedVc3 kN',
+              'Vc₃ = $roundedVc3 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4799,7 +4799,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               ),
             ),
             Text(
-              'as = $as',
+              'aₛ = $as',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4807,7 +4807,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'bo = $bo m',
+              'bₒ = $bo m',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4815,15 +4815,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc1 = $roundedVc1 kN',
+              'Vc₁ = $roundedVc1 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc2 = $roundedVc2 kN',
+              'Vc₂ = $roundedVc2 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc3 = $roundedVc3 kN',
+              'Vc₃ = $roundedVc3 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4986,7 +4986,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               ),
             ),
             Text(
-              'as = $as',
+              'aₛ = $as',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -4994,7 +4994,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'bo = $bo m',
+              'bₒ = $bo m',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5002,15 +5002,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc1 = $roundedVc1 kN',
+              'Vc₁ = $roundedVc1 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc2 = $roundedVc2 kN',
+              'Vc₂ = $roundedVc2 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc3 = $roundedVc3 kN',
+              'Vc₃ = $roundedVc3 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5166,7 +5166,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               ),
             ),
             Text(
-              'as = $as',
+              'aₛ = $as',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5174,7 +5174,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'bo = $bo m',
+              'bₒ = $bo m',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5182,15 +5182,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc1 = $roundedVc1 kN',
+              'Vc₁ = $roundedVc1 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc2 = $roundedVc2 kN',
+              'Vc₂ = $roundedVc2 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc3 = $roundedVc3 kN',
+              'Vc₃ = $roundedVc3 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5297,7 +5297,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               ),
             ),
             Text(
-              'as = $as',
+              'aₛ = $as',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5305,7 +5305,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'bo = $bo m',
+              'bₒ = $bo m',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5313,15 +5313,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc1 = $roundedVc1 kN',
+              'Vc₁ = $roundedVc1 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc2 = $roundedVc2 kN',
+              'Vc₂ = $roundedVc2 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc3 = $roundedVc3 kN',
+              'Vc₃ = $roundedVc3 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5468,7 +5468,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               ),
             ),
             Text(
-              'as = $as',
+              'aₛ = $as',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5476,7 +5476,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'bo = $bo m',
+              'bₒ = $bo m',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5484,15 +5484,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc1 = $roundedVc1 kN',
+              'Vc₁ = $roundedVc1 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc2 = $roundedVc2 kN',
+              'Vc₂ = $roundedVc2 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc3 = $roundedVc3 kN',
+              'Vc₃ = $roundedVc3 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5623,7 +5623,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               ),
             ),
             Text(
-              'as = $as',
+              'aₛ = $as',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5631,7 +5631,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'bo = $bo m',
+              'bₒ = $bo m',
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -5639,15 +5639,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc1 = $roundedVc1 kN',
+              'Vc₁ = $roundedVc1 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc2 = $roundedVc2 kN',
+              'Vc₂ = $roundedVc2 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              'Vc3 = $roundedVc3 kN',
+              'Vc₃ = $roundedVc3 kN',
               style: TextStyle(color: Colors.white),
             ),
             Text(
