@@ -328,8 +328,13 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                       entry_shearI(),
 
                       headerReduction(),
-                      entryFactorShear(),
-                      entryFactorMoment(),
+
+                      switchFactorShear(),
+                      containerFactorShear(),
+
+                      switchFactorMoment(),
+                      containerFactorMoment(),
+
                       SizedBox(height: 20),
                       dropdownBarDia(),
                       if (barDia == 'Others')
@@ -1058,7 +1063,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       ),
     );
   } // headerReduction
-  Widget entryFactorShear() {
+  
+  Widget switchFactorShear() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -1071,7 +1077,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  "Shear reduction factor:",
+                  'Shear (assumed as 0.75 if not given)',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -1084,38 +1090,18 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 ),
                 child: SizedBox(
                   height: 40, // Adjust height as needed
-                  child: TextField(
-                    controller: inputFactorShear,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Input required",
-                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[800],
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          Icons.clear, 
-                          color: Colors.white54,
-                        ),
-                        iconSize: 17,
-                        onPressed: () {
-                          // Clear the text field
-                          inputFactorShear.clear();
-                        },
-                      ),
-                    ),
-                  ),
+                  child: Switch(
+                    value: widget.state.factorShearToggle,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.factorShearToggle = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
                 )
               )
             ),
@@ -1123,8 +1109,102 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         ),
       ),
     );
-  } // entryFactorShear
-  Widget entryFactorMoment() {
+  } // switchFactorShear
+  Widget containerFactorShear() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.factorShearToggle,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                subentryFactorShear(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerFactorShear
+  Widget subentryFactorShear() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Shear factor, Φ:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputFactorShear,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputFactorShear.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subentryFactorShear
+  
+  Widget switchFactorMoment() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -1137,7 +1217,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  "Moment reduction factor:",
+                  'Moment (assumed as 0.9 if not given)',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -1150,38 +1230,18 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 ),
                 child: SizedBox(
                   height: 40, // Adjust height as needed
-                  child: TextField(
-                    controller: inputFactorMoment,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                    inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                    ],
-                    style: TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      hintText: "Input required",
-                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey[800],
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(25),
-                        borderSide: BorderSide(color: Colors.white),
-                      ),
-                      suffixIcon: IconButton(
-                        icon: Icon(
-                          Icons.clear, 
-                          color: Colors.white54,
-                        ),
-                        iconSize: 17,
-                        onPressed: () {
-                          // Clear the text field
-                          inputFactorMoment.clear();
-                        },
-                      ),
-                    ),
-                  ),
+                  child: Switch(
+                    value: widget.state.factorMomentToggle,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.factorMomentToggle = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
                 )
               )
             ),
@@ -1189,8 +1249,101 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         ),
       ),
     );
-  } // entryFactorMoment
-
+  } // switchFactorMoment
+  Widget containerFactorMoment() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.factorMomentToggle,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                subentryFactorMoment(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerFactorMoment
+  Widget subentryFactorMoment() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Moment factor, Φ:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputFactorMoment,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputFactorMoment.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subentryFactorMoment
+  
   Widget dropdownBarDia() {
     return Padding(
       padding: EdgeInsets.only(top: 20),

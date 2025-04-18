@@ -48,6 +48,7 @@ class AnalRectMomentState {
   String inputTop = '';
   String inputBot = '';
   String inputCc = '';
+  String inputFactorShear = '';
 
 
   // title
@@ -65,6 +66,7 @@ class AnalRectMomentState {
   bool topToggle = false;
   bool botToggle = false;
   bool concreteCover = false;
+  bool factorShearToggle = false;
 
   bool concreteDet = false;
   bool waterDet = false;

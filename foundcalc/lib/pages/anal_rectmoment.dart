@@ -82,6 +82,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   late TextEditingController inputTop;
   late TextEditingController inputBot;
   late TextEditingController inputCc;
+  late TextEditingController inputFactorShear;
 
   double? ete;
   double? b;
@@ -123,6 +124,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? dtop;
   double? dbot;
   double? cc;
+  double? phi;
 
   // solvar (solution variables)
   double? dcc;
@@ -152,6 +154,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? dp;
   double? x3;
   double? q3;
+  double? vu;
 
   // for solution container
   double? roundedEcc;
@@ -294,6 +297,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     inputTop = TextEditingController(text: widget.state.inputTop);
     inputBot = TextEditingController(text: widget.state.inputBot);
     inputCc = TextEditingController(text: widget.state.inputCc);
+    inputFactorShear = TextEditingController(text: widget.state.inputFactorShear);
 
     // for dropdowns
 
@@ -347,6 +351,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     inputTop.addListener(_updateState);
     inputBot.addListener(_updateState);
     inputCc.addListener(_updateState);
+    inputFactorShear.addListener(_updateState);
   }
 
   void _updateState() {
@@ -392,6 +397,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       widget.state.inputTop = inputTop.text;
       widget.state.inputBot = inputBot.text;
       widget.state.inputCc = inputCc.text;
+      widget.state.inputCc = inputFactorShear.text;
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -471,6 +477,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     inputTop.dispose();
     inputBot.dispose();
     inputCc.dispose();
+    inputFactorShear.dispose();
 
     super.dispose();
   }
@@ -1030,6 +1037,15 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         roundedQmin = null;
         roundedQmax = null;
       }
+    } else {
+      qmin = null;
+      qmax = null;
+
+      roundedPoverbl = null;
+      roundedSixMfOverBL2 = null;
+
+      roundedQmin = null;
+      roundedQmax = null;
     }
 
     if (widget.state.soilProp) { // Soil Prop is ON
@@ -1111,6 +1127,8 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       roundedQgmax = null;
     }
 
+    // design parttt
+
     if (widget.state.topToggle) {
       dtop = dtop;
     } else {
@@ -1144,6 +1162,14 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     } else {
       q3 = null;
     }
+
+    if (x3 != null && qmin != null && q3 != null && l != null && b != null) {
+      vu = 0.5*(q3! + qmin!)*(l! - x3!)*b!;
+    } else {
+      vu = null;
+    }
+
+
 
     /*
     if (uplift == false) {
@@ -1347,6 +1373,11 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                         switchCC(),
                       if (widget.state.design)
                         containerCC(),
+
+                      if (widget.state.design)
+                        switchFactorShear(),
+                      if (widget.state.design)
+                        containerFactorShear(),
 
                       if (widget.state.design)
                         buttonDesign(),
@@ -5033,6 +5064,146 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         ),
     );
   }
+
+  Widget switchFactorShear() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Shear (assumed as 0.75 if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.factorShearToggle,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.factorShearToggle = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchFactorShear
+  Widget containerFactorShear() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.factorShearToggle,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                subFactorShear(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerFactorShear
+  Widget subFactorShear() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Shear factor, Φ:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputFactorShear,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputFactorShear.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subFactorShear
 
   Widget buttonDesign() {
     return ElevatedButton(

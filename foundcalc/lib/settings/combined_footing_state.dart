@@ -23,32 +23,15 @@ class CombinedFootingState {
 
   String inputOtherDia = '';
 
-  String inputDf = '';
-  String inputDw = '';
-  String inputGammaDry = '';
-  String inputGammaMoist = '';
+  String inputFc = '';
+  String inputFy = '';
 
   final String title;
 
   bool scrollToTop = false;
-
-  bool qToggle = true;
-  bool pToggle = true;
-  bool topToggle = false;
-  bool botToggle = false;
-  bool soilProp = true;
-  bool weightPressures = false;
-  bool ccToggle = false;
-  bool concreteToggle = false;
-  bool waterToggle = false;
-  bool concreteDet = false;
-  bool waterDet = false;
-  bool otherMat = false;
-  bool concreteCover = false;
-
-  bool isGammaSatEnabled = true;
-  bool isGammaDryEnabled = true;
-  bool isGammaMoistEnabled = true;
+ 
+  bool factorShearToggle = false;
+  bool factorMomentToggle = false;
 
   bool showResults = false;
   bool solutionToggle = true;
