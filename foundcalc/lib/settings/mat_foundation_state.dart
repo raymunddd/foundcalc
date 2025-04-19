@@ -5,6 +5,12 @@ class MatFoundationState {
 
   // String? calculation;
   
+  // inputs
+  String inputCu = '';
+  String inputB = '';
+  String inputL = '';
+  String inputDf = '';
+  String inputTheta = '';
   // toggles
   bool toggleCalc = false;
 
