@@ -631,7 +631,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                             foregroundColor: Colors.white,
                           ),
                           onPressed: _addMatFoundationItem,
-                          child: Text("Mat Foundation 🚧"),
+                          child: Text("Mat Foundation"),
                         ),
                       ],
                     ),

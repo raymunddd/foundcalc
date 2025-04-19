@@ -44,16 +44,25 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
   late TextEditingController inputDf;
   late TextEditingController inputTheta;
 
+  late TextEditingController inputQ;
+  late TextEditingController inputGamma;
+
   // variables
   double? cu;
   double? b;
   double? l;
   double? df;
   double? theta;
+  
+  double? Q;
+  double? y;
   // solvar (solution variables)
   double? nc;
   double? nq;
   double? ny;
+  double? fs;
+
+  double? qnetu;
 
   // string getters
   String get headerTitle {
@@ -64,8 +73,85 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     }
   }
 
+  String get buttonTitle {
+    if (widget.state.toggleCalc) {
+      return 'Calculate F.S.';
+    } else {
+      return 'Solve qnetu';
+    }
+  }
+
   String? angle;
   final List<String> angleValues = List<String>.generate(51, (index) => index.toString());
+
+  @override
+  void initState() {
+    super.initState();
+    
+    _scrollController = ScrollController();
+
+    // for input
+    
+    inputCu = TextEditingController(text: widget.state.inputCu);
+    inputB = TextEditingController(text: widget.state.inputB);
+    inputL = TextEditingController(text: widget.state.inputL);
+    inputDf = TextEditingController(text: widget.state.inputDf);
+    inputTheta = TextEditingController(text: widget.state.inputTheta);
+    
+    inputQ = TextEditingController(text: widget.state.inputQ);
+    inputGamma = TextEditingController(text: widget.state.inputGamma);
+
+    // for dropdowns
+
+    /*
+    loadingCase = widget.state.loadingCase; (no default value)
+
+    calculation = "Factor of safety"; // Set default value here
+    widget.state.calculation = calculation;
+    */
+
+    // listeners
+
+    inputCu.addListener(_updateState);
+    inputB.addListener(_updateState);
+    inputL.addListener(_updateState);
+    inputDf.addListener(_updateState);
+    inputTheta.addListener(_updateState);
+
+    inputQ.addListener(_updateState);
+    inputGamma.addListener(_updateState);
+  }
+  void _updateState() {
+    setState(() {
+      widget.state.inputCu = inputCu.text;
+      widget.state.inputB = inputB.text;
+      widget.state.inputL = inputL.text;
+      widget.state.inputDf = inputDf.text;
+      widget.state.inputTheta = inputTheta.text;
+
+      widget.state.inputQ = inputQ.text;
+      widget.state.inputGamma = inputGamma.text;
+      
+      //calcQ();
+
+      widget.onStateChanged(widget.state);
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+
+    inputCu.dispose();
+    inputB.dispose();
+    inputL.dispose();
+    inputDf.dispose();
+    inputTheta.dispose();
+
+    inputQ.dispose();
+    inputGamma.dispose();
+    super.dispose();
+  }
 
   List<Map<String, dynamic>> localShear = [
     {"theta": 0, "nc": 5.14, "nq": 1, "ny": 0},
@@ -121,91 +207,158 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     {"theta": 50, "nc": 266.89, "nq": 319.07, "ny": 762.89},
   ];
 
-   // Method to get shear values based on theta
-  void getShearValues(double theta, String shearType) {
-    List<Map<String, dynamic>> shearList = localShear;
-
-    for (var entry in shearList) {
-      if (entry['theta'] == theta) {
-        setState(() {
-          nc = entry['nc'];
-          nq = entry['nq'];
-          ny = entry['ny'];
-        });
-        return; // Exit the method once the values are found
-      }
-    }
+  double roundToFourDecimalPlaces(double value) {
+    return (value * 10000).round() / 10000;
   }
 
-  @override
-  void initState() {
-    super.initState();
-    
-    _scrollController = ScrollController();
-
-    // for input
-    
-    inputCu = TextEditingController(text: widget.state.inputCu);
-    inputB = TextEditingController(text: widget.state.inputB);
-    inputL = TextEditingController(text: widget.state.inputL);
-    inputDf = TextEditingController(text: widget.state.inputDf);
-    inputTheta = TextEditingController(text: widget.state.inputTheta);
-
-    // for dropdowns
-
-    /*
-    loadingCase = widget.state.loadingCase; (no default value)
-
-    calculation = "Factor of safety"; // Set default value here
-    widget.state.calculation = calculation;
-    */
-
-    // listeners
-
-    inputCu.addListener(_updateState);
-    inputB.addListener(_updateState);
-    inputL.addListener(_updateState);
-    inputDf.addListener(_updateState);
-    inputTheta.addListener(_updateState);
-  }
-  void _updateState() {
-    setState(() {
-      widget.state.inputCu = inputCu.text;
-      widget.state.inputB = inputB.text;
-      widget.state.inputL = inputL.text;
-      widget.state.inputDf = inputDf.text;
-      widget.state.inputTheta = inputTheta.text;
-      
-      //calcQ();
-
-      widget.onStateChanged(widget.state);
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-
-    inputCu.dispose();
-    inputB.dispose();
-    inputL.dispose();
-    inputDf.dispose();
-    inputTheta.dispose();
-
-    super.dispose();
-  }
-
-  void solveFS() {
+  void solve() {
     cu = double.tryParse(inputCu.text);
     b = double.tryParse(inputB.text);
     l = double.tryParse(inputL.text);
     df = double.tryParse(inputDf.text);
     theta = double.tryParse(inputTheta.text);
+
+    Q = double.tryParse(inputQ.text);
+    y = double.tryParse(inputGamma.text);
+
+    if (widget.state.toggleCalc) {
+      widget.state.isItFs = true;
+    } else {
+      widget.state.isItFs = false;
+    }
+
+    if (theta != null) {
+      if (theta! > 0 && theta! <= 50) {
+        var shearData = localShear.firstWhere(
+          (element) => element['theta'] == theta,
+          orElse: () => {"nc": null, "nq": null, "ny": null}, // Default values if not found
+        );
+        setState(() {
+          nc = shearData['nc'];
+          nq = shearData['nq'];
+          ny = shearData['ny'];  
+        });
+      } else if (theta == 0) {
+        setState(() {
+          nc = 5.14;
+          nq = 1;
+          ny = 0;
+        });
+      } else {
+        showSnackBarTheta(context);
+        nc = nq = ny = null; // or set to some default values
+      }
+    } else {
+      nc = nq = ny = null;
+    }
+
+    
+
+    if (nc != null && ny != null && nq != null) {
+      if (cu != null && b != null && l != null && df != null && 
+      theta != null) {
+        if (l! < b!) {
+          qnetu = null;
+          widget.state.qnetu = null;
+          showSnackBarDimension(context);
+        } else { // L ≥ B
+          qnetu = cu! * nc! * (1 + (b! * nq!)/(l! * nc!)) * (1 + (0.4 * df!)/b!);
+          widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
+          setState(() {
+            widget.state.showResults = true;
+          });
+        }
+      } else {
+        showSnackBarIncorrect(context);
+        qnetu = null;
+        widget.state.qnetu = null;
+      }
+    } else {
+      showSnackBarIncorrect(context);
+    }
+
+    if (qnetu != null && Q != null && df != null && y != null && b != null && l != null) {
+      fs = qnetu! / ((Q! / (b! * l!)) - y! * df!);
+      widget.state.fs = roundToFourDecimalPlaces(fs!);
+    } else {
+      fs = null;
+      widget.state.fs = null;
+    }
+
+    print('nc = $nc, nq = $nq, ny = $ny, qnetu = $qnetu, F.S. = $fs');
   }
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context); // Call super.build
+  void showSnackBarTheta(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("The angle of internal friction must be from the specified range."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    setState(() {
+      widget.state.showResults = false;
+    });
+  }
+  void showSnackBarIncorrect(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Please provide input for all parameters."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    setState(() {
+      widget.state.showResults = false;
+    });
+  }
+  void showSnackBarDimension(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("L must be greater than B."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    setState(() {
+      widget.state.showResults = false;
+    });
+  }
+
+
+  Widget resultText() {
+    return Text(
+        '${widget.state.isItFs ? "F.S." : "qnetu"} = ${widget.state.isItFs ? (widget.state.fs) : (widget.state.qnetu)} ${widget.state.isItFs ? "" : "kPa"}',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold, 
+        ),
+    );
+  }
+  Widget clearButton() {
+    return ElevatedButton(
+      onPressed: () {        
+        inputCu.clear();
+        inputB.clear();
+        inputL.clear();
+        inputDf.clear();
+        inputTheta.clear();
+        inputQ.clear();
+        inputGamma.clear();
+        setState(() {
+          widget.state.showResults = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  }
+  @override   
+  Widget build(BuildContext context) {   
+    super.build(context); // Call super.build   
     return Scaffold(
       backgroundColor: Color(0xFF363434),
       appBar: AppBar(
@@ -248,7 +401,22 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
                       entryDf(),
                       entryTheta(),
                       subtextTheta(),
-                      buttonQnetu(),
+
+                      if (widget.state.toggleCalc)
+                        entryQ(),
+                      if (widget.state.toggleCalc)
+                        entryGamma(),
+
+                      SizedBox(height: 10),
+                      buttonSubmit(),
+
+                      if (widget.state.showResults)
+                        SizedBox(height: 10),
+                      if (widget.state.showResults)
+                        resultText(),
+
+                      SizedBox(height: 10),
+                      clearButton(),
                     ],
                   ),
                 ),
@@ -710,31 +878,144 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
       ),
     );
   } // subtextTheta
-  Widget buttonQnetu() {
+  
+  Widget entryQ() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Total load, Q (in kN):',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputQ,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputQ.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } // entryQ
+  Widget entryGamma() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Unit weight of soil, γ (in kN/m³):',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputGamma,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputGamma.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } // entryGamma
+
+  Widget buttonSubmit() {
     return ElevatedButton(
       onPressed: () {
-        solveFS();
-        /*
-        if (!widget.state.showResultsAnalysis) {
-          setState(() {
-            widget.state.showSolutionAnalysis = false;
-            widget.state.solutionToggleAnalysis = true;
-          });
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Please provide input for all parameters."),
-              backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
-        */
+        solve();
       },
       style: ElevatedButton.styleFrom(
         backgroundColor: Color(0xFF1F538D),
         foregroundColor: Colors.white,
       ),
-      child: Text('Solve FS'),
+      child: Text(buttonTitle),
     );
   }
 } // _MatFoundationState

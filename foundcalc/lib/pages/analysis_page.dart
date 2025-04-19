@@ -1541,15 +1541,15 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
   
   Widget resultText() {
     return Visibility(
-    visible: widget.state.showResults,
-    child: Text(
-      '${widget.state.isItStrip ? "w" : "P"} = ${widget.state.isItStrip ? (widget.state.finalAnswerUdl) : (widget.state.finalAnswerP)} ${widget.state.isItStrip ? "kN/m" : "kN"}',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold, 
+      visible: widget.state.showResults,
+      child: Text(
+        '${widget.state.isItStrip ? "w" : "P"} = ${widget.state.isItStrip ? (widget.state.finalAnswerUdl) : (widget.state.finalAnswerP)} ${widget.state.isItStrip ? "kN/m" : "kN"}',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold, 
+        ),
       ),
-    ),
-  );
+    );
   }
   
   Widget row1ShearFailure() {
