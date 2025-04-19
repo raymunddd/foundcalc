@@ -29,7 +29,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 @override
   bool get wantKeepAlive => true; // 2. Override wantKeepAlive and return true
 
-//ITO ANG SALARIN ng title
   String get displayTitle {
     if (widget.title.startsWith('RectMoment')) {
       int index = int.tryParse(widget.title.split(' ').last) ?? 0;
@@ -1533,7 +1532,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                     mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
                     // row managerrrr
                     children: [
-                      switchDesign(),
+                      radioDesign(),
                       header(),
                       dropdownColClass(),
 
@@ -1705,7 +1704,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     );
   }
   
-  Widget switchDesign() {
+  Widget radioDesign() {
     return Padding(
       padding: EdgeInsets.only(top: 10),
       child: Container(

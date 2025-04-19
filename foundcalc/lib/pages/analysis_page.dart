@@ -33,6 +33,15 @@ class AnalysisPage extends StatefulWidget {
 
 class _AnalysisPageState extends State<AnalysisPage> 
 with AutomaticKeepAliveClientMixin<AnalysisPage>{
+  
+  String get displayTitle {
+    if (widget.title.startsWith('Analysis')) {
+      int index = int.tryParse(widget.title.split(' ').last) ?? 0;
+      return "Analysis of Footings $index"; // Shorter for tab
+    }
+
+    return widget.title; 
+  }
 
   @override
   bool get wantKeepAlive => true; 
@@ -122,14 +131,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
   double? rounded_ps;
   double? rounded_uD;
 
-  String get displayTitle {
-  if (widget.title.startsWith('Analysis')) {
-        int index = int.tryParse(widget.title.split(' ').last) ?? 0;
-        return "Analysis of Footings $index"; // Shorter for tab
-      }
-
-      return widget.title; 
-    }
+  
 
   List<Map<String, dynamic>> generalShear = [
     {"theta": 0, "nc": 5.7, "nq": 1, "ny": 0},

@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'pages/about_page.dart';    // Import AboutPage
+// pages
 import 'pages/analysis_page.dart'; // Import AnalysisPage
 import 'pages/design_page.dart' as design;   // Import DesignPage with alias
 import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
-import 'pages/about_page.dart';    // Import AboutPage
 import 'pages/combined_footing.dart' as combined; // Import combined footing with alias
+
+import 'pages/mat_foundation.dart'; // Import MatFoundationPage
+// settings
 import 'settings/analysis_state.dart'; // Import AnalysisState
 import 'settings/design_state.dart';   // Import DesignState
 import 'settings/combined_footing_state.dart'; // Import CombinedFootingState
 import 'settings/anal_rectmoment_state.dart'; // Import AnalRectMomentState
 
+import 'settings/mat_foundation_state.dart'; // Import MatFoundationState
 class TabbedHomePage extends StatefulWidget {
   @override
   _TabbedHomePageState createState() => _TabbedHomePageState();
@@ -20,15 +25,20 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   late TabController _tabController;
   List<String> _tabs = ['Home']; // Initial tabs - Removed Analysis 1 and Design 1 from here
   int _tabCounter = 1; // Start counter at 1 (Home is already tab 0)
+
   List<String> analysisItems = []; // Initialize empty
   List<String> designItems = [];   // Initialize empty
   List<String> analRectMomentItems = []; // Initialize empty for RectMoment
   List<String> combinedFootingItems = []; // Initialize empty for Combined Footing
+
+  List<String> matFoundationItems = []; // Initialize empty for Mat Foundation
+  
   Map<String, AnalysisState> analysisStates = {};
   Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize empty
   Map<String, DesignState> designStates = {};
-  Map<String, CombinedFootingState> combinedFootingStates = {}; // Changed to CombinedFootingState
+  Map<String, CombinedFootingState> combinedFootingStates = {};
 
+  Map<String, MatFoundationState> matFoundationStates = {};
 
 
   @override
@@ -98,26 +108,26 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   }
 
   void _removeDesignItem(int index) {
-            setState(() {
-            String tabToRemove = _tabs[index];
-            int designIndex = designItems.indexOf(tabToRemove);
+    setState(() {
+      String tabToRemove = _tabs[index];
+      int designIndex = designItems.indexOf(tabToRemove);
             
-            if (designIndex != -1) {
-              // Remove from analysisItems and states
-              String removedTab = designItems.removeAt(designIndex);
-              designStates.remove(removedTab);
+      if (designIndex != -1) {
+        // Remove from analysisItems and states
+        String removedTab = designItems.removeAt(designIndex);
+        designStates.remove(removedTab);
 
-              // Remove from tabs
-              _tabs.removeAt(index);
+        // Remove from tabs
+        _tabs.removeAt(index);
               
-              // UPDATE (Wag kalimutan)
-              _tabController = TabController(length: _tabs.length, vsync: this);
-              if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
+        // UPDATE (Wag kalimutan)
+        _tabController = TabController(length: _tabs.length, vsync: this);
+        if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
                 _tabController.animateTo(_tabs.length - 1);
-              }
-            }
-          });
         }
+      }
+    });
+  }
 
 //ANAL RECT MOMENT
   void _addAnalRectMomentItem() {
@@ -193,15 +203,50 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     });
   }
 
+  // Mat Foundation     
+  void _addMatFoundationItem() {
+    setState(() {
+      int nextNumber = _getNextNumber(matFoundationItems, "Mat");
+      String newItem = 'Mat $nextNumber';
+      matFoundationItems.add(newItem);
+      matFoundationStates[newItem] = MatFoundationState(title: newItem); // Create state
+
+      _tabs.add(newItem); // Add to tabs list for display
+      _tabController = TabController(length: _tabs.length, vsync: this);
+      _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
+      _tabCounter++;
+    });
+  }
+
+  void _removeMatFoundationItem(int index) {
+    setState(() {
+      String tabToRemove = _tabs[index];
+      int matFoundationIndex = matFoundationItems.indexOf(tabToRemove);
+            
+      if (matFoundationIndex != -1) {
+        String removedTab = matFoundationItems.removeAt(matFoundationIndex);
+        matFoundationStates.remove(removedTab);
+
+        // Remove from tabs
+        _tabs.removeAt(index);
+              
+        // UPDATE (Wag kalimutan)
+        _tabController = TabController(length: _tabs.length, vsync: this);
+        if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
+          _tabController.animateTo(_tabs.length - 1);
+        }
+      }
+    });
+  }
 
   /*TEMPLATE KUNG LALAGAY NG IBA PANG CALC
         
   void _add<[NameNgCalc]>Item() {
     setState(() {
       int nextNumber = _getNextNumber(<[NameNgCalc]>Items, "Analysis");
-    String newItem = 'Name $nextNumber';
-    <[NameNgCalc]>Items.add(newItem);
-    <[NameNgCalc]>States[newItem] = <[NameNgCalc]>State(title: newItem); // Create state
+      String newItem = 'Name $nextNumber';
+      <[NameNgCalc]>Items.add(newItem);
+      <[NameNgCalc]>States[newItem] = <[NameNgCalc]>State(title: newItem); // Create state
 
       _tabs.add(newItem); // Add to tabs list for display
       _tabController = TabController(length: _tabs.length, vsync: this);
@@ -212,25 +257,26 @@ class _TabbedHomePageState extends State<TabbedHomePage>
 
   void _remove<[NameNgCalc]>Item(int index) {
     setState(() {
-            String tabToRemove = _tabs[index];
-            int <[NameNgCalc]>Index = <[NameNgCalc]>Items.indexOf(tabToRemove);
+      String tabToRemove = _tabs[index];
+      int <[NameNgCalc]>Index = <[NameNgCalc]>Items.indexOf(tabToRemove);
             
-            if (<[NameNgCalc]>Index != -1) {
-              // Remove from analysisItems and states
-              String removedTab = <[NameNgCalc]>Items.removeAt(<[NameNgCalc]>Index);
-              <[NameNgCalc]>States.remove(removedTab);
+      if (<[NameNgCalc]>Index != -1) {
+        // Remove from analysisItems and states
+        String removedTab = <[NameNgCalc]>Items.removeAt(<[NameNgCalc]>Index);
+        <[NameNgCalc]>States.remove(removedTab);
 
-              // Remove from tabs
-              _tabs.removeAt(index);
+        // Remove from tabs
+        _tabs.removeAt(index);
               
-              // UPDATE (Wag kalimutan)
-              _tabController = TabController(length: _tabs.length, vsync: this);
-              if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
-                _tabController.animateTo(_tabs.length - 1);
-              }
-            }
-          });
-        } */
+        // UPDATE (Wag kalimutan)
+        _tabController = TabController(length: _tabs.length, vsync: this);
+        if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
+          _tabController.animateTo(_tabs.length - 1);
+        }
+      }
+    });
+  }
+  */
 
 
   int _getNextNumber(List<String> items, String type) {
@@ -243,11 +289,6 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     int maxNumber = existingNumbers.isEmpty ? 0 : existingNumbers.reduce((a, b) => a > b ? a : b);
     return maxNumber + 1;
   }
-
-
-  
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -289,6 +330,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                               _removeAnalRectMomentItem(index);
                             } else if (title.startsWith('Combined')) {
                               _removeCombinedFootingItem(index);
+                            } else if (title.startsWith('Mat')) {
+                              _removeMatFoundationItem(index);
                             }
                           });
                         },
@@ -417,6 +460,31 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       Navigator.of(context).pop(); // Close the drawer
                     },
                   ),
+                ],
+                if (matFoundationItems.isNotEmpty) ...[
+                ListTile(
+                  tileColor: Color(0xFF414141),
+                  title: Text(
+                    'Mat Foundation',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                for (int i = 0; i < matFoundationItems.length; i++)
+                  ListTile(
+                    tileColor: Color(0xFF414141),
+                    title: Text(
+                      matFoundationItems[i],
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.white),
+                      onPressed: () => _removeMatFoundationItem(analysisItems.length + designItems.length + analRectMomentItems.length + combinedFootingItems.length + i + 1),
+                    ),
+                    onTap: () {
+                      _tabController.animateTo(analysisItems.length + designItems.length + analRectMomentItems.length + combinedFootingItems.length + i + 1);
+                      Navigator.of(context).pop(); // Close the drawer
+                    },
+                  ),
               ],
               
               /*
@@ -541,6 +609,15 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       onPressed: _addCombinedFootingItem,
                       child: Text("Combined Footing 🚧"),
                     ),
+                    SizedBox(height: 10),
+                    ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF1F538D),
+                        foregroundColor: Colors.white,
+                      ),
+                      onPressed: _addMatFoundationItem,
+                      child: Text("Mat Foundation 🚧"),
+                    ),
                   ],
                 ),
               ),
@@ -629,6 +706,34 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       onPressed: () {
                         if (title.startsWith('Combined')) {
                           combinedFootingStates[title]!.scrollToTop = true;
+                          setState(() {}); // Trigger rebuild to pass the message
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }
+            else if (title.startsWith('Mat')) {
+              return Stack(
+                children: [
+                  MatFoundationPage(
+                    title: title,
+                    state: matFoundationStates[title]!,
+                    onStateChanged: (newState) {
+                      matFoundationStates[title] = newState;
+                    },
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: Color(0xFF1F538D),
+                      mini: true,
+                      child: Icon(Icons.arrow_upward, color: Colors.white),
+                      onPressed: () {
+                        if (title.startsWith('Mat')) {
+                          matFoundationStates[title]!.scrollToTop = true;
                           setState(() {}); // Trigger rebuild to pass the message
                         }
                       },
