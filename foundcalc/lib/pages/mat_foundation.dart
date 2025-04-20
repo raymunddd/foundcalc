@@ -34,7 +34,7 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     return widget.title; 
   }
 
-  int selectedValue = 1;
+  int selectedCalc = 1; // FS
   // scroll bar
   late ScrollController _scrollController;
   // inputs
@@ -48,6 +48,9 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
   late TextEditingController inputQ;
   late TextEditingController inputGamma;
 
+  late TextEditingController inputN60;
+  late TextEditingController inputSe;
+
   // variables
   double? cu;
   double? b;
@@ -57,6 +60,9 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
   
   double? Q;
   double? y;
+
+  double? n60;
+  double? se;
   // solvar (solution variables)
   double? nc;
   double? nq;
@@ -68,25 +74,34 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
   double? fs;
 
   double? qnetu;
+  
+  double? fd;
+  double? fdFinal;
+  double? qneta;
   // rounded
   double? roundedFcs;
   double? roundedFcd;
   double? roundedQ;
+  double? roundedFdFinal;
 
   // string getters
   String get headerTitle {
-    if (widget.state.toggleCalc) {
+    if (selectedCalc == 1) {
       return 'Factor of safety';
-    } else {
+    } else if (selectedCalc == 2) {
       return 'Net ultimate bearing capacity';
+    } else {
+      return 'Net allowable bearing capacity';
     }
   }
 
   String get buttonTitle {
-    if (widget.state.toggleCalc) {
+    if (selectedCalc == 1) {
       return 'Calculate F.S.';
-    } else {
+    } else if (selectedCalc == 2) {
       return 'Solve qnet(u)';
+    } else {
+      return 'Solve qnet(a)';
     }
   }
 
@@ -118,6 +133,9 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     inputQ = TextEditingController(text: widget.state.inputQ);
     inputGamma = TextEditingController(text: widget.state.inputGamma);
 
+    inputN60 = TextEditingController(text: widget.state.inputN60);
+    inputSe = TextEditingController(text: widget.state.inputSe);
+
     // for dropdowns
 
     /*
@@ -137,6 +155,9 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
 
     inputQ.addListener(_updateState);
     inputGamma.addListener(_updateState);
+
+    inputN60.addListener(_updateState);
+    inputSe.addListener(_updateState);
   }
   void _updateState() {
     setState(() {
@@ -149,6 +170,8 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
       widget.state.inputQ = inputQ.text;
       widget.state.inputGamma = inputGamma.text;
       
+      widget.state.inputN60 = inputN60.text;
+      widget.state.inputSe = inputSe.text;
       //calcQ();
 
       widget.onStateChanged(widget.state);
@@ -167,6 +190,10 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
 
     inputQ.dispose();
     inputGamma.dispose();
+    
+    inputN60.dispose();
+    inputSe.dispose();
+
     super.dispose();
   }
 
@@ -227,6 +254,9 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
   double roundToFourDecimalPlaces(double value) {
     return (value * 10000).round() / 10000;
   }
+  double roundToTwoDecimalPlaces(double value) {
+    return (value * 100).round() / 100;
+  }
 
   void solve() {
     cu = double.tryParse(inputCu.text);
@@ -238,60 +268,107 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     Q = double.tryParse(inputQ.text);
     y = double.tryParse(inputGamma.text);
 
-    if (widget.state.toggleCalc) {
-      widget.state.isItFs = true;
-    } else {
-      widget.state.isItFs = false;
-    }
-
-    if (theta != null) {
-      if (theta! > 0 && theta! <= 50) {
-        var shearData = localShear.firstWhere(
-          (element) => element['theta'] == theta,
-          orElse: () => {"nc": null, "nq": null, "ny": null}, // Default values if not found
-        );
-        setState(() {
-          nc = shearData['nc'];
-          nq = shearData['nq'];
-          ny = shearData['ny'];  
-        });
-      } else if (theta == 0) {
-        setState(() {
-          nc = 5.14;
-          nq = 1;
-          ny = 0;
-        });
-      } else {
-        showSnackBarTheta(context);
-        nc = nq = ny = null; // or set to some default values
-      }
-    } else {
-      nc = nq = ny = null;
-    }
+    n60 = double.tryParse(inputN60.text);
+    se = double.tryParse(inputSe.text);
 
     
+    if (selectedCalc == 1) { // F.S.
+      widget.state.solvedCalc = 1;
+    } else if (selectedCalc == 2) { // qnet(u)
+      widget.state.solvedCalc = 2;
+    } else {  // qnet(a)
+      widget.state.solvedCalc = 3;
+    }
 
-    if (nc != null && ny != null && nq != null) {
+    if (selectedCalc == 1) { // F.S. calculation
       if (cu != null && b != null && l != null && df != null && 
-      theta != null) {
-        if (l! < b!) {
-          qnetu = null;
-          widget.state.qnetu = null;
-          showSnackBarDimension(context);
-        } else { // L ≥ B
-          fcs = (1 + (b! * nq!) / (l! * nc!));
-          fcd = 1 + (0.4 * df!) / b!;
-          qnetu = cu! * nc! * fcs! * fcd!;
+      theta != null && Q != null && y != null) {
+        if (theta! > 0 && theta! <= 50) {
+          var shearData = localShear.firstWhere(
+            (element) => element['theta'] == theta,
+            orElse: () => {"nc": null, "nq": null, "ny": null}, // Default values if not found
+          );
+          setState(() {
+            nc = shearData['nc'];
+            nq = shearData['nq'];
+            ny = shearData['ny'];  
+          });
+        } else if (theta == 0) {
+          setState(() {
+            nc = 5.14;
+            nq = 1;
+            ny = 0;
+          });
+        } else {
+          showSnackBarTheta(context);
+          setState(() {
+              widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
+          });
+          nc = nq = ny = null; // or set to some default values
+        }
 
-          roundedFcs = roundToFourDecimalPlaces(fcs!);
-          roundedFcd = roundToFourDecimalPlaces(fcd!);
-          widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
+        if (nc != null && nq != null && ny != null) {
+          if (l! < b!) {
+            qnetu = null;
+            widget.state.qnetu = null;
+            showSnackBarDimension(context);
+            setState(() {
+              widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
+            });
+            fs = 0.01;
+            return;
+          } else { // L ≥ B
+            fcs = (1 + (b! * nq!) / (l! * nc!));
+            fcd = 1 + (0.4 * df!) / b!;
+            qnetu = cu! * nc! * fcs! * fcd!;
+
+            roundedFcs = roundToFourDecimalPlaces(fcs!);
+            roundedFcd = roundToFourDecimalPlaces(fcd!);
+            widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
+          }
+        } else {
+          showSnackBarIncorrect(context);
+          setState(() {
+            widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
+          });
+          fs = 0.02;
+        }
+
+        if (qnetu != null) {
+          q = (Q! / (b! * l!)) - y! * df!;
+          fs = qnetu! / ((Q! / (b! * l!)) - y! * df!);
+
+          roundedQ = roundToFourDecimalPlaces(q!);
+          widget.state.fs = roundToFourDecimalPlaces(fs!);
           setState(() {
             widget.state.showResults = true;
           });
+        } else {
+          q = null;
+
+          roundedQ = null;
+          widget.state.fs = null;
+          showSnackBarIncorrect(context);
+          setState(() {
+            widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
+          });
+          fs = 0.03;
         }
-      } else {
+      } else { // all inputs are null
         showSnackBarIncorrect(context);
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
         fcs = null;
         fcd = null;
         qnetu = null;
@@ -299,20 +376,131 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
         roundedFcs = null;
         roundedFcd = null;
         widget.state.qnetu = null;
+
+        fs = 0.04;
       }
-    } else {
-      showSnackBarIncorrect(context);
+    } else if (selectedCalc == 2) { // qnet(u) calculation
+      if (cu != null && b != null && l != null && df != null && 
+      theta != null) {
+        if (theta! > 0 && theta! <= 50) {
+          var shearData = localShear.firstWhere(
+            (element) => element['theta'] == theta,
+            orElse: () => {"nc": null, "nq": null, "ny": null}, // Default values if not found
+          );
+          setState(() {
+            nc = shearData['nc'];
+            nq = shearData['nq'];
+            ny = shearData['ny'];  
+          });
+        } else if (theta == 0) {
+          setState(() {
+            nc = 5.14;
+            nq = 1;
+            ny = 0;
+          });
+        } else {
+          showSnackBarTheta(context);
+          setState(() {
+              widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
+          });
+          nc = nq = ny = null; // or set to some default values
+        }
+
+        if (nc != null && nq != null && ny != null) {
+          if (l! < b!) {
+            qnetu = null;
+            widget.state.qnetu = null;
+            showSnackBarDimension(context);
+            setState(() {
+              widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
+            });
+            fs = 0.01;
+            return;
+          } else { // L ≥ B
+            fcs = (1 + (b! * nq!) / (l! * nc!));
+            fcd = 1 + (0.4 * df!) / b!;
+            qnetu = cu! * nc! * fcs! * fcd!;
+
+            roundedFcs = roundToFourDecimalPlaces(fcs!);
+            roundedFcd = roundToFourDecimalPlaces(fcd!);
+            widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
+            setState(() {
+            widget.state.showResults = true;
+          });
+          }
+        } else {
+          showSnackBarIncorrect(context);
+          setState(() {
+            widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
+          });
+          fs = 0.02;
+        }
+      } else { // all inputs are null
+        showSnackBarIncorrect(context);
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
+        fcs = null;
+        fcd = null;
+        qnetu = null;
+
+        roundedFcs = null;
+        roundedFcd = null;
+        widget.state.qnetu = null;
+
+        fs = 0.04;
+      }
+    } else { // qnet(a) calculation
+      if (df != null && b != null && n60 != null && se != null) {
+        fd = 1 + (0.33 * df!) / b!;
+
+        if (fd != null) {
+          if (fd! <= 1.33) {
+            fdFinal = fd;
+            roundedFdFinal = roundToTwoDecimalPlaces(fdFinal!);
+          } else { // Fd > 1.33
+            fdFinal = 1.33;
+            roundedFdFinal = roundToTwoDecimalPlaces(fdFinal!);
+          }
+        } else {
+          fdFinal = null;
+          roundedFdFinal = null;
+        }
+
+        if (fdFinal != null) {
+          qneta = (n60! * fdFinal! * se!) / (0.08 * 25);
+          widget.state.qneta = roundToFourDecimalPlaces(qneta!);
+          setState(() {
+            widget.state.showResults = true;
+          });
+        } else {
+          qneta = null;
+          widget.state.qneta = null;
+        }
+
+      } else {
+        fd = null;
+        fdFinal = null;
+        qneta = null;
+        widget.state.qneta = null;
+        showSnackBarIncorrect(context);
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
+      }
     }
 
-    if (qnetu != null && Q != null && df != null && y != null && b != null && l != null) {
-      fs = qnetu! / ((Q! / (b! * l!)) - y! * df!);
-      widget.state.fs = roundToFourDecimalPlaces(fs!);
-    } else {
-      fs = null;
-      widget.state.fs = null;
-    }
-
-    print('nc = $nc, nq = $nq, ny = $ny, qnetu = $qnetu, F.S. = $fs');
+    print('nc = $nc, nq = $nq, ny = $ny, qnetu = $qnetu, F.S. = $fs, qneta = $qneta');
   }
 
   void showSnackBarTheta(BuildContext context) {
@@ -388,21 +576,34 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
                     // row managerrrr
                     children: [
                       headerCalc(),
-                      testRow(),
+                      SizedBox(height: 5),
                       radioCalc(),
+                      headerMain(),
 
-                      headerrr(),
-                      entryCu(),
+                      if (selectedCalc == 1 || selectedCalc == 2)
+                        entryCu(),
+
                       entryB(),
-                      entryL(),
-                      entryDf(),
-                      entryTheta(),
-                      subtextTheta(),
 
-                      if (widget.state.toggleCalc)
+                      if (selectedCalc == 1 || selectedCalc == 2)
+                        entryL(),
+
+                      entryDf(),
+
+                      if (selectedCalc == 1 || selectedCalc == 2)
+                        entryTheta(),
+                      if (selectedCalc == 1 || selectedCalc == 2)
+                        subtextTheta(),
+
+                      if (selectedCalc == 1)
                         entryQ(),
-                      if (widget.state.toggleCalc)
+                      if (selectedCalc == 1)
                         entryGamma(),
+
+                      if (selectedCalc == 3)
+                        entryN60(),
+                      if (selectedCalc == 3)
+                        entrySe(),
 
                       SizedBox(height: 10),
                       buttonSubmit(),
@@ -449,97 +650,24 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     );
   } // headerCalc
   Widget radioCalc() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          width: 150,
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Radio<bool>(
-                value: true,
-                groupValue: widget.state.toggleCalc,
-                onChanged: (bool? newValue) {
-                  setState(() {
-                    widget.state.toggleCalc = newValue ?? false;
-                    widget.onStateChanged(widget.state);
-                  });
-                },
-                activeColor: Color(0xFF1F538D),
-              ),
-              const Flexible(
-                child: Text(
-                  'Factor of safety',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(width: 20),
-        Container(
-          width: 150,
-          padding: const EdgeInsets.all(8),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Radio<bool>(
-                value: false,
-                groupValue: widget.state.toggleCalc,
-                onChanged: (bool? newValue) {
-                  setState(() {
-                    widget.state.toggleCalc = newValue ?? false;
-                    widget.onStateChanged(widget.state);
-                  });
-                },
-                activeColor: Color(0xFF1F538D),
-              ),
-              const Flexible(
-                child: Text(
-                  'Net ultimate bearing capacity',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 14,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
-    );
-  } // radioCalc
-  Widget testRow() {
     return Container(
-      /*
       width: MediaQuery.of(context).size.width * 0.9,
       constraints: BoxConstraints(maxWidth: 450),
-      */
-      width: 450,
-      color: Colors.grey.shade300, // Just to visualize the boundary
         child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            width: 140,
-            height: 40,
-            color: Colors.red,
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Radio<int>(
                   value: 1,
-                  groupValue: selectedValue,
+                  groupValue: selectedCalc,
                   onChanged: (val) {
                     setState(() {
-                      selectedValue = val!;
+                      selectedCalc = val!;
                     });
                   },
                   activeColor: Color(0xFF1F538D),
@@ -558,18 +686,17 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
             )
           ),
           Container(
-            width: 140,
-            height: 40,
-            color: Colors.yellow,
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Radio<int>(
                   value: 2,
-                  groupValue: selectedValue,
+                  groupValue: selectedCalc,
                   onChanged: (val) {
                     setState(() {
-                      selectedValue = val!;
+                      selectedCalc = val!;
                     });
                   },
                   activeColor: Color(0xFF1F538D),
@@ -588,18 +715,17 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
             )
           ),
           Container(
-            width: 140,
-            height: 40,
-            color: Colors.blue,
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Radio<int>(
                   value: 3,
-                  groupValue: selectedValue,
+                  groupValue: selectedCalc,
                   onChanged: (val) {
                     setState(() {
-                      selectedValue = val!;
+                      selectedCalc = val!;
                     });
                   },
                   activeColor: Color(0xFF1F538D),
@@ -622,7 +748,7 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     );    
   }
 ////////////////////////////////////
-  Widget headerrr() {
+  Widget headerMain() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20),
       child: Text(
@@ -1119,6 +1245,139 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     );
   } // entryGamma
 
+  Widget entryN60() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Standard penetration resistance, N₆₀:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputN60,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputN60.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryN60
+  Widget entrySe() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Settlement, Sₑ (in mm):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputSe,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputSe.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entrySe
+
   Widget buttonSubmit() {
     return ElevatedButton(
       onPressed: () {
@@ -1137,14 +1396,19 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
         width: 445,
         child: Column(
           children: [
-            if (widget.state.isItFs)
+            if (widget.state.solvedCalc == 1)
               Text(
                 'F.S. = ${widget.state.fs}',
                 style: TextStyle(color: Colors.white),
               ),
-            if (!widget.state.isItFs)
+            if (widget.state.solvedCalc == 2)
               Text(
                 'qnet(u) = ${widget.state.qnetu}',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 3)
+              Text(
+                'qnet(a) = ${widget.state.qneta}',
                 style: TextStyle(color: Colors.white),
               ),
           ],
@@ -1225,30 +1489,56 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
         width: 445,
         child: Column(
           children: [
-            Text(
-              'Nc = $nc',
-              style: TextStyle(color: Colors.white),
-            ),
-            Text(
-              'Nc = $nq',
-              style: TextStyle(color: Colors.white),
-            ),
-            Text(
-              'Ny = $ny',
-              style: TextStyle(color: Colors.white),
-            ),
-            Text(
-              'Fcs = $roundedFcs',
-              style: TextStyle(color: Colors.white),
-            ),
-            Text(
-              'Fcd = $roundedFcd',
-              style: TextStyle(color: Colors.white),
-            ),
-            Text(
-              'qnet(u) = ${widget.state.qnetu}',
-              style: TextStyle(color: Colors.white),
-            ),
+            if (widget.state.solvedCalc == 1 || widget.state.solvedCalc == 2)
+              Text(
+                'Nc = $nc',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 1 || widget.state.solvedCalc == 2)
+              Text(
+                'Nc = $nq',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 1 || widget.state.solvedCalc == 2)
+              Text(
+                'Ny = $ny',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 1 || widget.state.solvedCalc == 2)
+              Text(
+                'Fcs = $roundedFcs',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 1 || widget.state.solvedCalc == 2)
+              Text(
+                'Fcd = $roundedFcd',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 1 || widget.state.solvedCalc == 2)
+              Text(
+                'qnet(u) = ${widget.state.qnetu}',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 1)
+              Text(
+                'Q/A - γDf = $roundedQ',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 1)
+              Text(
+                'F.S. = ${widget.state.fs}',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 3)
+              Text(
+                'Fd = $roundedFdFinal',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (widget.state.solvedCalc == 3)
+              Text(
+                'qnet(a) = ${widget.state.qneta}',
+                style: TextStyle(color: Colors.white),
+              ),
           ],
         )
       )

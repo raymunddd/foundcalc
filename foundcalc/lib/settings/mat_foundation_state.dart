@@ -14,13 +14,18 @@ class MatFoundationState {
   
   String inputQ = '';
   String inputGamma = '';
+
+  String inputN60 = '';
+  String inputSe = '';
     // final answer
-    double? qnetu;
     double? fs;
+    double? qnetu;
+    double? qneta;
+
+  // int
+  int? solvedCalc;
 
   // toggles
-  bool toggleCalc = false;
-  bool isItFs = false;
   bool showResults = false;
   bool showSolution = false;
   bool solutionToggle = true;
