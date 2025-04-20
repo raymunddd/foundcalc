@@ -22,6 +22,8 @@ class MatFoundationState {
   bool toggleCalc = false;
   bool isItFs = false;
   bool showResults = false;
+  bool showSolution = false;
+  bool solutionToggle = true;
 
   final String title;
   MatFoundationState({required this.title});

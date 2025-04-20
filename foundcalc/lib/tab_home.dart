@@ -543,102 +543,109 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       body: TabBarView(
         controller: _tabController,
         children: [
-        //Home Tab
-            Center(
+        // Home Tab
+            Padding(
+              padding: const EdgeInsets.only(right: 4.0),
               child: ScrollbarTheme(
                 data: ScrollbarThemeData(
                   thumbColor: WidgetStateProperty.all(Colors.grey[800]), // Set the thumb color to white
                   trackColor: WidgetStateProperty.all(Colors.grey[800]), // Optional: Set the track color
                 ),
                 child: Scrollbar(
-                  controller: _scrollController,
+                  controller: _scrollController, // Link the ScrollController
                   thickness: 4,
                   radius: Radius.circular(10),
                   thumbVisibility: true, // Always show the scrollbar
                   child: SingleChildScrollView(
                     controller: _scrollController, // Link the ScrollController
-                    padding: EdgeInsets.all(16.0),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          "Welcome to Block B’s Footing Calculator!",
-                          style: TextStyle(
-                            fontSize: 24,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 45),
-                        Text(
-                          "What would you like to calculate?",
-                          style: TextStyle(
-                            fontSize: 20,
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: 20),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF1F538D),
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: _addAnalysisItem,
-                          child: Text("Analysis of Footings"),
-                        ),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF1F538D),
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: _addDesignItem,
-                          child: Text("Design of Footings"),
-                        ),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF1F538D),
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-                          ),
-                          onPressed: _addAnalRectMomentItem,
-                          child: SizedBox(
-                            width: 250,
-                            child: Text(
-                              "Analysis and Design of Rectangular Footings with Moment",
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Center(
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              "Welcome to Block B’s Footing Calculator!",
+                              style: TextStyle(
+                                fontSize: 24,
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            SizedBox(height: 45),
+                            Text(
+                              "What would you like to calculate?",
+                              style: TextStyle(
+                                fontSize: 20,
+                                color: Colors.white,
+                              ),
                               textAlign: TextAlign.center,
-                              softWrap: true,
-                              overflow: TextOverflow.visible,
                             ),
-                          ),
+                            SizedBox(height: 20),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF1F538D),
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: _addAnalysisItem,
+                              child: Text("Analysis of Footings"),
+                            ),
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF1F538D),
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: _addDesignItem,
+                              child: Text("Design of Footings"),
+                            ),
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF1F538D),
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
+                              ),
+                              onPressed: _addAnalRectMomentItem,
+                              child: SizedBox(
+                                width: 250,
+                                child: Text(
+                                  "Analysis and Design of Rectangular Footings with Moment",
+                                  textAlign: TextAlign.center,
+                                  softWrap: true,
+                                  overflow: TextOverflow.visible,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF1F538D),
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: _addCombinedFootingItem,
+                              child: Text("Combined Footing 🚧"),
+                            ),
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF1F538D),
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: _addMatFoundationItem,
+                              child: Text("Mat Foundation 🚧"),
+                            ),
+                            SizedBox(height: 1000),
+                          ],
                         ),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF1F538D),
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: _addCombinedFootingItem,
-                          child: Text("Combined Footing 🚧"),
-                        ),
-                        SizedBox(height: 10),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF1F538D),
-                            foregroundColor: Colors.white,
-                          ),
-                          onPressed: _addMatFoundationItem,
-                          child: Text("Mat Foundation 🚧"),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ),
+              ),
             ),
-          ),
+            
             // Analysis and Design pages will be added dynamically
             // They will be added in the TabBarView based on _tabs list
 

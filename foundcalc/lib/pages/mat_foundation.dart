@@ -34,6 +34,7 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     return widget.title; 
   }
 
+  int selectedValue = 1;
   // scroll bar
   late ScrollController _scrollController;
   // inputs
@@ -60,9 +61,17 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
   double? nc;
   double? nq;
   double? ny;
+  double? fcs;
+  double? fcd;
+
+  double? q;
   double? fs;
 
   double? qnetu;
+  // rounded
+  double? roundedFcs;
+  double? roundedFcd;
+  double? roundedQ;
 
   // string getters
   String get headerTitle {
@@ -77,7 +86,15 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     if (widget.state.toggleCalc) {
       return 'Calculate F.S.';
     } else {
-      return 'Solve qnetu';
+      return 'Solve qnet(u)';
+    }
+  }
+
+  String get solutionButtonLabel {
+    if (widget.state.showSolution) {
+      return 'Hide solution';
+    } else {
+      return 'View solution';
     }
   }
 
@@ -262,7 +279,12 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
           widget.state.qnetu = null;
           showSnackBarDimension(context);
         } else { // L ≥ B
-          qnetu = cu! * nc! * (1 + (b! * nq!)/(l! * nc!)) * (1 + (0.4 * df!)/b!);
+          fcs = (1 + (b! * nq!) / (l! * nc!));
+          fcd = 1 + (0.4 * df!) / b!;
+          qnetu = cu! * nc! * fcs! * fcd!;
+
+          roundedFcs = roundToFourDecimalPlaces(fcs!);
+          roundedFcd = roundToFourDecimalPlaces(fcd!);
           widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
           setState(() {
             widget.state.showResults = true;
@@ -270,7 +292,12 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
         }
       } else {
         showSnackBarIncorrect(context);
+        fcs = null;
+        fcd = null;
         qnetu = null;
+
+        roundedFcs = null;
+        roundedFcd = null;
         widget.state.qnetu = null;
       }
     } else {
@@ -325,37 +352,6 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     });
   }
 
-
-  Widget resultText() {
-    return Text(
-        '${widget.state.isItFs ? "F.S." : "qnetu"} = ${widget.state.isItFs ? (widget.state.fs) : (widget.state.qnetu)} ${widget.state.isItFs ? "" : "kPa"}',
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold, 
-        ),
-    );
-  }
-  Widget clearButton() {
-    return ElevatedButton(
-      onPressed: () {        
-        inputCu.clear();
-        inputB.clear();
-        inputL.clear();
-        inputDf.clear();
-        inputTheta.clear();
-        inputQ.clear();
-        inputGamma.clear();
-        setState(() {
-          widget.state.showResults = false;
-        });
-      },
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Color(0xFF1F538D),
-        foregroundColor: Colors.white,
-      ),
-      child: Text("Clear all values"),
-    );
-  }
   @override   
   Widget build(BuildContext context) {   
     super.build(context); // Call super.build   
@@ -392,6 +388,7 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
                     // row managerrrr
                     children: [
                       headerCalc(),
+                      testRow(),
                       radioCalc(),
 
                       headerrr(),
@@ -415,8 +412,19 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
                       if (widget.state.showResults)
                         resultText(),
 
+                      if (widget.state.showResults)
+                        SizedBox(height: 10),
+                      if (widget.state.showResults)
+                        solutionButton(),
+
+                      if (widget.state.showSolution)
+                        SizedBox(height: 10),
+                      if (widget.state.showSolution)
+                        containerSolution(),
+                        
                       SizedBox(height: 10),
                       clearButton(),
+                      
                     ],
                   ),
                 ),
@@ -508,7 +516,112 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
       ],
     );
   } // radioCalc
-
+  Widget testRow() {
+    return Container(
+      /*
+      width: MediaQuery.of(context).size.width * 0.9,
+      constraints: BoxConstraints(maxWidth: 450),
+      */
+      width: 450,
+      color: Colors.grey.shade300, // Just to visualize the boundary
+        child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Container(
+            width: 140,
+            height: 40,
+            color: Colors.red,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Radio<int>(
+                  value: 1,
+                  groupValue: selectedValue,
+                  onChanged: (val) {
+                    setState(() {
+                      selectedValue = val!;
+                    });
+                  },
+                  activeColor: Color(0xFF1F538D),
+                ),
+                const Flexible(
+                  child: Text(
+                    'Factor of safety',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            )
+          ),
+          Container(
+            width: 140,
+            height: 40,
+            color: Colors.yellow,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Radio<int>(
+                  value: 2,
+                  groupValue: selectedValue,
+                  onChanged: (val) {
+                    setState(() {
+                      selectedValue = val!;
+                    });
+                  },
+                  activeColor: Color(0xFF1F538D),
+                ),
+                const Flexible(
+                  child: Text(
+                    'Net ultimate bearing capacity',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            )
+          ),
+          Container(
+            width: 140,
+            height: 40,
+            color: Colors.blue,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Radio<int>(
+                  value: 3,
+                  groupValue: selectedValue,
+                  onChanged: (val) {
+                    setState(() {
+                      selectedValue = val!;
+                    });
+                  },
+                  activeColor: Color(0xFF1F538D),
+                ),
+                const Flexible(
+                  child: Text(
+                    'Net allowable bearing capacity',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            )
+          ), 
+        ],
+      ),
+    );    
+  }
+////////////////////////////////////
   Widget headerrr() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20),
@@ -1017,5 +1130,148 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
       ),
       child: Text(buttonTitle),
     );
+  }
+  Widget resultText() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            if (widget.state.isItFs)
+              Text(
+                'F.S. = ${widget.state.fs}',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (!widget.state.isItFs)
+              Text(
+                'qnet(u) = ${widget.state.qnetu}',
+                style: TextStyle(color: Colors.white),
+              ),
+          ],
+        )
+      )
+    );
+  }
+  
+  Widget clearButton() {
+    return ElevatedButton(
+      onPressed: () {        
+        inputCu.clear();
+        inputB.clear();
+        inputL.clear();
+        inputDf.clear();
+        inputTheta.clear();
+        inputQ.clear();
+        inputGamma.clear();
+        setState(() {
+          widget.state.showResults = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  }
+  
+  void toggleSolution() {
+    if (widget.state.solutionToggle) {
+      widget.state.showSolution = true;
+    } else {
+      widget.state.showSolution = false;
+    }
+    setState(() {
+      widget.state.solutionToggle = !widget.state.solutionToggle; // Toggle between functions
+    });
+  }
+
+  Widget solutionButton() {
+    return ElevatedButton(
+      onPressed: toggleSolution,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text(solutionButtonLabel),
+    );
+  }
+  Widget containerSolution() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 450),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          color: const Color(0xFF1F538D),
+        ),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              textSolution(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  Widget textSolution() { // Under
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'Nc = $nc',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Nc = $nq',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Ny = $ny',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Fcs = $roundedFcs',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Fcd = $roundedFcd',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'qnet(u) = ${widget.state.qnetu}',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  
+// for FAB to scroll to top
+  @override
+  void didUpdateWidget(MatFoundationPage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+
+    if (widget.state.scrollToTop) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollController.animateTo(
+          0,
+          duration: Duration(milliseconds: 500),
+          curve: Curves.easeInOut,
+        );
+      });
+
+      // Reset the flag
+      widget.state.scrollToTop = false;
+      widget.onStateChanged(widget.state);
+    }
   }
 } // _MatFoundationState
