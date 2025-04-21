@@ -58,6 +58,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
   late TextEditingController inputLambda;
 
+  late TextEditingController inputThetaR;
+  late TextEditingController inputOCR1;
+  late TextEditingController inputOCR2;
+
   @override
   bool get wantKeepAlive => true; 
 
@@ -93,6 +97,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
   double? lambda;
 
+  double? thetaR;
+  double? OCR1;
+  double? OCR2;
+  
   int? operation;
 
   // solvar (solution variables)
@@ -118,6 +126,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? C;
   double? Qv;
 
+  double? Qave1;
+  double? Qave2;
+  double? FavePart;
+  double? Fave1;
+  double? Fave2;
+
+
   // string getters
   String get displayTitle {
     if (widget.title.startsWith('Deep')) {
@@ -139,6 +154,18 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     'Densely compacted',
     'Loosely compacted',
   ];
+  
+  String? consolidation1;
+  final List<String> cons1Values = [
+    'Normally consolidated',
+    'Over consolidated',
+  ];
+  String? consolidation2;
+  final List<String> cons2Values = [
+    'Normally consolidated',
+    'Over consolidated',
+  ];
+
   String get soilPropOffHeaderrr {
     if (widget.state.isGammaSatEnabled) {
       return 'Input only two (2)';
@@ -186,6 +213,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       return 'Unconfined compressive strength of the clay, Qu (in kPa):';
     } else {
       return 'Unconfined compressive strength of the clay in the top layer, Qu₁ (in kPa):';
+    }
+  }
+  String get cons1Label {
+    if (!widget.state.isGammaSatEnabled) {
+      return 'Consolidation of soil:';
+    } else {
+      return 'Consolidation of soil (top layer):';
     }
   }
   String get pileDimLabel {
@@ -237,6 +271,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
     inputLambda = TextEditingController(text: widget.state.inputLambda);
 
+    inputThetaR = TextEditingController(text: widget.state.inputThetaR);
+    inputOCR1 = TextEditingController(text: widget.state.inputOCR1);
+    inputOCR2 = TextEditingController(text: widget.state.inputOCR2);
+
     // for dropdowns
 
     xsection = widget.state.xsection;
@@ -278,6 +316,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
     inputLambda.addListener(_updateState);
 
+    inputThetaR.addListener(_updateState);
+    inputOCR1.addListener(_updateState);
+    inputOCR2.addListener(_updateState);
+
   }
   void _updateState() {
     setState(() {
@@ -310,6 +352,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       widget.state.inputQu2 = inputQu2.text;
 
       widget.state.inputLambda = inputLambda.text;
+
+      widget.state.inputThetaR = inputThetaR.text;
+      widget.state.inputOCR1 = inputOCR1.text;
+      widget.state.inputOCR2 = inputOCR2.text;
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -381,12 +427,16 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
     inputLambda.dispose();
 
+    inputThetaR.dispose();
+    inputOCR1.dispose();
+    inputOCR2.dispose();
+    
     super.dispose();
   }
 
   void printer() {
     print('dw = $dw, df = $df, yfinal = $yFinal, ySat = $ySat, operation = $operation, watertable = $waterTable, C1 = $C1, C2 = $C2, alpha1 = $alpha1, alpha2 = $alpha2, perimeter = $perimeter');
-    print('mu = $muFinal, Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
+    print('Fave1 = $Fave1, Fave2 = $Fave2, Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
   }
 
   void solve() {
@@ -483,6 +533,18 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       nc = 9;
     }
 
+    // area and perimeter
+    if (xsection == 'Circular') {
+      A = pDim! * pDim!;
+      perimeter = pi * pDim!;
+    } else if (xsection == 'Square') {
+      A = 0.25 * pi * pDim! * pDim!;
+      perimeter = 4 * pDim!;
+    } else {
+      A = null;
+      perimeter = null;
+    }
+
     // main calc
     if (operation == 1) { // sand calc
       if (nq != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null &&
@@ -496,21 +558,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           dc = null;
         }
 
-        if (xsection == 'Square') {
-          A = pDim! * pDim!;
-        } else if (xsection == 'Circular') {
-          A = 0.25 * pi * pDim! * pDim!;
-        } else {
-          A = null;
-        }
-
         // bearing capacity
         if (waterTable == false) {
           Pv1 = yFinal! * df!;
           Pv2 = null;
           Qb = Pv1! * nq! * A!;
         } else if (waterTable == true) {
-          if (dw != null && dc != null) {
+          if (dw != null && dc != null && ySat != null) {
             if (dw! < dc!) {
               Pv1 = yFinal! * dw!;
               Pv2 = Pv1! + (ySat! - ywFinal!) * (dc! - dw!);
@@ -553,15 +607,6 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           } else {
             muFinal = null;
           }
-        }
-
-        // perimeter
-        if (xsection == 'Circular') {
-          perimeter = pi * pDim!;
-        } else if (xsection == 'Square') {
-          perimeter = 4 * pDim!;
-        } else {
-          perimeter = null;
         }
 
         if (dc != null && Pv1 != null) {
@@ -620,25 +665,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         Qall = 1;
       }
     } else if (operation == 2) { // alpha calc
-      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null) {
+      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
         alpha1 = double.tryParse(inputAlpha1.text);
         alpha2 = double.tryParse(inputAlpha2.text);
         C1 = double.tryParse(inputC1.text);
         C2 = double.tryParse(inputC2.text);
         qu1 = double.tryParse(inputQu1.text);
         qu2 = double.tryParse(inputQu2.text);
-
-        // area and perimeter
-        if (xsection == 'Circular') {
-          A = pDim! * pDim!;
-          perimeter = pi * pDim!;
-        } else if (xsection == 'Square') {
-          A = 0.25 * pi * pDim! * pDim!;
-          perimeter = 4 * pDim!;
-        } else {
-          A = null;
-          perimeter = null;
-        }
 
         if (nc != null && A != null) {
           if (C1 != null && C2 != null) {
@@ -704,28 +737,14 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         Qall = null;
       }
     } else if (operation == 3) { // lambda calc
-      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null) {
-        alpha1 = double.tryParse(inputAlpha1.text);
-        alpha2 = double.tryParse(inputAlpha2.text);
+      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
         C1 = double.tryParse(inputC1.text);
         C2 = double.tryParse(inputC2.text);
         qu1 = double.tryParse(inputQu1.text);
         qu2 = double.tryParse(inputQu2.text);
         lambda = double.tryParse(inputLambda.text);
 
-        // area and perimeter
-        if (xsection == 'Circular') {
-          A = pDim! * pDim!;
-          perimeter = pi * pDim!;
-        } else if (xsection == 'Square') {
-          A = 0.25 * pi * pDim! * pDim!;
-          perimeter = 4 * pDim!;
-        } else {
-          A = null;
-          perimeter = null;
-        }
-
-        if (nc != null && A != null) {
+        if (nc != null) {
           if (C1 != null && C2 != null) {
             Qb = C2! * nc! * A!;
           } else if (C1 != null) {
@@ -740,10 +759,16 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         if (waterTable == false) {
           Pv1 = yFinal! * df!;
           Pv2 = null;
+          Qb = Pv1! * nq! * A!;
         } else if (waterTable == true) {
-          if (dw != null) {
-            Pv1 = yFinal! * dw!;
-            Pv2 = Pv1! + (ySat! - ywFinal!) * (df! - dw!);
+          if (dw != null && dc != null && ySat != null) {
+            if (dw! < dc!) {
+              Pv1 = yFinal! * dw!;
+              Pv2 = Pv1! + (ySat! - ywFinal!) * (dc! - dw!);
+            } else {
+              Pv1 = yFinal! * df!;
+              Pv2 = null;
+            }
           } else {
             Pv1 = null;
             Pv2 = null;
@@ -753,7 +778,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Pv2 = null;
         }
 
-        if (perimeter != null && lambda != null && Pv1 != null && C1 != null) {
+        if (C1 != null) {
           if (waterTable == false) {
             C = C1;
             A1 = null;
@@ -763,7 +788,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           } else if (waterTable == true) {
             if (dw != null) {
               if (C2 != null && Pv2 != null) {
-                C = ((C1! * dw!) + (C2! * (df! - dw!))) / df!!;
+                C = ((C1! * dw!) + (C2! * (df! - dw!))) / df!;
                 A1 = 0.5 * Pv1! * dw!;
                 A2 = 0.5 * (Pv1! + Pv2!) * (df! - dw!);
                 Qv = (A1! + A2!) / df!;
@@ -810,6 +835,95 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Qall = null;
         }
 
+      }
+    } else if (operation == 4) { // beta calc
+      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
+        C1 = double.tryParse(inputC1.text);
+        C2 = double.tryParse(inputC2.text);
+        qu1 = double.tryParse(inputQu1.text);
+        qu2 = double.tryParse(inputQu2.text);
+        thetaR = double.tryParse(inputThetaR.text);
+        OCR1 = double.tryParse(inputOCR1.text);
+        OCR2 = double.tryParse(inputOCR2.text);
+
+        if (thetaR != null) {
+          FavePart = (1 - sin(thetaR! * pi / 180)) * tan(thetaR! * pi / 180);
+        } else {
+          FavePart = null;
+        }
+
+        if (nc != null) {
+          if (C1 != null && C2 != null) {
+            Qb = C2! * nc! * A!;
+          } else if (C1 != null) {
+            Qb = C1! * nc! * A!;
+          } else {
+            Qb = null;
+          }
+        } else {
+          Qb = null;
+        }
+
+        if (FavePart != null) {
+          if (waterTable == false) {
+            Qave1 = yFinal! * 0.5 * df!;
+            if (consolidation1 == 'Normally consolidated') {
+              Fave1 = FavePart! * Qave1!;
+              Qf = perimeter! * df! * Fave1!;
+            } else if (consolidation1 == 'Over consolidated') {
+              if (OCR1 != null) {
+                Fave1 = FavePart! * Qave1! * sqrt(OCR1!);
+                Qf = perimeter! * df! * Fave1!;
+              } else {
+                Fave1 = null;
+                Qf = null;
+              }
+            } else {
+              Fave1 = null;
+              Qf = null;
+            }
+          } else if (waterTable == true) {
+            if (dw != null && ySat != null) {
+              Qave1 = yFinal! * 0.5 * dw!;
+              Qave2 = (yFinal! * dw!) + (ySat! - ywFinal!) * 0.5 * (df! - dw!);
+              if (consolidation1 == 'Normally consolidated') {
+                Fave1 = FavePart! * Qave1!;
+              } else if (consolidation1 == 'Over consolidated') {
+                if (OCR1 != null) {
+                  Fave1 = FavePart! * Qave1! * sqrt(OCR1!);
+                }
+              }
+              if (consolidation2 == 'Normally consolidated') {
+                Fave2 = FavePart! * Qave2!;
+              } else if (consolidation2 == 'Over consolidated') {
+                if (OCR2 != null) {
+                  Fave2 = FavePart! * Qave2! * sqrt(OCR2!);
+                }
+              }
+              Qf = perimeter! * ((dw! * Fave1!) + ((df! - dw!) * Fave2!));
+            } else { // no Dw
+              Qf = null;
+            }
+          } else { // waterTable = null
+            Qf = null;
+          }
+        } else { // no perimeter, lambda, C1 and PV1
+          Qf = null;
+        }
+
+        if (Qb != null && Qf != null) {
+          Qult = Qb! + Qf!;
+        } else {
+          Qult = null;
+        }
+
+        if (Qult != null && FS != null) {
+          Qall = Qult! / FS!;
+        } else {
+          Qall = null;
+        }
+      } else {
+        Qall = null;
       }
     }
 
@@ -874,11 +988,17 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                       if (singular == 1 && soil == 1)
                         dropdownCompact(),
 
+                      if (singular == 1 && soil == 2 && method == 3)
+                        dropdownCons1(),
+                      if (singular == 1 && soil == 2 && method == 3 && consolidation1 == 'Over consolidated')
+                        entryOCR1(),
+                      if (singular == 1 && soil == 2 && method == 3 && widget.state.isGammaSatEnabled)
+                        dropdownCons2(),
+                      if (singular == 1 && soil == 2 && method == 3 && consolidation2 == 'Over consolidated')
+                        entryOCR2(),
+
                       if (singular == 1 && soil == 1)
                         entryNq(),
-
-                      entryPdim(),
-                      entryDf(),
 
                       if (singular == 1 && soil == 2 && method == 1)
                         entryAlpha1(),
@@ -887,6 +1007,12 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
                       if (singular == 1 && soil == 2 && method == 2)
                         entryLambda(),
+
+                      if (singular == 1 && soil == 2 && method == 3)
+                        entryThetaR(),
+
+                      entryPdim(),
+                      entryDf(),
 
                       // optional 
                       entryDw(),
@@ -2480,7 +2606,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
             child: Container(
               width: 120,
               child: Text(
-                'Angle of friction between the pile and the sand, θ:',
+                'Angle of friction between the pile and the sand, θ (in degrees):',
                 style: TextStyle(color: Colors.white),
               ),
             ),
@@ -3534,6 +3660,307 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       ),        
     );
   } // entryLambda
+// beta
+  Widget entryThetaR() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Drained friction angle of the remolded clay, θʀ (in degrees):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputThetaR, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputThetaR.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryThetaR
+  Widget dropdownCons1() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                cons1Label,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 179,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Colors.grey[800],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: consolidation1,
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
+                dropdownColor: Colors.grey[800],
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(color: Colors.white),
+                underline: SizedBox(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    consolidation1 = newValue;
+                    });
+                  },
+                items: cons1Values.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } // dropdownCons1
+  Widget entryOCR1() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Over consolidation ratio:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputOCR1, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputOCR1.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryOCR1
+  Widget dropdownCons2() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Consolidation of soil (bottom layer):',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 179,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Colors.grey[800],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: consolidation2,
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
+                dropdownColor: Colors.grey[800],
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(color: Colors.white),
+                underline: SizedBox(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    consolidation2 = newValue;
+                    });
+                  },
+                items: cons2Values.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } // dropdownCons2
+  Widget entryOCR2() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Over consolidation ratio:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputOCR2, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputOCR2.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryOCR2
   
 // ////////////////////////////////////
 

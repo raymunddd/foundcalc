@@ -38,6 +38,10 @@ class DeepState {
   
   String inputLambda = '';
 
+  String inputThetaR = '';
+  String inputOCR1 = '';
+  String inputOCR2 = '';
+
     // final answer
     /*
     double? fs;
@@ -57,6 +61,8 @@ class DeepState {
   bool frictionDet = true;
   bool kDet = false;
   bool ncDet = false;
+  bool normallyCons1 = false;
+  bool normallyCons2 = false;
 
   bool isGammaDryEnabled = false;
   bool isGammaMoistEnabled = false;
