@@ -77,6 +77,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? df; 
   double? dw;
   double? y; 
+  double? yMoist; 
   double? yDry;
   double? ySat;
   double? yw;
@@ -420,8 +421,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     e = double.tryParse(inputE.text);
 
     yDry = double.tryParse(inputGammaDry.text);
-    y = double.tryParse(inputGammaMoist.text);
-    ySat = double.tryParse(inputGammaSat.text);
+    yMoist = double.tryParse(inputGammaMoist.text);
 
     yMatInput = double.tryParse(inputOtherUnitWeight.text);
     fLoad = double.tryParse(inputFloorLoading.text);
@@ -497,15 +497,19 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     if (widget.state.soilProp) {
       if (gs != null && e != null && w != null) {
         y = ((gs!*yw!)*(1+w!))/(1+e!);
+        ySat = (yw! * (gs! + e!)) / (1 + e!);
       } else if (gs != null && e != null) {
         y = (gs!*yw!)/(1+e!);
+        ySat = (yw! * (gs! + e!)) / (1 + e!);
       } else {
         y = null;
+        ySat = null;
       }
     } else { //Soil Prop is OFF
-      if (y != null && yDry == null) {
-        y = y;
-      } else if (y == null && yDry != null) {
+      ySat = double.tryParse(inputGammaSat.text);
+      if (yMoist != null && yDry == null) {
+        y = yMoist;
+      } else if (yMoist == null && yDry != null) {
         y = yDry;
       } else {
         y = null;
@@ -613,16 +617,16 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       if (b != null && C != null && depth != null) {
         x = b! - C! - (depth!/1000);
       } else {
-        x = 0.02;
+        x = null;
       }
     } else if (colClass == "Corner") { // Corner
       if (b != null && C != null && depth != null) {
         x = b! - C! - (depth!/1000);
       } else {
-        x = 0.03;
+        x = null;
       }
     } else {
-      x = 0.04;
+      x = null;
     }
 
     if (qnu != null && b != null && x != null) {
@@ -1053,8 +1057,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     e = double.tryParse(inputE.text);
 
     yDry = double.tryParse(inputGammaDry.text);
-    y = double.tryParse(inputGammaMoist.text);
-    ySat = double.tryParse(inputGammaSat.text);
+    yMoist = double.tryParse(inputGammaMoist.text);
 
     yMatInput = double.tryParse(inputOtherUnitWeight.text);
     fLoad = double.tryParse(inputFloorLoading.text);
@@ -1130,15 +1133,19 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     if (widget.state.soilProp) {
       if (gs != null && e != null && w != null) {
         y = ((gs!*yw!)*(1+w!))/(1+e!);
+        ySat = (yw! * (gs! + e!)) / (1 + e!);
       } else if (gs != null && e != null) {
         y = (gs!*yw!)/(1+e!);
+        ySat = (yw! * (gs! + e!)) / (1 + e!);
       } else {
         y = null;
+        ySat = null;
       }
     } else { //Soil Prop is OFF
-      if (y != null && yDry == null) {
-        y = y;
-      } else if (y == null && yDry != null) {
+      ySat = double.tryParse(inputGammaSat.text);
+      if (yMoist != null && yDry == null) {
+        y = yMoist;
+      } else if (yMoist == null && yDry != null) {
         y = yDry;
       } else {
         y = null;

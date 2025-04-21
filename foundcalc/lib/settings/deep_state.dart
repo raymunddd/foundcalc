@@ -3,10 +3,30 @@ class DeepState {
   bool scrollToTop = false;
   // dropdowns
 
-  // String? calculation;
+  String? xsection;
+  String? compaction;
   
   // inputs
-  String inputCu = '';
+  String inputNq = '';
+  String inputK = '';
+  String inputFS = '';
+
+  String inputPdim = '';
+  String inputDf = '';
+  String inputDw = '';
+
+  String inputGs = '';
+  String inputE = '';
+  String inputW = '';
+
+  String inputGammaDry = '';
+  String inputGammaMoist = '';
+  String inputGammaSat = '';
+
+  String inputYw = '';
+
+  String inputMu = '';
+  String inputFrictionAngle = '';
   
     // final answer
     /*
@@ -21,6 +41,15 @@ class DeepState {
   */
 
   // toggles
+  bool soilProp = true;
+  bool waterDet = false;
+  bool frictionDet = true;
+  bool kDet = false;
+
+  bool isGammaDryEnabled = false;
+  bool isGammaMoistEnabled = false;
+  bool isGammaSatEnabled = false;
+
   bool showResults = false;
   bool showSolution = false;
   bool solutionToggle = true;

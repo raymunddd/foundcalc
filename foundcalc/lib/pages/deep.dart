@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:collection';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../settings/deep_state.dart';
@@ -25,12 +27,75 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   // scrollbar
   late ScrollController _scrollController;
 
+  late TextEditingController inputNq;
+
+  late TextEditingController inputPdim;
+  late TextEditingController inputDf;
+  late TextEditingController inputDw;
+  late TextEditingController inputK;
+  late TextEditingController inputFS;
+
+  late TextEditingController inputGs;
+  late TextEditingController inputE;
+  late TextEditingController inputW;
+
+  late TextEditingController inputGammaDry;
+  late TextEditingController inputGammaMoist;
+  late TextEditingController inputGammaSat;
+
+  late TextEditingController inputYw;
+
+  late TextEditingController inputMu;
+  late TextEditingController inputFrictionAngle;
+
   @override
   bool get wantKeepAlive => true; 
+
   int? singular;
   int? soil;
   int? method;
+  int? behavior;
 
+  double? nq;
+  double? pDim;
+  double? df;
+  double? dw;
+  double? K;
+  double? FS;
+  double? gs;
+  double? e;
+  double? w;
+  double? y;
+  double? yDry;
+  double? ySat;
+
+  double? mu;
+  double? frictionAngle;
+  double? yw;
+
+  int? operation;
+
+  // solvar (solution variables)
+  double? muFinal;
+  double? ywFinal;
+  double? yFinal;
+
+  double? dc;
+  double? A;
+  bool? waterTable;
+  double? Pv1;
+  double? Pv2;
+  double? Qb;
+  double? perimeter;
+  double? A1;
+  double? A2;
+  double? A3;
+  double? Apv;
+  double? Qf;
+  double? Qult;
+  double? Qall;
+
+  // string getters
   String get displayTitle {
     if (widget.title.startsWith('Deep')) {
       int index = int.tryParse(widget.title.split(' ').last) ?? 0;
@@ -38,6 +103,56 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     }
 
     return widget.title; 
+
+  }
+
+  String? xsection;
+  final List<String> sectionValues = [
+    'Circular',
+    'Square',
+  ];
+  String? compaction;
+  final List<String> compactionValues = [
+    'Densely compacted',
+    'Loosely compacted',
+  ];
+  String get soilPropOffHeaderrr {
+    if (widget.state.isGammaSatEnabled) {
+      return 'Input only two (2)';
+    } else {
+      return 'Input only one (1)';
+    }
+  }
+  String get gammaDryHint {
+    if (widget.state.isGammaDryEnabled) {
+      return '';
+    } else {
+      return 'Input not required';
+    }
+  }
+  String get gammaMoistHint {
+    if (widget.state.isGammaMoistEnabled) {
+      return '';
+    } else {
+      return 'Input not required';
+    }
+  }
+  String get gammaSatHint {
+    if (widget.state.isGammaSatEnabled) {
+      return 'Input required';
+    } else {
+      return 'Input not required';
+    }
+  }
+  String get pileDimLabel {
+    switch (xsection) {
+      case 'Square':
+        return 'Base of pile, B (in m):';
+      case 'Circular':
+        return 'Diameter of pile, D (in m):';
+      default:
+        return 'Dimension of pile (in m):';
+    }
   }
 
   @override
@@ -48,28 +163,362 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
     // for input
     
-    // inputCu = TextEditingController(text: widget.state.inputCu);
+    inputPdim = TextEditingController(text: widget.state.inputPdim);
+    inputDf = TextEditingController(text: widget.state.inputDf);
+    inputDw = TextEditingController(text: widget.state.inputDw);
+    inputNq = TextEditingController(text: widget.state.inputNq);
+    inputK = TextEditingController(text: widget.state.inputK);
+    inputFS = TextEditingController(text: widget.state.inputFS);
+
+    inputGs = TextEditingController(text: widget.state.inputGs);
+    inputE = TextEditingController(text: widget.state.inputE);
+    inputW = TextEditingController(text: widget.state.inputW);
+
+    inputGammaDry = TextEditingController(text: widget.state.inputGammaDry);
+    inputGammaMoist = TextEditingController(text: widget.state.inputGammaMoist);
+    inputGammaSat = TextEditingController(text: widget.state.inputGammaSat);
+
+    inputYw = TextEditingController(text: widget.state.inputYw);
+
+    inputMu = TextEditingController(text: widget.state.inputMu);
+    inputFrictionAngle = TextEditingController(text: widget.state.inputFrictionAngle);
 
     // for dropdowns
 
-    /*
-    loadingCase = widget.state.loadingCase; (no default value)
+    xsection = widget.state.xsection;
 
+    /*
     calculation = "Factor of safety"; // Set default value here
     widget.state.calculation = calculation;
     */
 
     // listeners
 
-    // inputCu.addListener(_updateState);
+    inputPdim.addListener(_updateState);
+    inputDf.addListener(_updateState);
+    inputDw.addListener(_updateState);
+    inputNq.addListener(_updateState);
+    inputK.addListener(_updateState);
+    inputFS.addListener(_updateState);
     
+    inputGs.addListener(_updateState);
+    inputE.addListener(_updateState);
+    inputW.addListener(_updateState);
+
+    inputGammaDry.addListener(_updateState);
+    inputGammaMoist.addListener(_updateState);
+    inputGammaSat.addListener(_updateState);
+
+    inputYw.addListener(_updateState);
+
+    inputMu.addListener(_updateState);
+    inputFrictionAngle.addListener(_updateState);
+
+  }
+  void _updateState() {
+    setState(() {
+      widget.state.inputPdim = inputPdim.text;
+      widget.state.inputDf = inputDf.text;
+      widget.state.inputDw = inputDw.text;
+      widget.state.inputNq = inputNq.text;
+      widget.state.inputK = inputK.text;
+      widget.state.inputFS = inputFS.text;
+
+      widget.state.inputGs = inputGs.text;
+      widget.state.inputE = inputE.text;
+      widget.state.inputW = inputW.text;
+
+      widget.state.inputGammaDry = inputGammaDry.text;
+      widget.state.inputGammaMoist = inputGammaMoist.text;
+      widget.state.inputGammaSat = inputGammaSat.text;
+   
+      widget.state.inputYw = inputYw.text;
+
+      widget.state.inputMu = inputYw.text;
+      widget.state.inputFrictionAngle = inputYw.text;
+
+      df = double.tryParse(inputDf.text);
+      dw = double.tryParse(inputDw.text);
+
+      if (dw != null) {
+        if (df != null) {
+          if (dw! < df!) {
+            widget.state.isGammaSatEnabled = true;
+          } else {
+            widget.state.isGammaSatEnabled = false;
+          }
+        } else {
+          widget.state.isGammaSatEnabled = true;
+        }
+      } else {
+        widget.state.isGammaSatEnabled = false;
+      }
+
+      yDry = double.tryParse(inputGammaDry.text);
+      y = double.tryParse(inputGammaMoist.text);
+
+      if (yDry != null) {
+        widget.state.isGammaMoistEnabled = false;
+      } else {
+        widget.state.isGammaMoistEnabled = true;
+      }
+
+      if (y != null) {
+        widget.state.isGammaDryEnabled = false;
+      } else {
+        widget.state.isGammaDryEnabled = true;
+      }
+
+      // solve();
+
+      widget.onStateChanged(widget.state);
+    });
   }
   void dispose() {
     _scrollController.dispose();
 
-    // inputCu.dispose();
+    inputPdim.dispose();
+    inputDf.dispose();
+    inputDw.dispose();
+    inputNq.dispose();
+    inputK.dispose();
+    inputFS.dispose();
+
+    inputGs.dispose();
+    inputE.dispose();
+    inputW.dispose();
+
+    inputGammaDry.dispose();
+    inputGammaMoist.dispose();
+    inputGammaSat.dispose();
+
+    inputYw.dispose();
+
+    inputMu.dispose();
+    inputFrictionAngle.dispose();
 
     super.dispose();
+  }
+
+  void printer() {
+    print('dw = $dw, df = $df, yfinal = $yFinal, ySat = $ySat, Dc = $dc, watertable = $waterTable, pv1 = $Pv1, pv2 = $Pv2');
+    print('mu = $muFinal, Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
+  }
+
+  void solve() {
+    nq = double.tryParse(inputNq.text);
+    pDim = double.tryParse(inputPdim.text);
+    df = double.tryParse(inputDf.text);
+    dw = double.tryParse(inputDw.text);
+
+    gs = double.tryParse(inputGs.text);
+    e = double.tryParse(inputE.text);
+    w = double.tryParse(inputW.text);
+
+    y = double.tryParse(inputGammaMoist.text);
+    yDry = double.tryParse(inputGammaDry.text);
+
+    yw = double.tryParse(inputYw.text);
+
+    mu = double.tryParse(inputMu.text);
+    frictionAngle = double.tryParse(inputFrictionAngle.text);
+
+    FS = double.tryParse(inputFS.text) ?? 3; // Default to 3 if null
+
+    if (widget.state.waterDet) {
+      if (yw != null) {
+        ywFinal = yw;
+      } else {
+        ywFinal = null;
+      }
+    } else {
+      ywFinal = 9.81;
+    }
+
+    if (widget.state.soilProp) { // Soil Prop is ON
+      if (gs != null && e != null && w != null) {
+        yFinal = ((gs!*yw!)*(1+w!))/(1+e!);
+        ySat = (yw! * (gs! + e!)) / (1 + e!);
+      } else if (gs != null && e != null) {
+        yFinal = (gs!*yw!)/(1+e!);
+        ySat = (yw! * (gs! + e!)) / (1 + e!);
+      } else {
+        yFinal = null;
+        ySat = null;
+      }
+    } else { // Soil Prop is OFF
+      ySat = double.tryParse(inputGammaSat.text);
+      if (y != null && yDry == null) {
+        yFinal = y;
+      } else if (y == null && yDry != null) {
+        yFinal = yDry;
+      } else {
+        yFinal = null;
+      }
+    }
+
+    if (dw != null && df != null) {
+      if (dw! < df!) {
+        waterTable = true;
+      } else {
+        waterTable = false;
+      }
+    } else if (df != null) {
+      waterTable = false;
+    } else {
+      waterTable = null;
+    }
+
+    if (singular == 1) { // singular
+      if (soil == 1) { // sand
+        operation = 1;
+      } else { // clay
+        if (method == 1) { // α method
+          operation = 1;
+        } else if (method == 2) { // λ method
+          operation = 2;
+        } else { // β method
+          operation = 3;
+        }
+      }
+    } else { // group
+      if (behavior == 1) { // individually
+        operation = 4;
+      } else { // as a block
+        operation = 5;
+      }
+    }
+
+    // main calc
+    if (operation == 1) { // sand calc
+      if (nq != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null) {
+        
+        if (compaction == 'Densely compacted') {
+          dc = 20 * pDim!;
+        } else if (compaction == 'Loosely compacted') {
+          dc = 10 * pDim!;
+        } else {
+          dc = null;
+        }
+
+        if (xsection == 'Square') {
+          A = pDim! * pDim!;
+        } else if (xsection == 'Circular') {
+          A = 0.25 * pi * pDim! * pDim!;
+        } else {
+          A = null;
+        }
+
+        // bearing capacity
+        if (waterTable == false) {
+          Pv1 = yFinal! * df!;
+          Pv2 = null;
+          Qb = Pv1! * nq! * A!;
+        } else if (waterTable == true) {
+          if (dw! < dc!) {
+            Pv1 = yFinal! * dw!;
+            Pv2 = Pv1! + (ySat! - ywFinal!) * (dc! - dw!);
+            Qb = Pv2! * nq! * A!;
+          } else if (dw! == dc!) {
+
+          } else {
+
+          }
+        } else {
+          Pv1 = null;
+          Pv2 = null;
+          Qb = null;
+        }
+
+        if (widget.state.kDet) {
+          if (K != null) {
+            K = double.tryParse(inputK.text);
+          } else {
+            K = null;
+          }
+        } else {
+          K = 1.25;
+        }
+
+        if (widget.state.frictionDet) {
+          if (mu != null) {
+            muFinal = mu!; 
+          } else {
+            muFinal = null;
+          }   
+        } else {
+          if (frictionAngle != null) {
+            muFinal = tan(frictionAngle! * (pi / 180));
+          } else {
+            muFinal = null;
+          }
+        }
+
+        // perimeter
+        if (xsection == 'Circular') {
+          perimeter = pi * pDim!;
+        } else if (xsection == 'Square') {
+          perimeter = 4 * pDim!;
+        } else {
+          perimeter = null;
+        }
+
+        if (waterTable == false) {
+          A1 = 0.5 * dc! * Pv1!;
+          A2 = (df! - dc!) * Pv1!;
+          A3 = 0;
+        } else if (waterTable == true) {
+          if (dw! < dc!) {
+            A1 = 0.5 * dw! * Pv1!;
+            A2 = 0.5 * (dc! - dw!) * (Pv1! + Pv2!);
+            A3 = (df! - dc!) * Pv2!;
+          } else if (dw! == dc!) {
+            A1 = 0.5 * dw! * Pv1!;
+            A2 = (df! - dc!) * Pv2!;
+            A3 = 0;
+          } else { // Dw > Dc
+            A1 = 0.5 * dc! * Pv1!;
+            A2 = (dw! - dc!) * Pv1!;
+            A3 = (df! - dw!) * Pv2!;
+          }
+        } else {
+          A1 = A2 = A3 = null;
+        }
+
+        if (A1 != null && A2 != null && A3 != null) {
+          Apv = A1! + A2! + A3!;
+        } else {
+          Apv = null;
+        }
+
+        if (K != null && muFinal != null && perimeter != null && Apv != null) {
+          Qf = K! * muFinal! * perimeter! * Apv!;
+        } else {
+          Qf = null;
+        }
+
+        if (Qb != null && Qf != null) {
+          Qult = Qb! + Qf!;
+        } else {
+          Qult = null;
+        }
+
+        if (Qult != null && FS != null) {
+          Qall = Qult! / FS!;
+        } else {
+          Qall = null;
+        }
+
+        print('Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
+      } else {
+        Qb = 1;
+        Qf = 1;
+        Qult = 1;
+        Qall = 1;
+      }
+    }
+
+    printer();
   }
 
   @override   
@@ -107,11 +556,59 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                     mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
                     // row managerrrr
                     children: [
+                      headerSingle(),
                       radioSingle(),
+
+                      if (singular == 1)
+                        headerSoil(),
                       if (singular == 1)
                         radioSoil(),
-                      if (soil == 2)
+
+                      if (singular == 1 && soil == 2)
+                        headerMethod(),
+                      if (singular == 1 && soil == 2)
                         radioMethod(),
+
+                      if (singular == 2)
+                        headerBehavior(),
+                      if (singular == 2)
+                        radioBehavior(),
+
+                      dropdownXsection(),
+                      dropdownCompact(),
+
+                      entryNq(),
+                      entryPdim(),
+                      entryDf(),
+                      entryDw(),
+                      entryFS(),
+
+                      switchSoilProp(),
+                      Stack(
+                        children: [
+                          containerSoilPropOn(),
+                          containerSoilPropOff(),
+                        ]
+                      ),
+
+                      switchFriction(),
+                      Stack(
+                        children: [
+                          containerFrictionOn(),
+                          containerFrictionOff(),
+                        ]
+                      ),
+
+                      if (widget.state.isGammaSatEnabled)
+                        switchWaterDet(),
+                      if (widget.state.isGammaSatEnabled)
+                        containerWaterOn(),
+
+                      switchKDet(),
+                      containerKOn(),
+                      
+                      SizedBox(height: 10),
+                      buttonSubmit(),
                       /*
                       SizedBox(height: 10),
                       buttonSubmit(),
@@ -145,16 +642,29 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     );
   } // build (main widget)
 
+  Widget headerSingle() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Text(
+        'Select calculation type:',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  } // headerSingle
   Widget radioSingle() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
       constraints: BoxConstraints(maxWidth: 450),
         child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: MediaQuery.of(context).size.width * 0.45,
-            constraints: BoxConstraints(maxWidth: 225),
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -182,8 +692,8 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
             )
           ),
           Container(
-            width: MediaQuery.of(context).size.width * 0.45,
-            constraints: BoxConstraints(maxWidth: 225),
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -213,17 +723,31 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         ],
       ),
     );    
-  }// for FAB to scroll to top
+  }
+  
+  Widget headerSoil() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Text(
+        'Type of soil:',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  } // headerSoil
   Widget radioSoil() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
       constraints: BoxConstraints(maxWidth: 450),
         child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Container(
-            width: MediaQuery.of(context).size.width * 0.45,
-            constraints: BoxConstraints(maxWidth: 225),
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -251,8 +775,8 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
             )
           ),
           Container(
-            width: MediaQuery.of(context).size.width * 0.45,
-            constraints: BoxConstraints(maxWidth: 225),
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
@@ -283,6 +807,20 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       ),
     );    
   }
+  
+  Widget headerMethod() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Text(
+        'Select method:',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  } // headerMethod
   Widget radioMethod() {
     return Container(
       width: MediaQuery.of(context).size.width * 0.9,
@@ -382,6 +920,1587 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     );    
   }
   
+  Widget headerBehavior() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Text(
+        'Behavior of piles:',
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 16,
+        ),
+        textAlign: TextAlign.center,
+      ),
+    );
+  } // headerBehavior
+  Widget radioBehavior() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.9,
+      constraints: BoxConstraints(maxWidth: 450),
+        child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Radio<int>(
+                  value: 1,
+                  groupValue: behavior,
+                  onChanged: (val) {
+                    setState(() {
+                      behavior = val!;
+                    });
+                  },
+                  activeColor: Color(0xFF1F538D),
+                ),
+                const Flexible(
+                  child: Text(
+                    'Piles act individually',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            )
+          ),
+          Container(
+            width: MediaQuery.of(context).size.width * 0.3,
+            constraints: BoxConstraints(maxWidth: 150),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Radio<int>(
+                  value: 2,
+                  groupValue: singular,
+                  onChanged: (val) {
+                    setState(() {
+                      singular = val!;
+                    });
+                  },
+                  activeColor: Color(0xFF1F538D),
+                ),
+                const Flexible(
+                  child: Text(
+                    'Piles act as a block',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 14,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+              ],
+            )
+          ),
+        ],
+      ),
+    );    
+  }
+  
+  Widget dropdownXsection() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Cross section of pile:',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 179,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Colors.grey[800],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: xsection,
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
+                dropdownColor: Colors.grey[800],
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(color: Colors.white),
+                underline: SizedBox(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    xsection = newValue;
+                    });
+                  },
+                items: sectionValues.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } // dropdownXsection
+  Widget dropdownCompact() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Expanded(
+              child: Text(
+                'Type of compaction:',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+            Container(
+              height: 40,
+              width: 179,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                color: Colors.grey[800],
+              ),
+              padding: EdgeInsets.symmetric(horizontal: 12),
+              child: DropdownButton<String>(
+                isExpanded: true,
+                value: compaction,
+                hint: Text('Select option', style: TextStyle(color: Colors.white54)),
+                dropdownColor: Colors.grey[800],
+                icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
+                iconSize: 24,
+                elevation: 16,
+                style: TextStyle(color: Colors.white),
+                underline: SizedBox(),
+                onChanged: (String? newValue) {
+                  setState(() {
+                    compaction = newValue;
+                    });
+                  },
+                items: compactionValues.map((String value) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value, style: TextStyle(color: Colors.white)),
+                  );
+                }).toList(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  } // dropdownCompact
+  
+  Widget entryNq() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Bearing capacity factor, Nq:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputNq, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputNq.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryNq
+  Widget entryPdim() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  pileDimLabel,
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputPdim,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputPdim.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryPdim
+  Widget entryDf() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Length of pile, L (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputDf, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputDf.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryDf
+  Widget entryDw() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Depth of the water table from ground level, Dw (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputDw, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputDw.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryDw
+  Widget entryFS() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Factor of safety:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputFS, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputFS.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryFS
+
+  Widget switchSoilProp() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Soil properties',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.soilProp,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.soilProp = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchSoilProp
+  
+  Widget containerSoilPropOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.soilProp,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+// Soil Prop On Manager
+                subGs(),
+                subVoidRatio(),
+                subWaterContent(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerSoilPropOn
+  Widget subGs() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Specific gravity of soil solids, Gs:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputGs,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputGs.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subGs
+  Widget subVoidRatio() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Void ratio, e:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputE,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputE.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subVoidRatio
+  Widget subWaterContent() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Water content, ω (%):',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputW,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Optional",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputW.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subWaterContent
+  
+  Widget containerSoilPropOff() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: !widget.state.soilProp,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 201, 40, 29),
+          ),
+          alignment: Alignment.center,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  soilPropOffHeader(),
+                  subGammaDry(),
+                  subGammaMoist(),
+                  subGammaSat(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerSoilPropOff
+  Widget soilPropOffHeader() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center, // Centers the text
+        children: [
+          Flexible(
+            child: Text(
+              soilPropOffHeaderrr,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold, // Makes text bold
+              ),
+              textAlign: TextAlign.center, // Centers the text inside the widget
+            ),
+          ),
+        ],
+      ),
+    );
+  } // soilPropOffHeader
+  Widget subGammaDry() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Dry/bulk unit weight, γdry (in kN/m³):',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputGammaDry,
+                  enabled: widget.state.isGammaDryEnabled,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: gammaDryHint,
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 226, 65, 54),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputGammaDry.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subGammaDry
+  Widget subGammaMoist() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Moist unit weight, γ (in kN/m³):',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputGammaMoist,
+                  enabled: widget.state.isGammaMoistEnabled,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: gammaMoistHint,
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 226, 65, 54),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputGammaMoist.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subGammaMoist
+  Widget subGammaSat() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Saturated unit weight, γsat (in kN/m³):',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputGammaSat,
+                  enabled: widget.state.isGammaSatEnabled,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: gammaSatHint,
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 226, 65, 54),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputGammaSat.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subGammaSat
+
+  Widget switchFriction() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Coefficient of friction',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.frictionDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.frictionDet = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchFriction
+  
+  Widget containerFrictionOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.frictionDet,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                subMu(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerFrictionOn
+  Widget subMu() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Coefficient of friction, μ:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputMu,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputMu.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subMu
+ 
+  Widget containerFrictionOff() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: !widget.state.frictionDet,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 201, 40, 29),
+          ),
+          alignment: Alignment.center,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  subFrictionAngle(),
+                ]
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerFrictionOff
+  Widget subFrictionAngle() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Angle of friction between the pile and the sand, θ:',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputFrictionAngle,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Input required',
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 226, 65, 54),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputFrictionAngle.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subFrictionAngle
+  
+  Widget switchWaterDet() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Unit weight of water (assumed as 9.81 kN/m³ if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.waterDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.waterDet = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchWaterDet
+  Widget containerWaterOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.waterDet,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+// Soil Prop On Manager
+                subYw(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerWaterOn
+  Widget subYw() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Unit weight of water, γw (in kN/m³):',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputYw,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputYw.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subYw
+
+  Widget switchKDet() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Shaft lateral pressure factor (assumed as 1.25 if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.kDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.kDet = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchKDet
+  Widget containerKOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.kDet,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                subK(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerKOn
+  Widget subK() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Shaft lateral pressure factor, K:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputK,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputK.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subK
+
+  Widget buttonSubmit() {
+    return ElevatedButton(
+      onPressed: () {
+        solve();
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text('Calculate'),
+    );
+  }
   // for FAB to scroll to top
   @override
   void didUpdateWidget(DeepPage oldWidget) {
