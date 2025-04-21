@@ -487,7 +487,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
             widget.state.isGammaSatEnabled = false;
           }
         } else {
-          widget.state.isGammaSatEnabled = true;
+          widget.state.isGammaSatEnabled = false;
         }
       } else {
         widget.state.isGammaSatEnabled = false;

@@ -27,7 +27,17 @@ class DeepState {
 
   String inputMu = '';
   String inputFrictionAngle = '';
+
+  String inputNc = '';
+  String inputAlpha1 = '';
+  String inputAlpha2 = '';
+  String inputC1 = '';
+  String inputC2 = '';
+  String inputQu1 = '';
+  String inputQu2 = '';
   
+  String inputLambda = '';
+
     // final answer
     /*
     double? fs;
@@ -42,9 +52,11 @@ class DeepState {
 
   // toggles
   bool soilProp = true;
+  bool cohesion = true;
   bool waterDet = false;
   bool frictionDet = true;
   bool kDet = false;
+  bool ncDet = false;
 
   bool isGammaDryEnabled = false;
   bool isGammaMoistEnabled = false;

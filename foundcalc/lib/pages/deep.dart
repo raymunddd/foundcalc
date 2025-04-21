@@ -47,6 +47,16 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
   late TextEditingController inputMu;
   late TextEditingController inputFrictionAngle;
+// alpha
+  late TextEditingController inputNc;
+  late TextEditingController inputAlpha1;
+  late TextEditingController inputAlpha2;
+  late TextEditingController inputC1;
+  late TextEditingController inputC2;
+  late TextEditingController inputQu1;
+  late TextEditingController inputQu2;
+
+  late TextEditingController inputLambda;
 
   @override
   bool get wantKeepAlive => true; 
@@ -73,6 +83,16 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? frictionAngle;
   double? yw;
 
+  double? nc;
+  double? alpha1;
+  double? alpha2;
+  double? C1;
+  double? C2;
+  double? qu1;
+  double? qu2;
+
+  double? lambda;
+
   int? operation;
 
   // solvar (solution variables)
@@ -94,6 +114,9 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? Qf;
   double? Qult;
   double? Qall;
+  
+  double? C;
+  double? Qv;
 
   // string getters
   String get displayTitle {
@@ -144,6 +167,27 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       return 'Input not required';
     }
   }
+  String get alpha1Label {
+    if (!widget.state.isGammaSatEnabled) {
+      return 'Adhesion factor, α:';
+    } else {
+      return 'Adhesion factor of the top layer, α₁:';
+    }
+  }
+  String get C1Label {
+    if (!widget.state.isGammaSatEnabled) {
+      return 'Cohesion, C (in kPa):';
+    } else {
+      return 'Cohesion of the top layer, C₁ (in kPa):';
+    }
+  }
+  String get Qu1Label {
+    if (!widget.state.isGammaSatEnabled) {
+      return 'Unconfined compressive strength of the clay, Qu (in kPa):';
+    } else {
+      return 'Unconfined compressive strength of the clay in the top layer, Qu₁ (in kPa):';
+    }
+  }
   String get pileDimLabel {
     switch (xsection) {
       case 'Square':
@@ -183,6 +227,16 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     inputMu = TextEditingController(text: widget.state.inputMu);
     inputFrictionAngle = TextEditingController(text: widget.state.inputFrictionAngle);
 
+    inputNc = TextEditingController(text: widget.state.inputNc);
+    inputAlpha1 = TextEditingController(text: widget.state.inputAlpha1);
+    inputAlpha2 = TextEditingController(text: widget.state.inputAlpha2);
+    inputC1 = TextEditingController(text: widget.state.inputC1);
+    inputC2 = TextEditingController(text: widget.state.inputC2);
+    inputQu1 = TextEditingController(text: widget.state.inputQu1);
+    inputQu2 = TextEditingController(text: widget.state.inputQu2);
+
+    inputLambda = TextEditingController(text: widget.state.inputLambda);
+
     // for dropdowns
 
     xsection = widget.state.xsection;
@@ -214,6 +268,16 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     inputMu.addListener(_updateState);
     inputFrictionAngle.addListener(_updateState);
 
+    inputNc.addListener(_updateState);
+    inputAlpha1.addListener(_updateState);
+    inputAlpha2.addListener(_updateState);
+    inputC1.addListener(_updateState);
+    inputC2.addListener(_updateState);
+    inputQu1.addListener(_updateState);
+    inputQu2.addListener(_updateState);
+
+    inputLambda.addListener(_updateState);
+
   }
   void _updateState() {
     setState(() {
@@ -234,8 +298,18 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
    
       widget.state.inputYw = inputYw.text;
 
-      widget.state.inputMu = inputYw.text;
-      widget.state.inputFrictionAngle = inputYw.text;
+      widget.state.inputMu = inputMu.text;
+      widget.state.inputFrictionAngle = inputFrictionAngle.text;
+
+      widget.state.inputNc = inputNc.text;
+      widget.state.inputAlpha1 = inputAlpha1.text;
+      widget.state.inputAlpha2 = inputAlpha2.text;
+      widget.state.inputC1 = inputC1.text;
+      widget.state.inputC2 = inputC2.text;
+      widget.state.inputQu1 = inputQu1.text;
+      widget.state.inputQu2 = inputQu2.text;
+
+      widget.state.inputLambda = inputLambda.text;
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -248,7 +322,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
             widget.state.isGammaSatEnabled = false;
           }
         } else {
-          widget.state.isGammaSatEnabled = true;
+          widget.state.isGammaSatEnabled = false;
         }
       } else {
         widget.state.isGammaSatEnabled = false;
@@ -297,11 +371,21 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     inputMu.dispose();
     inputFrictionAngle.dispose();
 
+    inputNc.dispose();
+    inputAlpha1.dispose();
+    inputAlpha2.dispose();
+    inputC1.dispose();
+    inputC2.dispose();
+    inputQu1.dispose();
+    inputQu2.dispose();
+
+    inputLambda.dispose();
+
     super.dispose();
   }
 
   void printer() {
-    print('dw = $dw, df = $df, yfinal = $yFinal, ySat = $ySat, Dc = $dc, watertable = $waterTable, pv1 = $Pv1, pv2 = $Pv2');
+    print('dw = $dw, df = $df, yfinal = $yFinal, ySat = $ySat, operation = $operation, watertable = $waterTable, C1 = $C1, C2 = $C2, alpha1 = $alpha1, alpha2 = $alpha2, perimeter = $perimeter');
     print('mu = $muFinal, Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
   }
 
@@ -374,24 +458,35 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         operation = 1;
       } else { // clay
         if (method == 1) { // α method
-          operation = 1;
-        } else if (method == 2) { // λ method
           operation = 2;
-        } else { // β method
+        } else if (method == 2) { // λ method
           operation = 3;
+        } else { // β method
+          operation = 4;
         }
       }
     } else { // group
       if (behavior == 1) { // individually
-        operation = 4;
-      } else { // as a block
         operation = 5;
+      } else { // as a block
+        operation = 6;
       }
+    }
+
+    if (widget.state.ncDet) {
+      if (K != null) {
+        nc = double.tryParse(inputNc.text);
+      } else {
+        nc = null;
+      }
+    } else {
+      nc = 9;
     }
 
     // main calc
     if (operation == 1) { // sand calc
-      if (nq != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null) {
+      if (nq != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null &&
+      xsection != null && compaction != null) {
         
         if (compaction == 'Densely compacted') {
           dc = 20 * pDim!;
@@ -415,14 +510,20 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Pv2 = null;
           Qb = Pv1! * nq! * A!;
         } else if (waterTable == true) {
-          if (dw! < dc!) {
-            Pv1 = yFinal! * dw!;
-            Pv2 = Pv1! + (ySat! - ywFinal!) * (dc! - dw!);
-            Qb = Pv2! * nq! * A!;
-          } else if (dw! == dc!) {
-
+          if (dw != null && dc != null) {
+            if (dw! < dc!) {
+              Pv1 = yFinal! * dw!;
+              Pv2 = Pv1! + (ySat! - ywFinal!) * (dc! - dw!);
+              Qb = Pv2! * nq! * A!;
+            } else {
+              Pv1 = yFinal! * df!;
+              Pv2 = null;
+              Qb = Pv1! * nq! * A!;
+            }
           } else {
-
+            Pv1 = null;
+            Pv2 = null;
+            Qb = null;
           }
         } else {
           Pv1 = null;
@@ -463,23 +564,27 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           perimeter = null;
         }
 
-        if (waterTable == false) {
-          A1 = 0.5 * dc! * Pv1!;
-          A2 = (df! - dc!) * Pv1!;
-          A3 = 0;
-        } else if (waterTable == true) {
-          if (dw! < dc!) {
-            A1 = 0.5 * dw! * Pv1!;
-            A2 = 0.5 * (dc! - dw!) * (Pv1! + Pv2!);
-            A3 = (df! - dc!) * Pv2!;
-          } else if (dw! == dc!) {
-            A1 = 0.5 * dw! * Pv1!;
-            A2 = (df! - dc!) * Pv2!;
-            A3 = 0;
-          } else { // Dw > Dc
+        if (dc != null && Pv1 != null) {
+          if (waterTable == false) {
             A1 = 0.5 * dc! * Pv1!;
-            A2 = (dw! - dc!) * Pv1!;
-            A3 = (df! - dw!) * Pv2!;
+            A2 = (df! - dc!) * Pv1!;
+            A3 = 0;
+          } else if (waterTable == true) {
+            if (dw != null && Pv2 != null) {
+              if (dw! < dc!) {
+                A1 = 0.5 * dw! * Pv1!;
+                A2 = 0.5 * (dc! - dw!) * (Pv1! + Pv2!);
+                A3 = (df! - dc!) * Pv2!;
+              } else { // Dw ≥ Dc
+                A1 = 0.5 * dc! * Pv1!;
+                A2 = (df! - dc!) * Pv1!;
+                A3 = 0;
+              }
+            } else {
+              A1 = A2 = A3 = null;
+            }
+          } else {
+            A1 = A2 = A3 = null;
           }
         } else {
           A1 = A2 = A3 = null;
@@ -508,13 +613,203 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         } else {
           Qall = null;
         }
-
-        print('Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
       } else {
         Qb = 1;
         Qf = 1;
         Qult = 1;
         Qall = 1;
+      }
+    } else if (operation == 2) { // alpha calc
+      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null) {
+        alpha1 = double.tryParse(inputAlpha1.text);
+        alpha2 = double.tryParse(inputAlpha2.text);
+        C1 = double.tryParse(inputC1.text);
+        C2 = double.tryParse(inputC2.text);
+        qu1 = double.tryParse(inputQu1.text);
+        qu2 = double.tryParse(inputQu2.text);
+
+        // area and perimeter
+        if (xsection == 'Circular') {
+          A = pDim! * pDim!;
+          perimeter = pi * pDim!;
+        } else if (xsection == 'Square') {
+          A = 0.25 * pi * pDim! * pDim!;
+          perimeter = 4 * pDim!;
+        } else {
+          A = null;
+          perimeter = null;
+        }
+
+        if (nc != null && A != null) {
+          if (C1 != null && C2 != null) {
+            Qb = C2! * nc! * A!;
+          } else if (C1 != null) {
+            Qb = C1! * nc! * A!;
+          } else {
+            Qb = null;
+          }
+        } else {
+          Qb = null;
+        }
+
+        if (perimeter != null) {
+          if (waterTable == false) {
+            if (alpha1 != null && C1 != null) {
+              Qf = alpha1! * C1! * perimeter! * df!;
+            } else {
+              Qf = null;
+            }
+          } else if (waterTable == true) {
+            if (dw != null) {
+              if (alpha1 != null && alpha2 != null && C1 != null && C2 != null) {
+                Qf = perimeter! * ((alpha1! * C1! * dw!) + (alpha2! * C2! * (df! - dw!)));
+              } else {
+                Qf = null;
+              }
+            } else { // no Dw
+              Qf = null;
+            }
+          } else { // waterTable = null
+            Qf = null;
+          }
+        } else { // no perimeter
+          Qf = null;
+        }
+
+        if (Qb != null && Qf != null) {
+          Qult = Qb! + Qf!;
+        } else {
+          Qult = null;
+        }
+
+        if (Qult != null && FS != null) {
+          Qall = Qult! / FS!;
+        } else {
+          Qall = null;
+        }
+
+      } else {
+        nc = null;
+        alpha1 = null;
+        alpha2 = null;
+        C1 = null;
+        C2 = null;
+        qu1 = null;
+        qu2 = null;
+        A = null;
+        perimeter = null;
+        Qb = null;
+        Qf = null;
+        Qult = null;
+        Qall = null;
+      }
+    } else if (operation == 3) { // lambda calc
+      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null) {
+        alpha1 = double.tryParse(inputAlpha1.text);
+        alpha2 = double.tryParse(inputAlpha2.text);
+        C1 = double.tryParse(inputC1.text);
+        C2 = double.tryParse(inputC2.text);
+        qu1 = double.tryParse(inputQu1.text);
+        qu2 = double.tryParse(inputQu2.text);
+        lambda = double.tryParse(inputLambda.text);
+
+        // area and perimeter
+        if (xsection == 'Circular') {
+          A = pDim! * pDim!;
+          perimeter = pi * pDim!;
+        } else if (xsection == 'Square') {
+          A = 0.25 * pi * pDim! * pDim!;
+          perimeter = 4 * pDim!;
+        } else {
+          A = null;
+          perimeter = null;
+        }
+
+        if (nc != null && A != null) {
+          if (C1 != null && C2 != null) {
+            Qb = C2! * nc! * A!;
+          } else if (C1 != null) {
+            Qb = C1! * nc! * A!;
+          } else {
+            Qb = null;
+          }
+        } else {
+          Qb = null;
+        }
+
+        if (waterTable == false) {
+          Pv1 = yFinal! * df!;
+          Pv2 = null;
+        } else if (waterTable == true) {
+          if (dw != null) {
+            Pv1 = yFinal! * dw!;
+            Pv2 = Pv1! + (ySat! - ywFinal!) * (df! - dw!);
+          } else {
+            Pv1 = null;
+            Pv2 = null;
+          }
+        } else {
+          Pv1 = null;
+          Pv2 = null;
+        }
+
+        if (perimeter != null && lambda != null && Pv1 != null && C1 != null) {
+          if (waterTable == false) {
+            C = C1;
+            A1 = null;
+            A2 = null;
+            Qv = Pv1! / 2;
+            Qf = perimeter! * df! * lambda! * (Qv! + 2*C!);
+          } else if (waterTable == true) {
+            if (dw != null) {
+              if (C2 != null && Pv2 != null) {
+                C = ((C1! * dw!) + (C2! * (df! - dw!))) / df!!;
+                A1 = 0.5 * Pv1! * dw!;
+                A2 = 0.5 * (Pv1! + Pv2!) * (df! - dw!);
+                Qv = (A1! + A2!) / df!;
+                Qf = perimeter! * df! * lambda! * (Qv! + 2*C!);
+              } else {
+                C = null;
+                A1 = null;
+                A2 = null;
+                Qv = null;
+                Qf = null;
+              }
+            } else { // no Dw
+              C = null;
+              A1 = null;
+              A2 = null;
+              Qv = null;
+              Qf = null;
+            }
+          } else { // waterTable = null
+            C = null;
+            A1 = null;
+            A2 = null;
+            Qv = null;
+            Qf = null;
+          }
+        } else { // no perimeter, lambda, C1 and PV1
+          Qf = null;
+          C = null;
+          A1 = null;
+          A2 = null;
+          Qv = null;
+          Qf = null;
+        }
+
+        if (Qb != null && Qf != null) {
+          Qult = Qb! + Qf!;
+        } else {
+          Qult = null;
+        }
+
+        if (Qult != null && FS != null) {
+          Qall = Qult! / FS!;
+        } else {
+          Qall = null;
+        }
+
       }
     }
 
@@ -575,14 +870,29 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                         radioBehavior(),
 
                       dropdownXsection(),
-                      dropdownCompact(),
 
-                      entryNq(),
+                      if (singular == 1 && soil == 1)
+                        dropdownCompact(),
+
+                      if (singular == 1 && soil == 1)
+                        entryNq(),
+
                       entryPdim(),
                       entryDf(),
+
+                      if (singular == 1 && soil == 2 && method == 1)
+                        entryAlpha1(),
+                      if (singular == 1 && soil == 2 && method == 1 && widget.state.isGammaSatEnabled)
+                        entryAlpha2(),
+
+                      if (singular == 1 && soil == 2 && method == 2)
+                        entryLambda(),
+
+                      // optional 
                       entryDw(),
                       entryFS(),
 
+                      // switching containers
                       switchSoilProp(),
                       Stack(
                         children: [
@@ -591,22 +901,42 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                         ]
                       ),
 
-                      switchFriction(),
-                      Stack(
-                        children: [
-                          containerFrictionOn(),
-                          containerFrictionOff(),
-                        ]
-                      ),
+                      if (singular == 1 && soil == 2)
+                        switchCohesion(),
+                      if (singular == 1 && soil == 2)
+                        Stack(
+                          children: [
+                            containerCohesionOn(),
+                            containerCohesionOff(),
+                          ]
+                        ),
+
+                      // optional containers
+                      if (singular == 1 && soil == 1)
+                        switchFriction(),
+                      if (singular == 1 && soil == 1)
+                        Stack(
+                          children: [
+                            containerFrictionOn(),
+                            containerFrictionOff(),
+                          ]
+                        ),
 
                       if (widget.state.isGammaSatEnabled)
                         switchWaterDet(),
                       if (widget.state.isGammaSatEnabled)
                         containerWaterOn(),
 
-                      switchKDet(),
-                      containerKOn(),
-                      
+                      if (singular == 1 && soil == 1)
+                        switchKDet(),
+                      if (singular == 1 && soil == 1)
+                        containerKOn(),
+
+                      if (singular == 1 && soil == 2)
+                        switchNc(),
+                      if (singular == 1 && soil == 2)
+                        containerNcOn(),
+
                       SizedBox(height: 10),
                       buttonSubmit(),
                       /*
@@ -2488,6 +2818,724 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       ),
     );
   } // subK
+// clay
+  Widget switchNc() {
+    return Padding(
+      padding: EdgeInsets.only(top: 10),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 120,
+                child: Text(
+                  'Cohesion factor (assumed as 9 if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.ncDet,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.ncDet = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchNc
+  Widget containerNcOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.ncDet,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                subNc(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerNcOn
+  Widget subNc() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Cohesion factor, Nc:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputNc,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputNc.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subNc
+
+// alpha
+  Widget entryAlpha1() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  alpha1Label,
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputAlpha1, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputAlpha1.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryAlpha1
+  Widget entryAlpha2() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  "Adhesion factor of the bottom layer, α₂:",
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputAlpha2, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Optional",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputAlpha2.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryAlpha2
+
+  Widget switchCohesion() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Cohesion',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.cohesion,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.cohesion = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchCohesion
+  
+  Widget containerCohesionOn() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.cohesion,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                subC1(),
+                if (widget.state.isGammaSatEnabled)
+                  subC2(),
+              ]
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerCohesionOn
+  Widget subC1() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                C1Label,
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputC1,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputC1.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subGs
+  Widget subC2() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Cohesion of the bottom layer, C₂ (in kPa):',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputC2,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputC2.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subC2
+
+  Widget containerCohesionOff() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: !widget.state.cohesion,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 201, 40, 29),
+          ),
+          alignment: Alignment.center,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  subQu1(),
+                  if (widget.state.isGammaSatEnabled)
+                    subQu2(),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerCohesionOff
+  Widget subQu1() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                Qu1Label,
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputQu1,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Input required',
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 226, 65, 54),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputQu1.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subQu1
+  Widget subQu2() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Unconfined compressive strength of the clay in the bottom layer, Qu₂ (in kPa):',
+                style: TextStyle(color: Colors.white),
+              ),
+            ),
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputQu2,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: 'Input required',
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 226, 65, 54)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 226, 65, 54),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputQu2.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subQu2
+// lambda
+  Widget entryLambda() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'λ:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputLambda, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputLambda.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryLambda
+  
+// ////////////////////////////////////
 
   Widget buttonSubmit() {
     return ElevatedButton(
