@@ -33,6 +33,15 @@ class AnalysisPage extends StatefulWidget {
 
 class _AnalysisPageState extends State<AnalysisPage> 
 with AutomaticKeepAliveClientMixin<AnalysisPage>{
+  
+  String get displayTitle {
+    if (widget.title.startsWith('Analysis')) {
+      int index = int.tryParse(widget.title.split(' ').last) ?? 0;
+      return "Analysis of Footings $index"; // Shorter for tab
+    }
+
+    return widget.title; 
+  }
 
   @override
   bool get wantKeepAlive => true; 
@@ -122,14 +131,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
   double? rounded_ps;
   double? rounded_uD;
 
-  String get displayTitle {
-  if (widget.title.startsWith('Analysis')) {
-        int index = int.tryParse(widget.title.split(' ').last) ?? 0;
-        return "Analysis of Footings $index"; // Shorter for tab
-      }
-
-      return widget.title; 
-    }
+  
 
   List<Map<String, dynamic>> generalShear = [
     {"theta": 0, "nc": 5.7, "nq": 1, "ny": 0},
@@ -900,6 +902,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
       );
       setState(() {
         widget.state.showResults = false;
+        widget.state.showSolution = false;
+        widget.state.solutionToggle = true;
       });
       return;
     } else {
@@ -914,6 +918,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
           );
           setState(() {
             widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
           });
           return;
         }
@@ -930,6 +936,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               );
               setState(() {
                 widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
               });
               return;
             }   
@@ -944,6 +952,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               );
               setState(() {
                 widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
               });
               return;
             }
@@ -959,6 +969,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
             );
             setState(() {
               widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
             });
             return;
           }
@@ -968,13 +980,15 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
         if (theta == null) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Please provide input for all parameters5.'),
+              content: Text('Please provide input for all parameters.'),
               backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
               duration: Duration(seconds: 3),
             ),
           );
           setState(() {
             widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
           });
           return;
         } else {
@@ -988,6 +1002,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
             );
             setState(() {
               widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
             });
             return;
           }
@@ -1003,6 +1019,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
           );
           setState(() {
             widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
           });
           return;
         }
@@ -1139,6 +1157,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
         inputUnitWeightConcrete.clear();
         setState(() {
           widget.state.showResults = false;
+          widget.state.solutionToggle = true;
           widget.state.showSolution = false;
         });
       },
@@ -1183,7 +1202,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
       child: Text(solutionButtonLabel),
     );
   }
-  // to be fixed;
+
   Widget solutionContainer() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),
@@ -1286,7 +1305,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "Ps = $rounded_ps kN",
+              "Pₛ = $rounded_ps kN",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1373,7 +1392,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               style: TextStyle(color: Colors.white),
             ),
             Text(
-              "ws = $rounded_ps kN/m",
+              "wₛ = $rounded_ps kN/m",
               style: TextStyle(color: Colors.white),
             ),
             Text(
@@ -1523,15 +1542,15 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
   
   Widget resultText() {
     return Visibility(
-    visible: widget.state.showResults,
-    child: Text(
-      '${widget.state.isItStrip ? "w" : "P"} = ${widget.state.isItStrip ? (widget.state.finalAnswerUdl) : (widget.state.finalAnswerP)} ${widget.state.isItStrip ? "kN/m" : "kN"}',
-      style: TextStyle(
-        color: Colors.white,
-        fontWeight: FontWeight.bold, 
+      visible: widget.state.showResults,
+      child: Text(
+        '${widget.state.isItStrip ? "w" : "P"} = ${widget.state.isItStrip ? (widget.state.finalAnswerUdl) : (widget.state.finalAnswerP)} ${widget.state.isItStrip ? "kN/m" : "kN"}',
+        style: TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.bold, 
+        ),
       ),
-    ),
-  );
+    );
   }
   
   Widget row1ShearFailure() {
