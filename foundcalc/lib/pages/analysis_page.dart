@@ -1157,6 +1157,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
         inputUnitWeightConcrete.clear();
         setState(() {
           widget.state.showResults = false;
+          widget.state.solutionToggle = true;
           widget.state.showSolution = false;
         });
       },

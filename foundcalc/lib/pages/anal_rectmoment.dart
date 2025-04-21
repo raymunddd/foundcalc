@@ -4753,6 +4753,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
           widget.state.waterDet = false;
 
           widget.state.showResultsAnalysis = false;
+          widget.state.solutionToggleAnalysis = true;
           widget.state.showSolutionAnalysis = false;
         });
       },
@@ -6147,6 +6148,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
           widget.state.factorShearToggle = false;
 
           widget.state.showResultsDesign = false;
+          widget.state.solutionToggleDesign = false;
           widget.state.showSolutionDesign = false;
         });
       },
@@ -6236,7 +6238,12 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
           widget.state.concreteCover = false;
           widget.state.factorShearToggle = false;
 
+          widget.state.showResultsAnalysis = false;
+          widget.state.solutionToggleAnalysis = true;
+          widget.state.showSolutionAnalysis = false;
+
           widget.state.showResultsDesign = false;
+          widget.state.solutionToggleDesign = true;
           widget.state.showSolutionDesign = false;
         });
       },

@@ -5,15 +5,17 @@ import 'pages/analysis_page.dart'; // Import AnalysisPage
 import 'pages/design_page.dart' as design;   // Import DesignPage with alias
 import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'pages/combined_footing.dart' as combined; // Import combined footing with alias
-
 import 'pages/mat_foundation.dart'; // Import MatFoundationPage
+
+import 'pages/deep.dart'; // Import DeepPage
 // settings
 import 'settings/analysis_state.dart'; // Import AnalysisState
 import 'settings/design_state.dart';   // Import DesignState
 import 'settings/combined_footing_state.dart'; // Import CombinedFootingState
 import 'settings/anal_rectmoment_state.dart'; // Import AnalRectMomentState
-
 import 'settings/mat_foundation_state.dart'; // Import MatFoundationState
+
+import 'settings/deep_state.dart'; // Import DeepState
 class TabbedHomePage extends StatefulWidget {
   @override
   _TabbedHomePageState createState() => _TabbedHomePageState();
@@ -32,16 +34,17 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   List<String> designItems = [];   // Initialize empty
   List<String> analRectMomentItems = []; // Initialize empty for RectMoment
   List<String> combinedFootingItems = []; // Initialize empty for Combined Footing
-
   List<String> matFoundationItems = []; // Initialize empty for Mat Foundation
   
+  List<String> deepItems = []; // Initialize empty for Mat Foundation
+
   Map<String, AnalysisState> analysisStates = {};
   Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize empty
   Map<String, DesignState> designStates = {};
   Map<String, CombinedFootingState> combinedFootingStates = {};
-
   Map<String, MatFoundationState> matFoundationStates = {};
 
+  Map<String, DeepState> deepStates = {};
 
   @override
   void initState() {
@@ -57,7 +60,16 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     super.dispose();
   }
 
+  int _getNextNumber(List<String> items, String type) {
+    if (items.isEmpty) return 1;
 
+    List<int> existingNumbers = items.map((item) {
+      return int.tryParse(item.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
+    }).toList();
+
+    int maxNumber = existingNumbers.isEmpty ? 0 : existingNumbers.reduce((a, b) => a > b ? a : b);
+    return maxNumber + 1;
+  }
 
 //ANALYSIS
   void _addAnalysisItem() {
@@ -243,6 +255,42 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     });
   }
 
+  // Deep Foundation     
+  void _addDeepItem() {
+    setState(() {
+      int nextNumber = _getNextNumber(deepItems, "Deep");
+      String newItem = 'Deep $nextNumber';
+      deepItems.add(newItem);
+      deepStates[newItem] = DeepState(title: newItem); // Create state
+
+      _tabs.add(newItem); // Add to tabs list for display
+      _tabController = TabController(length: _tabs.length, vsync: this);
+      _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
+      _tabCounter++;
+    });
+  }
+
+  void _removeDeepItem(int index) {
+    setState(() {
+      String tabToRemove = _tabs[index];
+      int deepIndex = deepItems.indexOf(tabToRemove);
+            
+      if (deepIndex != -1) {
+        String removedTab = deepItems.removeAt(deepIndex);
+        deepStates.remove(removedTab);
+
+        // Remove from tabs
+        _tabs.removeAt(index);
+              
+        // UPDATE (Wag kalimutan)
+        _tabController = TabController(length: _tabs.length, vsync: this);
+        if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
+          _tabController.animateTo(_tabs.length - 1);
+        }
+      }
+    });
+  }
+
   /*TEMPLATE KUNG LALAGAY NG IBA PANG CALC
         
   void _add<[NameNgCalc]>Item() {
@@ -281,18 +329,6 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     });
   }
   */
-
-
-  int _getNextNumber(List<String> items, String type) {
-    if (items.isEmpty) return 1;
-
-    List<int> existingNumbers = items.map((item) {
-      return int.tryParse(item.replaceAll(RegExp(r'[^0-9]'), '')) ?? 0;
-    }).toList();
-
-    int maxNumber = existingNumbers.isEmpty ? 0 : existingNumbers.reduce((a, b) => a > b ? a : b);
-    return maxNumber + 1;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -336,6 +372,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                               _removeCombinedFootingItem(index);
                             } else if (title.startsWith('Mat')) {
                               _removeMatFoundationItem(index);
+                            } else if (title.startsWith('Deep')) {
+                              _removeDeepItem(index);
                             }
                           });
                         },
@@ -490,6 +528,31 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     },
                   ),
               ],
+              if (deepItems.isNotEmpty) ...[
+                ListTile(
+                  tileColor: Color(0xFF414141),
+                  title: Text(
+                    'Deep Foundation',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                for (int i = 0; i < deepItems.length; i++)
+                  ListTile(
+                    tileColor: Color(0xFF414141),
+                    title: Text(
+                      deepItems[i],
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.white),
+                      onPressed: () => _removeDeepItem(analysisItems.length + designItems.length + analRectMomentItems.length + combinedFootingItems.length + matFoundationItems.length + i + 1),
+                    ),
+                    onTap: () {
+                      _tabController.animateTo(analysisItems.length + designItems.length + analRectMomentItems.length + combinedFootingItems.length + matFoundationItems.length + i + 1);
+                      Navigator.of(context).pop(); // Close the drawer
+                    },
+                  ),
+              ],
               
               /*
               if (<[NameNgCalc]>Items.isNotEmpty) ...[
@@ -636,6 +699,15 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                               onPressed: _addMatFoundationItem,
                               child: Text("Mat Foundation"),
                             ),
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF1F538D),
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: _addDeepItem,
+                              child: Text("Deep Foundation 🚧"),
+                            ),
                           ],
                         ),
                       ),
@@ -757,6 +829,34 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       onPressed: () {
                         if (title.startsWith('Mat')) {
                           matFoundationStates[title]!.scrollToTop = true;
+                          setState(() {}); // Trigger rebuild to pass the message
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }
+            else if (title.startsWith('Deep')) {
+              return Stack(
+                children: [
+                  DeepPage(
+                    title: title,
+                    state: deepStates[title]!,
+                    onStateChanged: (newState) {
+                      deepStates[title] = newState;
+                    },
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: Color(0xFF1F538D),
+                      mini: true,
+                      child: Icon(Icons.arrow_upward, color: Colors.white),
+                      onPressed: () {
+                        if (title.startsWith('Mat')) {
+                          deepStates[title]!.scrollToTop = true;
                           setState(() {}); // Trigger rebuild to pass the message
                         }
                       },

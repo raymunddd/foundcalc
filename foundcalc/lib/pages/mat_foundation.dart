@@ -747,7 +747,6 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
       ),
     );    
   }
-////////////////////////////////////
   Widget headerMain() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20),
@@ -1425,10 +1424,16 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
         inputL.clear();
         inputDf.clear();
         inputTheta.clear();
+
         inputQ.clear();
         inputGamma.clear();
+
+        inputN60.clear();
+        inputSe.clear();
         setState(() {
           widget.state.showResults = false;
+          widget.state.solutionToggle = true;
+          widget.state.showSolution = false;
         });
       },
       style: ElevatedButton.styleFrom(
@@ -1564,4 +1569,5 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
       widget.onStateChanged(widget.state);
     }
   }
+
 } // _MatFoundationState
