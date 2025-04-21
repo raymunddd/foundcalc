@@ -6,16 +6,18 @@ import 'pages/design_page.dart' as design;   // Import DesignPage with alias
 import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
 import 'pages/combined_footing.dart' as combined; // Import combined footing with alias
 import 'pages/mat_foundation.dart'; // Import MatFoundationPage
-
 import 'pages/deep.dart'; // Import DeepPage
+
+import 'pages/retaining.dart'; // Import RetainingPage
 // settings
 import 'settings/analysis_state.dart'; // Import AnalysisState
 import 'settings/design_state.dart';   // Import DesignState
 import 'settings/combined_footing_state.dart'; // Import CombinedFootingState
 import 'settings/anal_rectmoment_state.dart'; // Import AnalRectMomentState
 import 'settings/mat_foundation_state.dart'; // Import MatFoundationState
-
 import 'settings/deep_state.dart'; // Import DeepState
+
+import 'settings/retaining_state.dart'; // Import RetainingState
 class TabbedHomePage extends StatefulWidget {
   @override
   _TabbedHomePageState createState() => _TabbedHomePageState();
@@ -35,16 +37,18 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   List<String> analRectMomentItems = []; // Initialize empty for RectMoment
   List<String> combinedFootingItems = []; // Initialize empty for Combined Footing
   List<String> matFoundationItems = []; // Initialize empty for Mat Foundation
-  
-  List<String> deepItems = []; // Initialize empty for Mat Foundation
+  List<String> deepItems = []; // Initialize empty for Deep Foundation
+
+  List<String> retainingItems = []; // Initialize empty for Retaining Wall
 
   Map<String, AnalysisState> analysisStates = {};
   Map<String, AnalRectMomentState> analRectMomentStates = {}; // Initialize empty
   Map<String, DesignState> designStates = {};
   Map<String, CombinedFootingState> combinedFootingStates = {};
   Map<String, MatFoundationState> matFoundationStates = {};
-
   Map<String, DeepState> deepStates = {};
+
+  Map<String, RetainingState> retainingStates = {};
 
   @override
   void initState() {
@@ -291,6 +295,42 @@ class _TabbedHomePageState extends State<TabbedHomePage>
     });
   }
 
+  // Retaining Wall     
+  void _addRetainingItem() {
+    setState(() {
+      int nextNumber = _getNextNumber(retainingItems, "Retaining");
+      String newItem = 'Retaining $nextNumber';
+      retainingItems.add(newItem);
+      retainingStates[newItem] = RetainingState(title: newItem); // Create state
+
+      _tabs.add(newItem); // Add to tabs list for display
+      _tabController = TabController(length: _tabs.length, vsync: this);
+      _tabController.animateTo(_tabs.length - 1); // Switch to the new tab
+      _tabCounter++;
+    });
+  }
+
+  void _removeRetainingItem(int index) {
+    setState(() {
+      String tabToRemove = _tabs[index];
+      int retainingIndex = retainingItems.indexOf(tabToRemove);
+            
+      if (retainingIndex != -1) {
+        String removedTab = retainingItems.removeAt(retainingIndex);
+        retainingStates.remove(removedTab);
+
+        // Remove from tabs
+        _tabs.removeAt(index);
+              
+        // UPDATE (Wag kalimutan)
+        _tabController = TabController(length: _tabs.length, vsync: this);
+        if (_tabController.index >= _tabs.length && _tabs.isNotEmpty) {
+          _tabController.animateTo(_tabs.length - 1);
+        }
+      }
+    });
+  }
+
   /*TEMPLATE KUNG LALAGAY NG IBA PANG CALC
         
   void _add<[NameNgCalc]>Item() {
@@ -374,6 +414,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                               _removeMatFoundationItem(index);
                             } else if (title.startsWith('Deep')) {
                               _removeDeepItem(index);
+                            } else if (title.startsWith('Retaining')) {
+                              _removeRetainingItem(index);
                             }
                           });
                         },
@@ -553,6 +595,31 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     },
                   ),
               ],
+              if (retainingItems.isNotEmpty) ...[
+                ListTile(
+                  tileColor: Color(0xFF414141),
+                  title: Text(
+                    'Retaining Wall',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                for (int i = 0; i < retainingItems.length; i++)
+                  ListTile(
+                    tileColor: Color(0xFF414141),
+                    title: Text(
+                      retainingItems[i],
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.white),
+                      onPressed: () => _removeRetainingItem(analysisItems.length + designItems.length + analRectMomentItems.length + combinedFootingItems.length + matFoundationItems.length + retainingItems.length + i + 1),
+                    ),
+                    onTap: () {
+                      _tabController.animateTo(analysisItems.length + designItems.length + analRectMomentItems.length + combinedFootingItems.length + matFoundationItems.length + retainingItems.length + i + 1);
+                      Navigator.of(context).pop(); // Close the drawer
+                    },
+                  ),
+              ],
               
               /*
               if (<[NameNgCalc]>Items.isNotEmpty) ...[
@@ -580,7 +647,6 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     },
                   ),
               ],*/
-
 
               ListTile(
                 tileColor: Color(0xFF414141),
@@ -707,6 +773,15 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                               ),
                               onPressed: _addDeepItem,
                               child: Text("Deep Foundation 🚧"),
+                            ),
+                            SizedBox(height: 10),
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Color(0xFF1F538D),
+                                foregroundColor: Colors.white,
+                              ),
+                              onPressed: _addRetainingItem,
+                              child: Text("Retaining Wall 🚧"),
                             ),
                           ],
                         ),
@@ -855,7 +930,35 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       mini: true,
                       child: Icon(Icons.arrow_upward, color: Colors.white),
                       onPressed: () {
-                        if (title.startsWith('Mat')) {
+                        if (title.startsWith('Deep')) {
+                          deepStates[title]!.scrollToTop = true;
+                          setState(() {}); // Trigger rebuild to pass the message
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              );
+            }
+            else if (title.startsWith('Retaining')) {
+              return Stack(
+                children: [
+                  RetainingPage(
+                    title: title,
+                    state: retainingStates[title]!,
+                    onStateChanged: (newState) {
+                      retainingStates[title] = newState;
+                    },
+                  ),
+                  Positioned(
+                    right: 16,
+                    bottom: 16,
+                    child: FloatingActionButton(
+                      backgroundColor: Color(0xFF1F538D),
+                      mini: true,
+                      child: Icon(Icons.arrow_upward, color: Colors.white),
+                      onPressed: () {
+                        if (title.startsWith('Retaining')) {
                           deepStates[title]!.scrollToTop = true;
                           setState(() {}); // Trigger rebuild to pass the message
                         }
