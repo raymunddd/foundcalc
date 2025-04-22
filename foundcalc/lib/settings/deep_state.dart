@@ -52,6 +52,8 @@ class DeepState {
   double? Qult;
   double? Qall;
 
+  double? Eg;
+  double? minS;
   /*
   // int
   int? solvedCalc;

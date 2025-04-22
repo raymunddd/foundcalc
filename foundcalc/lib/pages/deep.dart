@@ -79,6 +79,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? df;
   double? dw;
   double? K;
+  double? Kfinal;
   double? FS;
   double? gs;
   double? e;
@@ -92,10 +93,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? yw;
 
   double? nc;
+  double? ncFinal;
   double? alpha1;
   double? alpha2;
   double? C1;
   double? C2;
+  double? C1final;
+  double? C2final;
   double? qu1;
   double? qu2;
 
@@ -121,6 +125,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   bool? waterTable;
   double? Pv1;
   double? Pv2;
+  bool? dwLessThanDc;
   double? Qb;
   double? perimeter;
   double? A1;
@@ -146,7 +151,28 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? Bg;
   double? Eg;
   double? minS;
+  
+  // rounded
+  double? roundedAtip;
+  double? roundedPerimeter;
+  double? roundedPv1;
+  double? roundedPv2;
+  double? roundedMu;
+  double? roundedA1;
+  double? roundedA2;
+  double? roundedA3;
+  double? roundedApv;
 
+  double? roundedQv;
+
+  double? roundedQave1;
+  double? roundedQave2;
+  double? roundedFave1;
+  double? roundedFave2;
+
+  double? roundedBg;
+  double? roundedLg;
+  double? roundedAgroup;
 
   // string getters
   String get displayTitle {
@@ -474,14 +500,25 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   }
 
   void printer() {
-    print('dw = $dw, df = $df, yfinal = $yFinal, ySat = $ySat, operation = $operation, watertable = $waterTable, C1 = $C1, C2 = $C2, alpha1 = $alpha1, alpha2 = $alpha2, perimeter = $perimeter');
-    print('Fave1 = $Fave1, Fave2 = $Fave2, Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
+    print('pDim = $pDim, Atip = $A, A1 = $A1, A2 = $A2, Qv = $Qv, yFinal = $yFinal, ySat = $ySat, operation = $operation, watertable = $waterTable, C1 = $C1, C2 = $C2, perimeter = $perimeter, showresults = ${widget.state.showResults}, showsSol = ${widget.state.showSolution}, cohesionSwitch = ${widget.state.cohesion}');
+    print('Pv1 = $Pv1, Pv2 = $Pv2, Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
   }
 
   double roundToFourDecimalPlaces(double value) {
     return (value * 10000).round() / 10000;
   }
-
+  void showSnackBarIncorrect(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Please provide input for all parameters."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    setState(() {
+      widget.state.showResults = false;
+    });
+  }
   void solve() {
     nq = double.tryParse(inputNq.text);
     pDim = double.tryParse(inputPdim.text);
@@ -566,26 +603,33 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       }
     }
 
+    nc = double.tryParse(inputNc.text);
     if (widget.state.ncDet) {
-      if (K != null) {
-        nc = double.tryParse(inputNc.text);
+      if (nc != null) {
+        ncFinal = nc!;
       } else {
-        nc = null;
+        ncFinal = null;
       }
     } else {
-      nc = 9;
+      ncFinal = 9;
     }
 
     // area and perimeter
-    if (xsection == 'Circular') {
-      A = pDim! * pDim!;
-      perimeter = pi * pDim!;
-    } else if (xsection == 'Square') {
-      A = 0.25 * pi * pDim! * pDim!;
-      perimeter = 4 * pDim!;
-    } else {
-      A = null;
-      perimeter = null;
+    if (pDim != null && xsection != null) {
+      if (xsection == 'Circular') {
+        A = 0.25 * pi * pDim! * pDim!;
+        perimeter = pi * pDim!;
+        roundedAtip = roundToFourDecimalPlaces(A!);
+        roundedPerimeter = roundToFourDecimalPlaces(perimeter!);
+      } else if (xsection == 'Square') {
+        A = pDim! * pDim!;
+        perimeter = 4 * pDim!;
+        roundedAtip = roundToFourDecimalPlaces(A!);
+        roundedPerimeter = roundToFourDecimalPlaces(perimeter!);
+      } else {
+        A = null;
+        perimeter = null;
+      }
     }
 
     // main calc
@@ -612,10 +656,12 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
               Pv1 = yFinal! * dw!;
               Pv2 = Pv1! + (ySat! - ywFinal!) * (dc! - dw!);
               Qb = Pv2! * nq! * A!;
+              dwLessThanDc = true;
             } else {
               Pv1 = yFinal! * df!;
               Pv2 = null;
               Qb = Pv1! * nq! * A!;
+              dwLessThanDc = false;
             }
           } else {
             Pv1 = null;
@@ -628,14 +674,22 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Qb = null;
         }
 
+        if (Pv1 != null && Pv2 != null) {
+          roundedPv1 = roundToFourDecimalPlaces(Pv1!);
+          roundedPv2 = roundToFourDecimalPlaces(Pv2!);
+        } else if (Pv1 != null) {
+          roundedPv1 = roundToFourDecimalPlaces(Pv1!);
+        }
+
+        K = double.tryParse(inputK.text);
         if (widget.state.kDet) {
           if (K != null) {
-            K = double.tryParse(inputK.text);
+            Kfinal = K;
           } else {
-            K = null;
+            Kfinal = null;
           }
         } else {
-          K = 1.25;
+          Kfinal = 1.25;
         }
 
         if (widget.state.frictionDet) {
@@ -652,21 +706,32 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           }
         }
 
+        if (muFinal != null) {
+          roundedMu = roundToFourDecimalPlaces(muFinal!);
+        }
+
         if (dc != null && Pv1 != null) {
           if (waterTable == false) {
             A1 = 0.5 * dc! * Pv1!;
             A2 = (df! - dc!) * Pv1!;
             A3 = 0;
+            roundedA1 = roundToFourDecimalPlaces(A1!);
+            roundedA2 = roundToFourDecimalPlaces(A2!);
           } else if (waterTable == true) {
             if (dw != null && Pv2 != null) {
               if (dw! < dc!) {
                 A1 = 0.5 * dw! * Pv1!;
                 A2 = 0.5 * (dc! - dw!) * (Pv1! + Pv2!);
                 A3 = (df! - dc!) * Pv2!;
+                roundedA1 = roundToFourDecimalPlaces(A1!);
+                roundedA2 = roundToFourDecimalPlaces(A2!);
+                roundedA3 = roundToFourDecimalPlaces(A3!);
               } else { // Dw ≥ Dc
                 A1 = 0.5 * dc! * Pv1!;
                 A2 = (df! - dc!) * Pv1!;
                 A3 = 0;
+                roundedA1 = roundToFourDecimalPlaces(A1!);
+                roundedA2 = roundToFourDecimalPlaces(A2!);
               }
             } else {
               A1 = A2 = A3 = null;
@@ -680,12 +745,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
         if (A1 != null && A2 != null && A3 != null) {
           Apv = A1! + A2! + A3!;
+          roundedApv = roundToFourDecimalPlaces(Apv!);
         } else {
           Apv = null;
         }
 
-        if (K != null && muFinal != null && perimeter != null && Apv != null) {
-          Qf = K! * muFinal! * perimeter! * Apv!;
+        if (Kfinal != null && muFinal != null && perimeter != null && Apv != null) {
+          Qf = Kfinal! * muFinal! * perimeter! * Apv!;
         } else {
           Qf = null;
         }
@@ -702,13 +768,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Qall = null;
         }
       } else {
-        Qb = 1;
-        Qf = 1;
-        Qult = 1;
-        Qall = 1;
+        Qb = null;
+        Qf = null;
+        Qult = null;
+        Qall = null;
       }
     } else if (operation == 2) { // alpha calc
-      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
+      if (ncFinal != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
         alpha1 = double.tryParse(inputAlpha1.text);
         alpha2 = double.tryParse(inputAlpha2.text);
         C1 = double.tryParse(inputC1.text);
@@ -716,11 +782,37 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         qu1 = double.tryParse(inputQu1.text);
         qu2 = double.tryParse(inputQu2.text);
 
+        if (widget.state.cohesion) {
+          if (waterTable == true) {
+            if (C1 != null && C2 != null) {
+              C1final = C1!;
+              C2final = C2!;  
+            } else {
+              C1final = null;
+              C2final = null;
+            }
+          } else {
+            if (C1 != null) {
+              C1final = C1!;
+            } else {
+              C1final != null;
+            }
+          }
+        } else {
+          if (qu1 != null && qu2 != null) {
+            C1final = 0.5 * qu1!;
+            C2final = 0.5 * qu2!;
+          } else {
+            C1final = null;
+            C2final = null;
+          }
+        }
+
         if (nc != null && A != null) {
-          if (C1 != null && C2 != null) {
-            Qb = C2! * nc! * A!;
+          if (C1final != null && C2final != null) {
+            Qb = C2final! * ncFinal! * A!;
           } else if (C1 != null) {
-            Qb = C1! * nc! * A!;
+            Qb = C1final! * ncFinal! * A!;
           } else {
             Qb = null;
           }
@@ -729,15 +821,15 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         }
 
         if (waterTable == false) {
-          if (alpha1 != null && C1 != null) {
-            Qf = alpha1! * C1! * perimeter! * df!;
+          if (alpha1 != null && C1final != null) {
+            Qf = alpha1! * C1final! * perimeter! * df!;
           } else {
             Qf = null;
           }
         } else if (waterTable == true) {
           if (dw != null) {
-            if (alpha1 != null && alpha2 != null && C1 != null && C2 != null) {
-              Qf = perimeter! * ((alpha1! * C1! * dw!) + (alpha2! * C2! * (df! - dw!)));
+            if (alpha1 != null && alpha2 != null && C1final != null && C2final != null) {
+              Qf = perimeter! * ((alpha1! * C1final! * dw!) + (alpha2! * C2final! * (df! - dw!)));
             } else {
               Qf = null;
             }
@@ -761,33 +853,50 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         }
 
       } else {
-        nc = null;
-        alpha1 = null;
-        alpha2 = null;
-        C1 = null;
-        C2 = null;
-        qu1 = null;
-        qu2 = null;
-        A = null;
-        perimeter = null;
         Qb = null;
         Qf = null;
         Qult = null;
         Qall = null;
       }
     } else if (operation == 3) { // lambda calc
-      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
+      if (ncFinal != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
         C1 = double.tryParse(inputC1.text);
         C2 = double.tryParse(inputC2.text);
         qu1 = double.tryParse(inputQu1.text);
         qu2 = double.tryParse(inputQu2.text);
         lambda = double.tryParse(inputLambda.text);
 
+        if (widget.state.cohesion) {
+          if (waterTable == true) {
+            if (C1 != null && C2 != null) {
+              C1final = C1!;
+              C2final = C2!;  
+            } else {
+              C1final = null;
+              C2final = null;
+            }
+          } else {
+            if (C1 != null) {
+              C1final = C1!;
+            } else {
+              C1final != null;
+            }
+          }
+        } else {
+          if (qu1 != null && qu2 != null) {
+            C1final = 0.5 * qu1!;
+            C2final = 0.5 * qu2!;
+          } else {
+            C1final = null;
+            C2final = null;
+          }
+        }
+
         if (nc != null) {
-          if (C1 != null && C2 != null) {
-            Qb = C2! * nc! * A!;
-          } else if (C1 != null) {
-            Qb = C1! * nc! * A!;
+          if (C1final != null && C2final != null) {
+            Qb = C2final! * ncFinal! * A!;
+          } else if (C1final != null) {
+            Qb = C1final! * ncFinal! * A!;
           } else {
             Qb = null;
           }
@@ -798,16 +907,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         if (waterTable == false) {
           Pv1 = yFinal! * df!;
           Pv2 = null;
-          Qb = Pv1! * nq! * A!;
         } else if (waterTable == true) {
-          if (dw != null && dc != null && ySat != null) {
-            if (dw! < dc!) {
-              Pv1 = yFinal! * dw!;
-              Pv2 = Pv1! + (ySat! - ywFinal!) * (dc! - dw!);
-            } else {
-              Pv1 = yFinal! * df!;
-              Pv2 = null;
-            }
+          if (dw != null && ySat != null) {
+            Pv1 = yFinal! * dw!;
+            Pv2 = Pv1! + (ySat! - ywFinal!) * (df! - dw!);
           } else {
             Pv1 = null;
             Pv2 = null;
@@ -817,17 +920,17 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Pv2 = null;
         }
 
-        if (C1 != null) {
+        if (C1final != null && lambda != null) {
           if (waterTable == false) {
-            C = C1;
-            A1 = null;
+            C = C1final;
+            A1 = 0.5 * Pv1! * df!;
             A2 = null;
             Qv = Pv1! / 2;
             Qf = perimeter! * df! * lambda! * (Qv! + 2*C!);
           } else if (waterTable == true) {
             if (dw != null) {
-              if (C2 != null && Pv2 != null) {
-                C = ((C1! * dw!) + (C2! * (df! - dw!))) / df!;
+              if (C2final != null && Pv2 != null) {
+                C = ((C1final! * dw!) + (C2final! * (df! - dw!))) / df!;
                 A1 = 0.5 * Pv1! * dw!;
                 A2 = 0.5 * (Pv1! + Pv2!) * (df! - dw!);
                 Qv = (A1! + A2!) / df!;
@@ -836,21 +939,21 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                 C = null;
                 A1 = null;
                 A2 = null;
-                Qv = null;
+                Qv = 4;
                 Qf = null;
               }
             } else { // no Dw
               C = null;
               A1 = null;
               A2 = null;
-              Qv = null;
+              Qv = 3;
               Qf = null;
             }
           } else { // waterTable = null
             C = null;
             A1 = null;
             A2 = null;
-            Qv = null;
+            Qv = 2;
             Qf = null;
           }
         } else { // no perimeter, lambda, C1 and PV1
@@ -858,8 +961,12 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           C = null;
           A1 = null;
           A2 = null;
-          Qv = null;
+          Qv = 1;
           Qf = null;
+        }
+
+        if (Qv != null) {
+          roundedQv = roundToFourDecimalPlaces(Qv!);
         }
 
         if (Qb != null && Qf != null) {
@@ -874,9 +981,14 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Qall = null;
         }
 
+      } else {
+        Qb = null;
+        Qf = null;
+        Qult = null;
+        Qall = null;
       }
     } else if (operation == 4) { // beta calc
-      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
+      if (ncFinal != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
         C1 = double.tryParse(inputC1.text);
         C2 = double.tryParse(inputC2.text);
         qu1 = double.tryParse(inputQu1.text);
@@ -885,20 +997,43 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         OCR1 = double.tryParse(inputOCR1.text);
         OCR2 = double.tryParse(inputOCR2.text);
 
-        if (thetaR != null) {
+        if (widget.state.cohesion) {
+          if (waterTable == true) {
+            if (C1 != null && C2 != null) {
+              C1final = C1!;
+              C2final = C2!;  
+            } else {
+              C1final = null;
+              C2final = null;
+            }
+          } else {
+            if (C1 != null) {
+              C1final = C1!;
+            } else {
+              C1final != null;
+            }
+          }
+        } else {
+          if (qu1 != null && qu2 != null) {
+            C1final = 0.5 * qu1!;
+            C2final = 0.5 * qu2!;
+          } else {
+            C1final = null;
+            C2final = null;
+          }
+        }
+
+        if (thetaR != null) { //klklkl
           FavePart = (1 - sin(thetaR! * pi / 180)) * tan(thetaR! * pi / 180);
         } else {
           FavePart = null;
         }
 
-        if (nc != null) {
-          if (C1 != null && C2 != null) {
-            Qb = C2! * nc! * A!;
-          } else if (C1 != null) {
-            Qb = C1! * nc! * A!;
-          } else {
-            Qb = null;
-          }
+
+        if (C1final != null && C2final != null) {
+          Qb = C2final! * ncFinal! * A!;
+        } else if (C1final != null) {
+          Qb = C1final! * ncFinal! * A!;
         } else {
           Qb = null;
         }
@@ -930,24 +1065,54 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
               } else if (consolidation1 == 'Over consolidated') {
                 if (OCR1 != null) {
                   Fave1 = FavePart! * Qave1! * sqrt(OCR1!);
+                } else {
+                  Fave1 = null;
                 }
+              } else {
+                Fave1 = null;
               }
               if (consolidation2 == 'Normally consolidated') {
                 Fave2 = FavePart! * Qave2!;
               } else if (consolidation2 == 'Over consolidated') {
                 if (OCR2 != null) {
                   Fave2 = FavePart! * Qave2! * sqrt(OCR2!);
+                } else {
+                  Fave2 = null;
                 }
+              } else {
+                Fave2 = null;
               }
-              Qf = perimeter! * ((dw! * Fave1!) + ((df! - dw!) * Fave2!));
+
+              if (Fave1 != null && Fave2 != null) {
+                Qf = perimeter! * ((dw! * Fave1!) + ((df! - dw!) * Fave2!));
+              } else {
+                Qf = null;
+              }
             } else { // no Dw
               Qf = null;
             }
           } else { // waterTable = null
             Qf = null;
           }
-        } else { // no perimeter, lambda, C1 and PV1
+        } else { // no perimeter
           Qf = null;
+        }
+
+        if (Fave1 != null && Fave2 != null && Qave1 != null && Qave2 != null) {
+          roundedFave1 = roundToFourDecimalPlaces(Fave1!);
+          roundedFave2 = roundToFourDecimalPlaces(Fave2!);
+          roundedQave1 = roundToFourDecimalPlaces(Qave1!);
+          roundedQave2 = roundToFourDecimalPlaces(Qave2!);
+        } else if (Fave1 != null && Qave1 != null) {
+          roundedFave1 = roundToFourDecimalPlaces(Fave1!);
+          roundedFave2 = null;
+          roundedQave1 = roundToFourDecimalPlaces(Qave1!);
+          roundedQave2 = null;
+        } else {
+          roundedFave1 = null;
+          roundedFave2 = null;
+          roundedQave1 = null;
+          roundedQave2 = null;
         }
 
         if (Qb != null && Qf != null) {
@@ -962,28 +1127,60 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Qall = null;
         }
       } else {
+        Qb = null;
+        Qf = null;
+        Qult = null;
         Qall = null;
       }
     } else if (operation == 5) { // indiv calc
-      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
+      if (ncFinal != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
         C1 = double.tryParse(inputC1.text);
         C2 = double.tryParse(inputC2.text);
         qu1 = double.tryParse(inputQu1.text);
         qu2 = double.tryParse(inputQu2.text);
-        s = double.tryParse(inputQu2.text);
-        nVert = double.tryParse(inputQu2.text);
-        nHori = double.tryParse(inputQu2.text);
+        s = double.tryParse(inputS.text);
+        nVert = double.tryParse(inputNhori.text);
+        nHori = double.tryParse(inputNvert.text);
+
+        if (widget.state.cohesion) {
+          if (waterTable == true) {
+            if (C1 != null && C2 != null) {
+              C1final = C1!;
+              C2final = C2!;  
+            } else {
+              C1final = null;
+              C2final = null;
+            }
+          } else {
+            if (C1 != null) {
+              C1final = C1!;
+            } else {
+              C1final != null;
+            }
+          }
+        } else {
+          if (qu1 != null && qu2 != null) {
+            C1final = 0.5 * qu1!;
+            C2final = 0.5 * qu2!;
+          } else {
+            C1final = null;
+            C2final = null;
+          }
+        }
 
         if (nHori != null && nVert != null && s != null) {
           totalN = nVert! * nHori!;
           Eg = (((2 * s!) * (nHori! + nVert! - 2)) + (4 * pDim!)) / (perimeter! * nHori! * nVert!);
+          minS = (0.5 * ((perimeter! * nHori! * nVert!) - (4 * pDim!))) / (nHori! + nVert! - 2);
+          widget.state.Eg = roundToFourDecimalPlaces(Eg!);
+          widget.state.minS = roundToFourDecimalPlaces(minS!);
         }
 
-        if (nc != null && A != null && totalN != null) {
-          if (C1 != null && C2 != null) {
-            Qb = C2! * nc! * A!  * totalN!;
-          } else if (C1 != null) {
-            Qb = C1! * nc! * A!  * totalN!;
+        if (totalN != null) {
+          if (C1final != null && C2final != null) {
+            Qb = C2final! * ncFinal! * A!  * totalN!;
+          } else if (C1final != null) {
+            Qb = C1final! * ncFinal! * A!  * totalN!;
           } else {
             Qb = null;
           }
@@ -991,13 +1188,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Qb = null;
         }
 
-        if (C1 != null) {
+        if (C1final != null) {
           if (waterTable == false) {
-            Qf = C1! * perimeter! * df!;
+            Qf = C1final! * perimeter! * df!;
           } else if (waterTable == true) {
             if (dw != null) {
-              if (C1 != null && C2 != null) {
-                Qf = perimeter! * ((C1! * dw!) + (C2! * (df! - dw!)));
+              if (C1final != null && C2final != null) {
+                Qf = perimeter! * ((C1final! * dw!) + (C2final! * (df! - dw!)));
               } else {
                 Qf = null;
               }
@@ -1021,30 +1218,79 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           }
 
         }
+      } else {
+        Qb = null;
+        Qf = null;
+        Qult = null;
+        Qall = null;
+        Eg = null;
+        minS = null;
       }
     } else { // operation == 6; group calc
-      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
+      if (ncFinal != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
         C1 = double.tryParse(inputC1.text);
         C2 = double.tryParse(inputC2.text);
         qu1 = double.tryParse(inputQu1.text);
         qu2 = double.tryParse(inputQu2.text);
-        s = double.tryParse(inputQu2.text);
-        nVert = double.tryParse(inputQu2.text);
-        nHori = double.tryParse(inputQu2.text);
+        s = double.tryParse(inputS.text);
+        nVert = double.tryParse(inputNhori.text);
+        nHori = double.tryParse(inputNvert.text);
+
+        if (widget.state.cohesion) {
+          if (waterTable == true) {
+            if (C1 != null && C2 != null) {
+              C1final = C1!;
+              C2final = C2!;  
+            } else {
+              C1final = null;
+              C2final = null;
+            }
+          } else {
+            if (C1 != null) {
+              C1final = C1!;
+            } else {
+              C1final != null;
+            }
+          }
+        } else {
+          if (qu1 != null && qu2 != null) {
+            C1final = 0.5 * qu1!;
+            C2final = 0.5 * qu2!;
+          } else {
+            C1final = null;
+            C2final = null;
+          }
+        }
 
         if (nHori != null && nVert != null && s != null) {
           Lg = (((nHori! - 1) * s!) + pDim!);
           Bg = (((nVert! - 1) * s!) + pDim!);
           Agroup = Lg! * Bg!;
+          roundedLg = roundToFourDecimalPlaces(Lg!);
+          roundedBg = roundToFourDecimalPlaces(Bg!);
+          roundedAgroup = roundToFourDecimalPlaces(Agroup!);
           Eg = (((2 * s!) * (nHori! + nVert! - 2)) + (4 * pDim!)) / (perimeter! * nHori! * nVert!);
           minS = (0.5 * ((perimeter! * nHori! * nVert!) - (4 * pDim!))) / (nHori! + nVert! - 2);
+          widget.state.Eg = roundToFourDecimalPlaces(Eg!);
+          widget.state.minS = roundToFourDecimalPlaces(minS!);
+        } else {
+          Lg = null;
+          Bg = null;
+          Agroup = null;
+          roundedLg = null;
+          roundedBg = null;
+          roundedAgroup = null;
+          Eg = null;
+          minS = null;
+          widget.state.Eg = null;
+          widget.state.minS = null;
         }
 
-        if (nc != null && A != null && totalN != null) {
-          if (C1 != null && C2 != null) {
-            Qb = C2! * nc! * Agroup!;
-          } else if (C1 != null) {
-            Qb = C1! * nc! * Agroup!;
+        if (Agroup != null) {
+          if (C1final != null && C2final != null) {
+            Qb = C2final! * ncFinal! * Agroup!;
+          } else if (C1final != null) {
+            Qb = C1final! * ncFinal! * Agroup!;
           } else {
             Qb = null;
           }
@@ -1052,13 +1298,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Qb = null;
         }
 
-        if (C1 != null) {
+        if (C1final != null) {
           if (waterTable == false) {
-            Qf = C1! * perimeter! * df!;
+            Qf = C1final! * perimeter! * df!;
           } else if (waterTable == true) {
             if (dw != null) {
-              if (C1 != null && C2 != null) {
-                Qf = perimeter! * ((C1! * dw!) + (C2! * (df! - dw!)));
+              if (C1final != null && C2final != null) {
+                Qf = perimeter! * ((C1final! * dw!) + (C2final! * (df! - dw!)));
               } else {
                 Qf = null;
               }
@@ -1086,12 +1332,120 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       }
     }
 
-    if (Qb != null && Qf != null && Qult != null && Qall != null) {
-      widget.state.Qb = roundToFourDecimalPlaces(Qb!);
-      widget.state.Qf = roundToFourDecimalPlaces(Qf!);
-      widget.state.Qult = roundToFourDecimalPlaces(Qult!);
-      widget.state.Qall = roundToFourDecimalPlaces(Qall!);
+    if (operation == 1) {
+      if (Qb != null && Qf != null && Qult != null && Qall != null) {
+        widget.state.Qb = roundToFourDecimalPlaces(Qb!);
+        widget.state.Qf = roundToFourDecimalPlaces(Qf!);
+        widget.state.Qult = roundToFourDecimalPlaces(Qult!);
+        widget.state.Qall = roundToFourDecimalPlaces(Qall!);
+        setState(() {
+          widget.state.showResults = true;
+        });
+        return;
+      } else {
+        showSnackBarIncorrect(context);
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
+        return;
+      }
+    } else if (operation == 2 || operation == 3 || operation == 4) {
+      if (waterTable == false) {
+        if (Qb != null && Qf != null && Qult != null && Qall != null && C1final != null) {
+          widget.state.Qb = roundToFourDecimalPlaces(Qb!);
+          widget.state.Qf = roundToFourDecimalPlaces(Qf!);
+          widget.state.Qult = roundToFourDecimalPlaces(Qult!);
+          widget.state.Qall = roundToFourDecimalPlaces(Qall!);
+          setState(() {
+            widget.state.showResults = true;
+          });
+        } else {
+          showSnackBarIncorrect(context);
+          setState(() {
+            widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
+          });
+          return;
+        }
+      } else if (waterTable == true) {
+        if (Qb != null && Qf != null && Qult != null && Qall != null && C1final != null && C2final != null) {
+          widget.state.Qb = roundToFourDecimalPlaces(Qb!);
+          widget.state.Qf = roundToFourDecimalPlaces(Qf!);
+          widget.state.Qult = roundToFourDecimalPlaces(Qult!);
+          widget.state.Qall = roundToFourDecimalPlaces(Qall!);
+          setState(() {
+            widget.state.showResults = true;
+          });
+        } else {
+          showSnackBarIncorrect(context);
+          setState(() {
+            widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
+          });
+          return;
+        }
+      } else {
+        showSnackBarIncorrect(context);
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
+        return;
+      }
+    } else { // operation == 5 || operation == 6
+      if (Qb != null && Qf != null && Qult != null && Qall != null && Eg != null && minS != null && C1final != null && C2final != null) {
+        widget.state.Qb = roundToFourDecimalPlaces(Qb!);
+        widget.state.Qf = roundToFourDecimalPlaces(Qf!);
+        widget.state.Qult = roundToFourDecimalPlaces(Qult!);
+        widget.state.Qall = roundToFourDecimalPlaces(Qall!);
+        setState(() {
+          widget.state.showResults = true;
+        });
+      } else {
+        showSnackBarIncorrect(context);
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
+      }
     }
+
+    /*
+    if (operation == 1 || operation == 2 || operation == 3 || operation == 4) {
+      if (widget.state.Qb == null && widget.state.Qf == null && widget.state.Qult == null && widget.state.Qall == null) {
+        setState(() {
+          showSnackBarIncorrect(context);
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
+        dwLessThanDc = true; // ololol
+      } else {
+        setState(() {
+          widget.state.showResults = true;
+        });
+      }
+    } else { // operation == 5 || operation == 6
+      if (widget.state.Qb != null && widget.state.Qf != null && widget.state.Qult != null && widget.state.Qall != null && widget.state.Eg != null && widget.state.minS != null) {
+        setState(() {
+          widget.state.showResults = true;
+        });
+      } else {
+        setState(() {
+          showSnackBarIncorrect(context);
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
+      }
+    }
+    */
 
     printer();
   }
@@ -1273,10 +1627,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                       
                       if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
                       || singular == 2) // all included
-                        SizedBox(height: 10),
+                      SizedBox(height: 10),
                       if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
                       || singular == 2) // all included
-                        clearButton(),
+                      clearButton(),
         
                     ],
                   ),
@@ -3982,7 +4336,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
               child: Container(
                 width: 150,
                 child: Text(
-                  'Over consolidation ratio:',
+                  'Over consolidation ratio (OCR):',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -4099,7 +4453,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
               child: Container(
                 width: 150,
                 child: Text(
-                  'Over consolidation ratio:',
+                  'Over consolidation ratio (OCR):',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -4372,21 +4726,86 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         child: Column(
           children: [
             Text(
-              'Bearing capacity of pile, Qb = ${widget.state.Qb}',
-              style: TextStyle(color: Colors.white),
+              "Bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
-              'Frictional capacity of pile, Qf = ${widget.state.Qf}',
-              style: TextStyle(color: Colors.white),
+              "Qb = ${widget.state.Qb} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            /////////////////
+            Text(
+              "Frictional capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
-              'Frictional capacity of pile, Qult = ${widget.state.Qult}',
-              style: TextStyle(color: Colors.white),
+              "Qf = ${widget.state.Qf} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
             Text(
-              'Frictional capacity of pile, Qall = ${widget.state.Qall}',
-              style: TextStyle(color: Colors.white),
+              "Ultimate bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
+            Text(
+              "Qult = ${widget.state.Qult} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Allowable bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qall = ${widget.state.Qall} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (operation == 5 || operation == 6)
+              Text(
+                "Group efficiency, Eg = ${widget.state.Eg}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            if (operation == 5 || operation == 6)
+              Text(
+              "Minimum pile spacing to be",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (operation == 5 || operation == 6)
+              Text(
+                "100% efficient = ${widget.state.minS} m",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
           ],
         )
       )
@@ -4431,24 +4850,688 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              textSolution(),
+              if (operation == 1) 
+                solution1(),
+              if (operation == 2) 
+                solution2(),
+              if (operation == 3) 
+                solution3(),
+              if (operation == 4) 
+                solution4(),
+              if (operation == 5) 
+                solution5(),
+              if (operation == 6) 
+                solution6(),
             ],
           ),
         ),
       ),
     );
   }
-  Widget textSolution() {
+  // sand
+  Widget solution1() {
     return Flexible(
       child: Container(
         width: 445,
         child: Column(
           children: [
+            Text(
+              'Atip = $roundedAtip m²',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Pv₁ = $roundedPv1 kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (waterTable == true)
+              Text(
+                'Pv₂ = $roundedPv2 kPa',
+                style: TextStyle(color: Colors.white),
+              ),
+            Text(
+              "Bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qb = ${widget.state.Qb} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Critical depth, Dc = $dc',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'μ = $roundedMu',
+              style: TextStyle(color: Colors.white),
+            ),
+            /////////////////////////////////////////
+            if (waterTable == false || dwLessThanDc == false)
+              Text(
+                'Area from 0 m to $dc m',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == false || dwLessThanDc == false)
+              Text(
+                'A₁ = $roundedA1',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == false || dwLessThanDc == false)
+              Text(
+                'Area from $dc m to $df m',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == false || dwLessThanDc == false)
+              Text(
+                'A₂ = $roundedA2',
+                style: TextStyle(color: Colors.white),
+              ),
+            ////////////////////////
+            if (dwLessThanDc == true)
+              Text(
+                'Area from 0 m to $dw m',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (dwLessThanDc == true)
+              Text(
+                'A₁ = $roundedA1',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (dwLessThanDc == true)
+              Text(
+                'Area from $dw m to $dc m',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (dwLessThanDc == true)
+              Text(
+                'A₂ = $roundedA2',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (dwLessThanDc == true)
+              Text(
+                'Area from $dc m to $df m',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (dwLessThanDc == true)
+              Text(
+                'A₃ = $roundedA3',
+                style: TextStyle(color: Colors.white),
+              ),
+            /////////////////
+            Text(
+              'Apv = $roundedApv',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'P = $roundedPerimeter m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Frictional capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qf = ${widget.state.Qf} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Ultimate bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qult = ${widget.state.Qult} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Allowable bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qall = ${widget.state.Qall} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ],
         )
       )
     );
   }
+  // alpha
+  Widget solution2() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'Atip = $roundedAtip m²',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qb = ${widget.state.Qb} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            /////////////////
+            Text(
+              'P = $roundedPerimeter m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Frictional capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qf = ${widget.state.Qf} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Ultimate bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qult = ${widget.state.Qult} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Allowable bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qall = ${widget.state.Qall} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  // lambda (sol3)
+  Widget solution3() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'Atip = $roundedAtip m²',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qb = ${widget.state.Qb} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              'Pv₁ = $roundedPv1 kPa',
+              style: TextStyle(color: Colors.white),
+            ),
+            if (waterTable == true)
+              Text(
+                'Pv₂ = $roundedPv2 kPa',
+                style: TextStyle(color: Colors.white),
+              ),
+            /////////////////////////////////////////
+            if (waterTable == false)
+              Text(
+                'Area from 0 m to $df m',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == false)
+              Text(
+                'A₁ = $roundedA1',
+                style: TextStyle(color: Colors.white),
+              ),
+            /////////////////////////////////////////
+            if (waterTable == true)
+              Text(
+                'Area from 0 m to $dw m',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == true)
+              Text(
+                'A₁ = $roundedA1',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == true)
+              Text(
+                'Area from $dw m to $df m',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == true)
+              Text(
+                'A₂ = $roundedA2',
+                style: TextStyle(color: Colors.white),
+              ),
+            /////////////////
+            Text(
+              'Apv = $roundedApv',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Qᵥ = $roundedQv',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'P = $roundedPerimeter m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Frictional capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qf = ${widget.state.Qf} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Ultimate bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qult = ${widget.state.Qult} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Allowable bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qall = ${widget.state.Qall} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  // beta (sol4)
+  Widget solution4() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'Atip = $roundedAtip m²',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qb = ${widget.state.Qb} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            /////////////////////////////////////////
+            if (waterTable == false)
+              Text(
+                'Qave = $roundedQave1',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == false)
+              Text(
+                'Fave = $roundedFave1',
+                style: TextStyle(color: Colors.white),
+              ),
+            /////////////////////////////////////////
+            if (waterTable == true)
+              Text(
+                'Qave₁ = $roundedQave1',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == true)
+              Text(
+                'Qave₂ = $roundedQave2',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == true)
+              Text(
+                'Fave₁ = $roundedFave1',
+                style: TextStyle(color: Colors.white),
+              ),
+            if (waterTable == true)
+              Text(
+                'Fave₂ = $roundedFave2',
+                style: TextStyle(color: Colors.white),
+              ),
+            /////////////////
+            Text(
+              'P = $roundedPerimeter m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Frictional capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qf = ${widget.state.Qf} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Ultimate bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qult = ${widget.state.Qult} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Allowable bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qall = ${widget.state.Qall} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  // indiv
+  Widget solution5() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'Atip = $roundedAtip m²',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Total number of piles = $totalN',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qb = ${widget.state.Qb} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            /////////////////
+            Text(
+              'P = $roundedPerimeter m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Frictional capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qf = ${widget.state.Qf} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Ultimate bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qult = ${widget.state.Qult} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Allowable bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qall = ${widget.state.Qall} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Group efficiency, Eg = ${widget.state.Eg}",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Minimum pile spacing to be 100% efficient = ${widget.state.minS}m",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  // group
+  Widget solution6() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'Bg = $roundedBg m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Lg = $roundedLg m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'A = $roundedAgroup m²',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qb = ${widget.state.Qb} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            /////////////////
+            Text(
+              'P = $roundedPerimeter m',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              "Frictional capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qf = ${widget.state.Qf} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Ultimate bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qult = ${widget.state.Qult} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Allowable bearing capacity of pile,",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qall = ${widget.state.Qall} kPa",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Group efficiency, Eg = ${widget.state.Eg}",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Minimum pile spacing to be",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "100% efficient = ${widget.state.minS} m",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  
 
   Widget clearButton() {
     return ElevatedButton(
