@@ -1465,6 +1465,7 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
       child: Text(solutionButtonLabel),
     );
   }
+  
   Widget containerSolution() {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 15),

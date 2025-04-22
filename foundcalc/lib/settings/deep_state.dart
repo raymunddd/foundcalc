@@ -46,12 +46,11 @@ class DeepState {
   String inputNvert = '';
   String inputNhori = '';
 
-    // final answer
-    /*
-    double? fs;
-    double? qnetu;
-    double? qneta;
-    */
+  // final answer
+  double? Qb;
+  double? Qf;
+  double? Qult;
+  double? Qall;
 
   /*
   // int

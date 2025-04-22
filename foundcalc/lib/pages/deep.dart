@@ -71,7 +71,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
   int? singular;
   int? soil;
-  int? method;
+  int method = 1;
   int? behavior;
 
   double? nq;
@@ -141,6 +141,9 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? Fave2;
 
   double? totalN;
+  double? Agroup;
+  double? Lg;
+  double? Bg;
   double? Eg;
   double? minS;
 
@@ -244,6 +247,14 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         return 'Dimension of pile (in m):';
     }
   }
+  String get solutionButtonLabel {
+    if (widget.state.showSolution) {
+      return 'Hide solution';
+    } else {
+      return 'View solution';
+    }
+  }
+
 
   @override
   void initState() {
@@ -465,6 +476,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   void printer() {
     print('dw = $dw, df = $df, yfinal = $yFinal, ySat = $ySat, operation = $operation, watertable = $waterTable, C1 = $C1, C2 = $C2, alpha1 = $alpha1, alpha2 = $alpha2, perimeter = $perimeter');
     print('Fave1 = $Fave1, Fave2 = $Fave2, Qb = $Qb, Qf = $Qf, Qult = $Qult, Qall = $Qall');
+  }
+
+  double roundToFourDecimalPlaces(double value) {
+    return (value * 10000).round() / 10000;
   }
 
   void solve() {
@@ -959,11 +974,16 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
         nVert = double.tryParse(inputQu2.text);
         nHori = double.tryParse(inputQu2.text);
 
-        if (nc != null && A != null) {
+        if (nHori != null && nVert != null && s != null) {
+          totalN = nVert! * nHori!;
+          Eg = (((2 * s!) * (nHori! + nVert! - 2)) + (4 * pDim!)) / (perimeter! * nHori! * nVert!);
+        }
+
+        if (nc != null && A != null && totalN != null) {
           if (C1 != null && C2 != null) {
-            Qb = C2! * nc! * A!;
+            Qb = C2! * nc! * A!  * totalN!;
           } else if (C1 != null) {
-            Qb = C1! * nc! * A!;
+            Qb = C1! * nc! * A!  * totalN!;
           } else {
             Qb = null;
           }
@@ -999,9 +1019,78 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           } else {
             Qall = null;
           }
+
+        }
+      }
+    } else { // operation == 6; group calc
+      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
+        C1 = double.tryParse(inputC1.text);
+        C2 = double.tryParse(inputC2.text);
+        qu1 = double.tryParse(inputQu1.text);
+        qu2 = double.tryParse(inputQu2.text);
+        s = double.tryParse(inputQu2.text);
+        nVert = double.tryParse(inputQu2.text);
+        nHori = double.tryParse(inputQu2.text);
+
+        if (nHori != null && nVert != null && s != null) {
+          Lg = (((nHori! - 1) * s!) + pDim!);
+          Bg = (((nVert! - 1) * s!) + pDim!);
+          Agroup = Lg! * Bg!;
+          Eg = (((2 * s!) * (nHori! + nVert! - 2)) + (4 * pDim!)) / (perimeter! * nHori! * nVert!);
+          minS = (0.5 * ((perimeter! * nHori! * nVert!) - (4 * pDim!))) / (nHori! + nVert! - 2);
+        }
+
+        if (nc != null && A != null && totalN != null) {
+          if (C1 != null && C2 != null) {
+            Qb = C2! * nc! * Agroup!;
+          } else if (C1 != null) {
+            Qb = C1! * nc! * Agroup!;
+          } else {
+            Qb = null;
+          }
+        } else {
+          Qb = null;
+        }
+
+        if (C1 != null) {
+          if (waterTable == false) {
+            Qf = C1! * perimeter! * df!;
+          } else if (waterTable == true) {
+            if (dw != null) {
+              if (C1 != null && C2 != null) {
+                Qf = perimeter! * ((C1! * dw!) + (C2! * (df! - dw!)));
+              } else {
+                Qf = null;
+              }
+            } else { // no Dw
+              Qf = null;
+            }
+          } else { // waterTable = null
+            Qf = null;
+          }
+
+          if (Qb != null && Qf != null) {
+            Qult = Qb! + Qf!;
+          } else {
+            Qult = null;
+          }
+
+          if (Qult != null && FS != null) {
+            Qall = Qult! / FS!;
+          } else {
+            Qall = null;
+          }
+
         }
 
       }
+    }
+
+    if (Qb != null && Qf != null && Qult != null && Qall != null) {
+      widget.state.Qb = roundToFourDecimalPlaces(Qb!);
+      widget.state.Qf = roundToFourDecimalPlaces(Qf!);
+      widget.state.Qult = roundToFourDecimalPlaces(Qult!);
+      widget.state.Qall = roundToFourDecimalPlaces(Qall!);
     }
 
     printer();
@@ -1060,7 +1149,9 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                       if (singular == 2)
                         radioBehavior(),
 
-                      dropdownXsection(),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        dropdownXsection(),
 
                       if (singular == 1 && soil == 1)
                         dropdownCompact(),
@@ -1088,33 +1179,45 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                       if (singular == 1 && soil == 2 && method == 3)
                         entryThetaR(),
 
-                      entryPdim(),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        entryPdim(),
 
-                      if (singular == 2 && behavior == 1)
+                      if (singular == 2)
                         entryS(),
-                      if (singular == 2 && behavior == 1)
+                      if (singular == 2)
                         entryNhori(),
-                      if (singular == 2 && behavior == 1)
+                      if (singular == 2)
                         entryNvert(),
 
-                      entryDf(),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        entryDf(),
 
                       // optional 
-                      entryDw(),
-                      entryFS(),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        entryDw(),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        entryFS(),
 
                       // switching containers
-                      switchSoilProp(),
-                      Stack(
-                        children: [
-                          containerSoilPropOn(),
-                          containerSoilPropOff(),
-                        ]
-                      ),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        switchSoilProp(),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        Stack(
+                          children: [
+                            containerSoilPropOn(),
+                            containerSoilPropOff(),
+                          ]
+                        ),
 
-                      if ((singular == 1 && soil == 2) || (singular == 2 && behavior == 1))
+                      if ((singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3)) || (singular == 2))
                         switchCohesion(),
-                      if ((singular == 1 && soil == 2) || (singular == 2 && behavior == 1))
+                      if ((singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3)) || (singular == 2))
                         Stack(
                           children: [
                             containerCohesionOn(),
@@ -1143,16 +1246,15 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                       if (singular == 1 && soil == 1)
                         containerKOn(),
 
-                      if (singular == 1 && soil == 2)
+                      if ((singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3)) || (singular == 2))
                         switchNc(),
-                      if (singular == 1 && soil == 2)
+                      if ((singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3)) || (singular == 2))
                         containerNcOn(),
 
                       SizedBox(height: 10),
-                      buttonSubmit(),
-                      /*
-                      SizedBox(height: 10),
-                      buttonSubmit(),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        buttonSubmit(),
 
                       if (widget.state.showResults)
                         SizedBox(height: 10),
@@ -1163,15 +1265,19 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                         SizedBox(height: 10),
                       if (widget.state.showResults)
                         solutionButton(),
-
+      
                       if (widget.state.showSolution)
                         SizedBox(height: 10),
                       if (widget.state.showSolution)
                         containerSolution(),
                       
-                      SizedBox(height: 10),
-                      clearButton(),
-                      */        
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        SizedBox(height: 10),
+                      if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) // all included
+                        clearButton(),
+        
                     ],
                   ),
                 ),
@@ -4046,8 +4152,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       ),        
     );
   } // entryOCR2
-
-// indiv
+// group
   Widget entryS() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
@@ -4246,10 +4351,8 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       ),        
     );
   } // entryNvert
-
-
+    
 // ////////////////////////////////////
-
   Widget buttonSubmit() {
     return ElevatedButton(
       onPressed: () {
@@ -4262,6 +4365,151 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       child: Text('Calculate'),
     );
   }
+  Widget resultText() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              'Bearing capacity of pile, Qb = ${widget.state.Qb}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Frictional capacity of pile, Qf = ${widget.state.Qf}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Frictional capacity of pile, Qult = ${widget.state.Qult}',
+              style: TextStyle(color: Colors.white),
+            ),
+            Text(
+              'Frictional capacity of pile, Qall = ${widget.state.Qall}',
+              style: TextStyle(color: Colors.white),
+            ),
+          ],
+        )
+      )
+    );
+  }
+  
+  void toggleSolution() {
+    if (widget.state.solutionToggle) {
+      widget.state.showSolution = true;
+    } else {
+      widget.state.showSolution = false;
+    }
+    setState(() {
+      widget.state.solutionToggle = !widget.state.solutionToggle; // Toggle between functions
+    });
+  }
+
+  Widget solutionButton() {
+    return ElevatedButton(
+      onPressed: toggleSolution,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text(solutionButtonLabel),
+    );
+  }
+  
+  Widget containerSolution() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 450),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          color: const Color(0xFF1F538D),
+        ),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              textSolution(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+  Widget textSolution() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+          ],
+        )
+      )
+    );
+  }
+
+  Widget clearButton() {
+    return ElevatedButton(
+      onPressed: () { 
+        xsection = null;
+        compaction = null;
+        consolidation1 = null;
+        consolidation2 = null;
+
+        inputPdim.clear();
+        inputDf.clear();
+        inputDw.clear();
+        inputNq.clear();
+        inputK.clear();
+        inputFS.clear();
+
+        inputGs.clear();
+        inputE.clear();
+        inputW.clear();
+
+        inputGammaDry.clear();
+        inputGammaMoist.clear();
+        inputGammaSat.clear();
+
+        inputYw.clear();
+
+        inputMu.clear();
+        inputFrictionAngle.clear();
+
+        inputNc.clear();
+        inputAlpha1.clear();
+        inputAlpha2.clear();
+        inputC1.clear();
+        inputC2.clear();
+        inputQu1.clear();
+        inputQu2.clear();
+        
+        inputLambda.clear();
+
+        inputThetaR.clear();
+        inputOCR1.clear();
+        inputOCR2.clear();
+                                
+        inputS.clear();
+        inputNvert.clear();
+        inputNhori.clear();
+        
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.solutionToggle = true;
+          widget.state.showSolution = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  }
+  
   // for FAB to scroll to top
   @override
   void didUpdateWidget(DeepPage oldWidget) {
