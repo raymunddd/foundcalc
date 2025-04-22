@@ -42,6 +42,10 @@ class DeepState {
   String inputOCR1 = '';
   String inputOCR2 = '';
 
+  String inputS = '';
+  String inputNvert = '';
+  String inputNhori = '';
+
     // final answer
     /*
     double? fs;

@@ -4,11 +4,13 @@ class RetainingState {
   // dropdowns
 
   // String? xsection;
-
   
   // inputs
-  // String inputNq = '';
-  
+  String inputCohesion= '';
+  String inputLayerLength = '';
+  String inputOCR = '';
+  String inputN = '';
+
     // final answer
     /*
     double? fs;

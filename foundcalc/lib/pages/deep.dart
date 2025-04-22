@@ -62,6 +62,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   late TextEditingController inputOCR1;
   late TextEditingController inputOCR2;
 
+  late TextEditingController inputS;
+  late TextEditingController inputNvert;
+  late TextEditingController inputNhori;
+
   @override
   bool get wantKeepAlive => true; 
 
@@ -100,6 +104,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? thetaR;
   double? OCR1;
   double? OCR2;
+
+  double? s;
+  double? nVert;
+  double? nHori;
   
   int? operation;
 
@@ -131,6 +139,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? FavePart;
   double? Fave1;
   double? Fave2;
+
+  double? totalN;
+  double? Eg;
+  double? minS;
 
 
   // string getters
@@ -275,6 +287,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     inputOCR1 = TextEditingController(text: widget.state.inputOCR1);
     inputOCR2 = TextEditingController(text: widget.state.inputOCR2);
 
+    inputS = TextEditingController(text: widget.state.inputS);
+    inputNvert = TextEditingController(text: widget.state.inputNvert);
+    inputNhori = TextEditingController(text: widget.state.inputNhori);
+
     // for dropdowns
 
     xsection = widget.state.xsection;
@@ -320,6 +336,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     inputOCR1.addListener(_updateState);
     inputOCR2.addListener(_updateState);
 
+    inputS.addListener(_updateState);
+    inputNvert.addListener(_updateState);
+    inputNhori.addListener(_updateState);
+
   }
   void _updateState() {
     setState(() {
@@ -356,6 +376,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       widget.state.inputThetaR = inputThetaR.text;
       widget.state.inputOCR1 = inputOCR1.text;
       widget.state.inputOCR2 = inputOCR2.text;
+
+      widget.state.inputS = inputS.text;
+      widget.state.inputNvert = inputNvert.text;
+      widget.state.inputNhori = inputNhori.text;
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -430,6 +454,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
     inputThetaR.dispose();
     inputOCR1.dispose();
     inputOCR2.dispose();
+
+    inputS.dispose();
+    inputNvert.dispose();
+    inputNhori.dispose();
     
     super.dispose();
   }
@@ -685,27 +713,23 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           Qb = null;
         }
 
-        if (perimeter != null) {
-          if (waterTable == false) {
-            if (alpha1 != null && C1 != null) {
-              Qf = alpha1! * C1! * perimeter! * df!;
+        if (waterTable == false) {
+          if (alpha1 != null && C1 != null) {
+            Qf = alpha1! * C1! * perimeter! * df!;
+          } else {
+            Qf = null;
+          }
+        } else if (waterTable == true) {
+          if (dw != null) {
+            if (alpha1 != null && alpha2 != null && C1 != null && C2 != null) {
+              Qf = perimeter! * ((alpha1! * C1! * dw!) + (alpha2! * C2! * (df! - dw!)));
             } else {
               Qf = null;
             }
-          } else if (waterTable == true) {
-            if (dw != null) {
-              if (alpha1 != null && alpha2 != null && C1 != null && C2 != null) {
-                Qf = perimeter! * ((alpha1! * C1! * dw!) + (alpha2! * C2! * (df! - dw!)));
-              } else {
-                Qf = null;
-              }
-            } else { // no Dw
-              Qf = null;
-            }
-          } else { // waterTable = null
+          } else { // no Dw
             Qf = null;
           }
-        } else { // no perimeter
+        } else { // waterTable = null
           Qf = null;
         }
 
@@ -925,6 +949,59 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       } else {
         Qall = null;
       }
+    } else if (operation == 5) { // indiv calc
+      if (nc != null && pDim != null && yFinal != null && ywFinal != null && waterTable != null && xsection != null && A != null && perimeter != null) {
+        C1 = double.tryParse(inputC1.text);
+        C2 = double.tryParse(inputC2.text);
+        qu1 = double.tryParse(inputQu1.text);
+        qu2 = double.tryParse(inputQu2.text);
+        s = double.tryParse(inputQu2.text);
+        nVert = double.tryParse(inputQu2.text);
+        nHori = double.tryParse(inputQu2.text);
+
+        if (nc != null && A != null) {
+          if (C1 != null && C2 != null) {
+            Qb = C2! * nc! * A!;
+          } else if (C1 != null) {
+            Qb = C1! * nc! * A!;
+          } else {
+            Qb = null;
+          }
+        } else {
+          Qb = null;
+        }
+
+        if (C1 != null) {
+          if (waterTable == false) {
+            Qf = C1! * perimeter! * df!;
+          } else if (waterTable == true) {
+            if (dw != null) {
+              if (C1 != null && C2 != null) {
+                Qf = perimeter! * ((C1! * dw!) + (C2! * (df! - dw!)));
+              } else {
+                Qf = null;
+              }
+            } else { // no Dw
+              Qf = null;
+            }
+          } else { // waterTable = null
+            Qf = null;
+          }
+
+          if (Qb != null && Qf != null) {
+            Qult = Qb! + Qf!;
+          } else {
+            Qult = null;
+          }
+
+          if (Qult != null && FS != null) {
+            Qall = Qult! / FS!;
+          } else {
+            Qall = null;
+          }
+        }
+
+      }
     }
 
     printer();
@@ -1012,6 +1089,14 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                         entryThetaR(),
 
                       entryPdim(),
+
+                      if (singular == 2 && behavior == 1)
+                        entryS(),
+                      if (singular == 2 && behavior == 1)
+                        entryNhori(),
+                      if (singular == 2 && behavior == 1)
+                        entryNvert(),
+
                       entryDf(),
 
                       // optional 
@@ -1027,9 +1112,9 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                         ]
                       ),
 
-                      if (singular == 1 && soil == 2)
+                      if ((singular == 1 && soil == 2) || (singular == 2 && behavior == 1))
                         switchCohesion(),
-                      if (singular == 1 && soil == 2)
+                      if ((singular == 1 && soil == 2) || (singular == 2 && behavior == 1))
                         Stack(
                           children: [
                             containerCohesionOn(),
@@ -1433,10 +1518,10 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
               children: [
                 Radio<int>(
                   value: 2,
-                  groupValue: singular,
+                  groupValue: behavior,
                   onChanged: (val) {
                     setState(() {
-                      singular = val!;
+                      behavior = val!;
                     });
                   },
                   activeColor: Color(0xFF1F538D),
@@ -3961,7 +4046,208 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       ),        
     );
   } // entryOCR2
-  
+
+// indiv
+  Widget entryS() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Spacing between piles, s (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputS, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputS.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryS
+  Widget entryNhori() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Number of columns in plan view, m',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputNhori, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly, // Allows only whole numbers
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputNhori.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryNhori
+  Widget entryNvert() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Number of rows in plan view, n',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: TextField(
+                    controller: inputNvert, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.digitsOnly, // Allows only whole numbers
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputNvert.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryNvert
+
+
 // ////////////////////////////////////
 
   Widget buttonSubmit() {
