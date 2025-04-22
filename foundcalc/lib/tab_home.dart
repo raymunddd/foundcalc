@@ -772,7 +772,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: _addDeepItem,
-                              child: Text("Deep Foundation 🚧"),
+                              child: Text("Deep Foundation"),
                             ),
                             SizedBox(height: 10),
                             ElevatedButton(
