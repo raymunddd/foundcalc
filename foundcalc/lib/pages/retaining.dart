@@ -28,15 +28,13 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
   // scrollbar
   late ScrollController _scrollController;
 
-  late TextEditingController inputCohesion;
-  late TextEditingController inputLayerLength;
-  late TextEditingController inputN;
-  late TextEditingController inputOCR;
+  late TextEditingController inputIncline;
+  late TextEditingController input_g;
+  late TextEditingController input_yPassive;
+  late TextEditingController inputBaseFriction;
 
-  double? cohesion;
-  double? layerLength;
-  double? n;
-  double? OCR;
+  double? incline;
+  double? g;
 
   double? answer;
 
@@ -45,7 +43,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
 
   // string getters
   String get displayTitle {
-    if (widget.title.startsWith('Retaining')) {
+    if (widget.title.startsWith('RetWall')) {
       int index = int.tryParse(widget.title.split(' ').last) ?? 0;
       return "Retaining Wall $index";
     }
@@ -53,11 +51,6 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     return widget.title; 
 
   }
-  String? consolidation;
-  final List<String> consValues = [
-    'Normally consolidated',
-    'Over consolidated',
-  ];
   
 
   @override
@@ -68,10 +61,10 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
 
     // for input
 
-    inputCohesion = TextEditingController(text: widget.state.inputCohesion);
-    inputLayerLength = TextEditingController(text: widget.state.inputLayerLength);
-    inputOCR = TextEditingController(text: widget.state.inputOCR);
-    inputN = TextEditingController(text: widget.state.inputN);
+    inputIncline = TextEditingController(text: widget.state.inputIncline);
+    input_g = TextEditingController(text: widget.state.input_g);
+    input_yPassive = TextEditingController(text: widget.state.input_yPassive);
+    inputBaseFriction = TextEditingController(text: widget.state.inputBaseFriction);
 
     // for dropdowns
     
@@ -84,10 +77,10 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
 
     // listeners
 
-    inputCohesion.addListener(_updateState);
-    inputLayerLength.addListener(_updateState);
-    inputOCR.addListener(_updateState);
-    inputN.addListener(_updateState);
+    inputIncline.addListener(_updateState); 
+    input_g.addListener(_updateState); 
+    input_yPassive.addListener(_updateState); 
+    inputBaseFriction.addListener(_updateState); 
 
     }
 
@@ -95,23 +88,25 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     setState(() {
       // solve();
 
+      widget.state.inputIncline = inputIncline.text;
+      widget.state.input_g = input_g.text;
+      widget.state.input_yPassive = input_yPassive.text;
+      widget.state.inputBaseFriction = inputBaseFriction.text;
+
       widget.onStateChanged(widget.state);
     });
   }
   void dispose() {
     _scrollController.dispose();
 
-    inputCohesion.dispose();
-    inputLayerLength.dispose();
-    inputOCR.dispose();
-    inputN.dispose();
-    
+    inputIncline.dispose();
+    input_g.dispose();
+    input_yPassive.dispose();
+    inputBaseFriction.dispose();
+
     super.dispose();
   }
   void solve() {
-    double total = 0.0;
-
-
 
     print("Total: $answer"); // or display it using a Text widget
   }
@@ -149,10 +144,62 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      entryNumberOfLayers(),
-                      SizedBox(height: 10),
-                      submitButton(),
-                      testWidget(),
+                      if (widget.state.resultantPa && !widget.state.passiveSoil && !widget.state.slopedSoil)
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset('assets/images/retModel1-1.png'),
+                        ),
+                      if (!widget.state.resultantPa && !widget.state.passiveSoil && !widget.state.slopedSoil)
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset('assets/images/retModel2-1.png'),
+                        ),
+                      if (widget.state.resultantPa && !widget.state.passiveSoil && widget.state.slopedSoil)
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset('assets/images/retModel3-1.png'),
+                        ),
+                      if (!widget.state.resultantPa && !widget.state.passiveSoil && widget.state.slopedSoil)
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset('assets/images/retModel4-1.png'),
+                        ),
+                      if (widget.state.resultantPa && widget.state.passiveSoil && !widget.state.slopedSoil)
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset('assets/images/retModel5-1.png'),
+                        ),
+                      if (!widget.state.resultantPa && widget.state.passiveSoil && !widget.state.slopedSoil)
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset('assets/images/retModel6-1.png'),
+                        ),
+                      if (widget.state.resultantPa && widget.state.passiveSoil && widget.state.slopedSoil)
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset('assets/images/retModel7-1.png'),
+                        ),
+                      if (!widget.state.resultantPa && widget.state.passiveSoil && widget.state.slopedSoil)
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset('assets/images/retModel8-1.png'),
+                        ),
+
+                      switchResultantPa(),
+                      switchSlopedSoil(),
+                      switchswitchPassive(),
+
+                      if (widget.state.resultantPa)
+                        entryInclinePa(),
+                      
                       /*
                       SizedBox(height: 10),
                       buttonSubmit(),
@@ -185,28 +232,9 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       ),
     );
   } // build (main widget)
-  InputDecoration inputDecoration(VoidCallback onClear) {
-    return InputDecoration(
-      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(25),
-      ),
-      filled: true,
-      fillColor: Colors.grey[800],
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(25),
-        borderSide: BorderSide(color: Colors.white),
-      ),
-      suffixIcon: IconButton(
-        icon: Icon(Icons.clear, color: Colors.white54),
-        iconSize: 17,
-        onPressed: onClear,
-      ),
-    );
-  }
-  Widget entryNumberOfLayers() {
+  Widget switchResultantPa() {
     return Padding(
-      padding: EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: 20),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         constraints: BoxConstraints(maxWidth: 500),
@@ -217,7 +245,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
               child: Container(
                 width: 150,
                 child: Text(
-                  'Number of soil layers:',
+                  'Resultant Pₐ',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -230,8 +258,147 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                 ),
                 child: SizedBox(
                   height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.resultantPa,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.resultantPa = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchResultantPa
+  Widget switchSlopedSoil() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Sloped active soil',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.slopedSoil,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.slopedSoil = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchSlopedSoil
+  Widget switchswitchPassive() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Passive soil',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.passiveSoil,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.passiveSoil = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchPassive
+  // resultant on
+  Widget entryInclinePa() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Angle of incline of Pₐ, θ (in degrees):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
                   child: TextField(
-                    controller: inputN, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
+                    controller: inputIncline,
                     keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
@@ -257,7 +424,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          inputN.clear();
+                          inputIncline.clear();
                         },
                       ),
                     ),
@@ -269,253 +436,209 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
         ),
       ),        
     );
-  } // entryNumberOfLayers
-
-  Widget testWidget() {
+  } // entryInclinePa
+  // sloped on
+  Widget entry_g() {
     return Padding(
-      padding: EdgeInsets.only(top: 10),
+      padding: EdgeInsets.only(top: 20),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
         constraints: BoxConstraints(maxWidth: 500),
-        child: Column(
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
           children: [
-            Text(
-              'Layer 1:',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-              textAlign: TextAlign.center,
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'g (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
             ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-              children: [
-                Flexible(
-                  child: Container(
-                    width: 150,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Consolidation of soil:',
-                      style: TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
-                  )
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
                 ),
-                Flexible(
-                  child: Container(
-                    width: 150,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Cohesion, C:',
-                      style: TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                ),
-                Flexible(
-                  child: Container(
-                    width: 150,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Length of layer, L:',
-                      style: TextStyle(color: Colors.white),
-                      textAlign: TextAlign.center,
-                    ),
-                  )
-                ),
-              ],
-            ),
-            SizedBox(height: 10),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
-              children: [
-                Container(
+                child: SizedBox(
                   height: 40,
-                  width: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(25),
-                    color: Colors.grey[800],
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 12),
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: consolidation,
-                    hint: Text('Select option', style: TextStyle(color: Colors.white54)),
-                    dropdownColor: Colors.grey[800],
-                    icon: Icon(Icons.arrow_drop_down, color: Colors.white54),
-                    iconSize: 24,
-                    elevation: 16,
+                  child: TextField(
+                    controller: input_g,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
                     style: TextStyle(color: Colors.white),
-                    underline: SizedBox(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        consolidation = newValue;
-                        });
-                      },
-                    items: consValues.map((String value) {
-                      return DropdownMenuItem<String>(
-                        value: value,
-                        child: Text(value, style: TextStyle(color: Colors.white)),
-                      );
-                    }).toList(),
-                  ),
-                ),
-                Container(
-                  width: 150,
-                  child: TextSelectionTheme(
-                    data: TextSelectionThemeData(
-                      cursorColor: Colors.white,
-                    ),
-                    child: SizedBox(
-                      height: 40, // Adjust height as needed
-                      child: TextField(
-                        controller: inputCohesion, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
-                        keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                        ],
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: "Input required",
-                          hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[800],
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              Icons.clear, 
-                              color: Colors.white54,
-                            ),
-                            iconSize: 17,
-                            onPressed: () {
-                              // Clear the text field
-                              inputCohesion.clear();
-                            },
-                          ),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
                         ),
-                      )
-                    )
-                  ),
-                ),
-                Container(
-                  width: 150,
-                  child: TextSelectionTheme(
-                    data: TextSelectionThemeData(
-                      cursorColor: Colors.white,
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          input_g.clear();
+                        },
+                      ),
                     ),
-                    child: SizedBox(
-                      height: 40, // Adjust height as needed
-                      child: TextField(
-                        controller: inputLayerLength, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
-                        keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                        inputFormatters: [
-                          FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                        ],
-                        style: TextStyle(color: Colors.white),
-                        decoration: InputDecoration(
-                          hintText: "Input required",
-                          hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[800],
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(25),
-                            borderSide: BorderSide(color: Colors.white),
-                          ),
-                          suffixIcon: IconButton(
-                            icon: Icon(
-                              Icons.clear, 
-                              color: Colors.white54,
-                            ),
-                            iconSize: 17,
-                            onPressed: () {
-                              // Clear the text field
-                              inputLayerLength.clear();
-                            },
-                          ),
-                        ),
-                      )
-                    )
-                  ),
-                ),
-              ],
+                  )
+                )
+              ),
             ),
-            if (consolidation == 'Over consolidated')
-              SizedBox(height: 10),
-            if (consolidation == 'Over consolidated')
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center, // Centers row children horizontally
-                children: [
-                  Flexible(
-                    child: Container(
-                      width: 150,
-                      alignment: Alignment.center,
-                      child: Text(
-                        'Over consolidation ratio, OCR:',
-                        style: TextStyle(color: Colors.white),
-                        textAlign: TextAlign.center,
-                      ),
-                    )
-                  ),
-                  Container(
-                    width: 150,
-                    child: TextSelectionTheme(
-                      data: TextSelectionThemeData(
-                        cursorColor: Colors.white,
-                      ),
-                      child: SizedBox(
-                        height: 40, // Adjust height as needed
-                        child: TextField(
-                          controller: inputOCR, //Ito yun pampalagay sa variable hahaha. Dapat di to mawawala
-                          keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
-                          inputFormatters: [
-                            FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
-                          ],
-                          style: TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: "Input required",
-                            hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[800],
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(25),
-                              borderSide: BorderSide(color: Colors.white),
-                            ),
-                            suffixIcon: IconButton(
-                              icon: Icon(
-                                Icons.clear, 
-                                color: Colors.white54,
-                              ),
-                              iconSize: 17,
-                              onPressed: () {
-                                // Clear the text field
-                                inputOCR.clear();
-                              },
-                            ),
-                          ),
-                        )
-                      )
-                    ),
-                  ),
-                ],
-              ),     
           ],
-        )
+        ),
       ),        
     );
-  }
+  } // entry_g
+  // passive on
+  Widget entryGammaPassive() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Unit weight of passive soil (in m):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: input_g,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          input_g.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryGammaPassive
+  // passive off
+  Widget entryBaseFriction() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Coefficient of friction at the base:',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputBaseFriction,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputBaseFriction.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryBaseFriction
+  
 
   Widget submitButton() {
     return ElevatedButton(

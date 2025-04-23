@@ -6,10 +6,12 @@ class RetainingState {
   // String? xsection;
   
   // inputs
-  String inputCohesion= '';
-  String inputLayerLength = '';
-  String inputOCR = '';
-  String inputN = '';
+
+  String inputIncline = '';
+  String input_g = '';
+  String input_yPassive = '';
+  String inputBaseFriction = '';
+
 
     // final answer
     /*
@@ -24,6 +26,10 @@ class RetainingState {
   */
 
   // toggles
+
+  bool resultantPa = false;
+  bool slopedSoil = false;
+  bool passiveSoil = false;
 
   // bool isGammaDryEnabled = false;
   // bool isGammaMoistEnabled = false;

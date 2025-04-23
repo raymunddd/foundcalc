@@ -298,8 +298,8 @@ class _TabbedHomePageState extends State<TabbedHomePage>
   // Retaining Wall     
   void _addRetainingItem() {
     setState(() {
-      int nextNumber = _getNextNumber(retainingItems, "Retaining");
-      String newItem = 'Retaining $nextNumber';
+      int nextNumber = _getNextNumber(retainingItems, "RetWall");
+      String newItem = 'RetWall $nextNumber';
       retainingItems.add(newItem);
       retainingStates[newItem] = RetainingState(title: newItem); // Create state
 
@@ -414,7 +414,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                               _removeMatFoundationItem(index);
                             } else if (title.startsWith('Deep')) {
                               _removeDeepItem(index);
-                            } else if (title.startsWith('Retaining')) {
+                            } else if (title.startsWith('RetWall')) {
                               _removeRetainingItem(index);
                             }
                           });
@@ -940,7 +940,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                 ],
               );
             }
-            else if (title.startsWith('Retaining')) {
+            else if (title.startsWith('RetWall')) {
               return Stack(
                 children: [
                   RetainingPage(
@@ -958,7 +958,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       mini: true,
                       child: Icon(Icons.arrow_upward, color: Colors.white),
                       onPressed: () {
-                        if (title.startsWith('Retaining')) {
+                        if (title.startsWith('RetWall')) {
                           deepStates[title]!.scrollToTop = true;
                           setState(() {}); // Trigger rebuild to pass the message
                         }
