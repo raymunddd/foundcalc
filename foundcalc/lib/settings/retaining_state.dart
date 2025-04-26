@@ -11,7 +11,9 @@ class RetainingState {
   String input_g = '';
   String input_yPassive = '';
   String inputBaseFriction = '';
-
+  String inputPassiveSoilFrictionAngle = '';
+  String inputPassiveEarthPressure = '';
+  String inputPassiveCohesion = '';
 
     // final answer
     /*

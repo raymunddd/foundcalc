@@ -32,6 +32,9 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
   late TextEditingController input_g;
   late TextEditingController input_yPassive;
   late TextEditingController inputBaseFriction;
+  late TextEditingController inputPassiveSoilFrictionAngle;
+  late TextEditingController inputPassiveEarthPressure;
+  late TextEditingController inputPassiveCohesion;
 
   double? incline;
   double? g;
@@ -65,6 +68,9 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     input_g = TextEditingController(text: widget.state.input_g);
     input_yPassive = TextEditingController(text: widget.state.input_yPassive);
     inputBaseFriction = TextEditingController(text: widget.state.inputBaseFriction);
+    inputPassiveSoilFrictionAngle = TextEditingController(text: widget.state.inputPassiveSoilFrictionAngle);
+    inputPassiveEarthPressure = TextEditingController(text: widget.state.inputPassiveEarthPressure);
+    inputPassiveCohesion = TextEditingController(text: widget.state.inputPassiveCohesion);
 
     // for dropdowns
     
@@ -81,6 +87,9 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     input_g.addListener(_updateState); 
     input_yPassive.addListener(_updateState); 
     inputBaseFriction.addListener(_updateState); 
+    inputPassiveSoilFrictionAngle.addListener(_updateState); 
+    inputPassiveEarthPressure.addListener(_updateState); 
+    inputPassiveCohesion.addListener(_updateState); 
 
     }
 
@@ -92,6 +101,9 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       widget.state.input_g = input_g.text;
       widget.state.input_yPassive = input_yPassive.text;
       widget.state.inputBaseFriction = inputBaseFriction.text;
+      widget.state.inputPassiveSoilFrictionAngle = inputPassiveSoilFrictionAngle.text;
+      widget.state.inputPassiveEarthPressure = inputPassiveEarthPressure.text;
+      widget.state.inputPassiveCohesion = inputPassiveCohesion.text;
 
       widget.onStateChanged(widget.state);
     });
@@ -103,6 +115,9 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     input_g.dispose();
     input_yPassive.dispose();
     inputBaseFriction.dispose();
+    inputPassiveSoilFrictionAngle.dispose();
+    inputPassiveEarthPressure.dispose();
+    inputPassiveCohesion.dispose();
 
     super.dispose();
   }
@@ -195,10 +210,22 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
 
                       switchResultantPa(),
                       switchSlopedSoil(),
-                      switchswitchPassive(),
+                      switchPassive(),
 
                       if (widget.state.resultantPa)
                         entryInclinePa(),
+                      if (widget.state.slopedSoil)
+                        entry_g(),
+                      if (!widget.state.passiveSoil)
+                        entryBaseFriction(),
+                      if (widget.state.passiveSoil)
+                        entryGammaPassive(),
+                      if (widget.state.passiveSoil)
+                        entryPassiveEarthPressure(),
+                      if (widget.state.passiveSoil)
+                        entryPassiveCohesion(),
+                      if (widget.state.passiveSoil)
+                        entryPassiveSoilFrictionAngle(),
                       
                       /*
                       SizedBox(height: 10),
@@ -324,7 +351,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       ),
     );
   } // switchSlopedSoil
-  Widget switchswitchPassive() {
+  Widget switchPassive() {
     return Padding(
       padding: EdgeInsets.only(top: 20),
       child: Container(
@@ -370,6 +397,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       ),
     );
   } // switchPassive
+  
   // resultant on
   Widget entryInclinePa() {
     return Padding(
@@ -437,6 +465,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       ),        
     );
   } // entryInclinePa
+  
   // sloped on
   Widget entry_g() {
     return Padding(
@@ -504,6 +533,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       ),        
     );
   } // entry_g
+  
   // passive on
   Widget entryGammaPassive() {
     return Padding(
@@ -518,7 +548,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
               child: Container(
                 width: 150,
                 child: Text(
-                  'Unit weight of passive soil (in m):',
+                  'Unit weight of passive soil, γp (in kN/m³):',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -532,7 +562,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                 child: SizedBox(
                   height: 40,
                   child: TextField(
-                    controller: input_g,
+                    controller: input_yPassive,
                     keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
                     inputFormatters: [
                       FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
@@ -558,7 +588,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                         iconSize: 17,
                         onPressed: () {
                           // Clear the text field
-                          input_g.clear();
+                          input_yPassive.clear();
                         },
                       ),
                     ),
@@ -571,6 +601,205 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       ),        
     );
   } // entryGammaPassive
+  Widget entryPassiveSoilFrictionAngle() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Passive soil friction angle, θ₂ (in degrees):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputPassiveSoilFrictionAngle,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputPassiveSoilFrictionAngle.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryPassiveSoilFrictionAngle
+  Widget entryPassiveEarthPressure() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Passive earth pressure coefficient, k₂ (in degrees):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputPassiveEarthPressure,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputPassiveEarthPressure.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryPassiveEarthPressure
+  Widget entryPassiveCohesion() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Passive soil cohesion, c₂ (in kPa):',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40,
+                  child: TextField(
+                    controller: inputPassiveCohesion,
+                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                    style: TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: "Input required",
+                      hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      filled: true,
+                      fillColor: Colors.grey[800],
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(25),
+                        borderSide: BorderSide(color: Colors.white),
+                      ),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          Icons.clear, 
+                          color: Colors.white54,
+                        ),
+                        iconSize: 17,
+                        onPressed: () {
+                          // Clear the text field
+                          inputPassiveCohesion.clear();
+                        },
+                      ),
+                    ),
+                  )
+                )
+              ),
+            ),
+          ],
+        ),
+      ),        
+    );
+  } // entryPassiveCohesion
+ 
   // passive off
   Widget entryBaseFriction() {
     return Padding(
@@ -638,7 +867,6 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       ),        
     );
   } // entryBaseFriction
-  
 
   Widget submitButton() {
     return ElevatedButton(
