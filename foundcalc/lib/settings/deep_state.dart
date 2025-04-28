@@ -53,6 +53,7 @@ class DeepState {
   double? Qall;
 
   double? Eg;
+  double? QallGroupAction;
   double? minS;
   /*
   // int

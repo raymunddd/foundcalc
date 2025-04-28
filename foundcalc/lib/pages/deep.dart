@@ -146,6 +146,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   double? Fave2;
 
   double? totalN;
+  double? QallGroupAction;
   double? Agroup;
   double? Lg;
   double? Bg;
@@ -1217,6 +1218,14 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
             Qall = null;
           }
 
+          if (Qall != null && Eg != null) {
+            QallGroupAction = Qall! * Eg!;
+            widget.state.QallGroupAction = roundToFourDecimalPlaces(QallGroupAction!);
+          } else {
+            QallGroupAction = null;
+            widget.state.QallGroupAction = null;
+          }
+
         }
       } else {
         Qb = null;
@@ -1326,6 +1335,8 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
           } else {
             Qall = null;
           }
+
+
 
         }
 
@@ -5408,6 +5419,13 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
             ),
             Text(
               "Group efficiency, Eg = ${widget.state.Eg}",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "Qall considering group action = ${widget.state.QallGroupAction} kPa",
               style: TextStyle(
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
