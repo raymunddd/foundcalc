@@ -520,6 +520,19 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       widget.state.showResults = false;
     });
   }
+  void showSnackBarGamma(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("γsat must be greater than γ/γdry."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    setState(() {
+      widget.state.showResults = false;
+    });
+  }
+  
   void solve() {
     nq = double.tryParse(inputNq.text);
     pDim = double.tryParse(inputPdim.text);
@@ -570,6 +583,16 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
       } else {
         yFinal = null;
       }
+    }
+
+    if (y != null && ySat != null) {
+      showSnackBarGamma(context);
+      setState(() {
+        widget.state.showResults = false;
+        widget.state.showSolution = false;
+        widget.state.solutionToggle = true;
+      });
+      return;
     }
 
     if (dw != null && df != null) {

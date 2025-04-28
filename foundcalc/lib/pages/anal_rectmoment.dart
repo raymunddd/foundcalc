@@ -832,6 +832,22 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       }
     }
 
+    if (y != null && ySat != null) {
+      setState(() {
+        widget.state.showResultsAnalysis = false;
+        widget.state.showSolutionAnalysis = false;
+        widget.state.solutionToggleAnalysis = true;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("γsat must be greater than γ/γdry."),
+          backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
     // pressure due to soil
     if (df != null && t != null && y != null) {
       if (dw != null) {

@@ -516,6 +516,23 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }
     }
     
+    if (y != null && ySat != null) {
+      setState(() {
+        showSolution = false;
+        showSolutionOWS = false;
+        showSolutionTWS = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("γsat must be greater than γ/γdry."),
+          backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+      
+
     if (df != null && t != null && y != null) {
       if (dw != null) {
         if (dw! < df!) {
@@ -1150,6 +1167,22 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       } else {
         y = null;
       }
+    }
+
+    if (y != null && ySat != null) {
+      setState(() {
+        showSolution = false;
+        showSolutionOWS = false;
+        showSolutionTWS = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("γsat must be greater than γ/γdry."),
+          backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
     }
     
     if (df != null && t != null && y != null) {

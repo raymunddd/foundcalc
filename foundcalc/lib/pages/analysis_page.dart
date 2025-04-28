@@ -940,7 +940,20 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
                 widget.state.solutionToggle = true;
               });
               return;
-            }   
+            } else if ((ySat! < y!) || (ySat! < yDry!)) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('γsat must be greater than γ/γdry.'),
+                  backgroundColor:  const Color.fromARGB(255, 201, 40, 29),
+                  duration: Duration(seconds: 3),
+                ),
+              );
+              setState(() {
+                widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
+              });
+            }
           } else { // if Dw ≥ Df
             if ((y != null && yDry != null) || (y == null && yDry == null)) { 
               ScaffoldMessenger.of(context).showSnackBar(
