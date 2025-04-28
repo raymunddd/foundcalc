@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:ffi';
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../settings/retaining_state.dart';
@@ -60,6 +61,8 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
   double? passiveGamma;
   double? passiveTheta;
   double? passiveC;
+  String? k1String;
+  String? k2String;
   double? k1;
   double? k2;
   double? activeGamma;
@@ -80,10 +83,10 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
   double? stripLengthFinal;
 
   int? operation;
-  double? answer;
 // solvar
   double? Pa;
   double? OM;
+  double? Ph;
   double? PhFinal;
   double? Pv;
   double? W1;
@@ -98,6 +101,12 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
   double? RM;
   double? FSo;
   double? FSs;
+  double? xbar;
+  double? eccentricity;
+  double? Bover6;
+  bool? adequacy;
+  double? qmin;
+  double? qmax;
 
   double? passiveK;
   double? Pp;
@@ -105,6 +114,17 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
   // if operation == 2
   double? W5;
   double? x5;
+  // rounded
+  double? roundedPa;
+  double? roundedPh;
+  double? roundedPv;
+  double? roundedOM;
+  double? roundedKp;
+  double? roundedPp;
+  double? roundedMPp;
+  double? roundedSumW;
+  double? roundedRM;
+  double? roundedXbar;
 
   @override
   bool get wantKeepAlive => true;
@@ -119,7 +139,13 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     return widget.title; 
 
   }
-  
+  String get solutionButtonLabel {
+    if (widget.state.showSolution) {
+      return 'Hide solution';
+    } else {
+      return 'View solution';
+    }
+  }
 
   @override
   void initState() {
@@ -249,7 +275,8 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
 
     super.dispose();
   }
-  void parseFraction() {
+  
+  void parseFractionKa() {
     if (KaString!.contains('/')) {
       var parts = KaString!.split('/');
       if (parts.length == 2) {
@@ -271,6 +298,66 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       }
     }
   }
+  void parseFractionk1() {
+    if (k1String!.contains('/')) {
+      var parts = k1String!.split('/');
+      if (parts.length == 2) {
+        int? numerator = int.tryParse(parts[0].trim());
+        int? denominator = int.tryParse(parts[1].trim());
+
+        if (numerator != null && denominator != null && denominator != 0) {
+          k1 = numerator / denominator;
+        } else {
+          k1 = null;
+        }
+      }
+    } else {
+      double? wholeNumber = double.tryParse(k1String!);
+      if (wholeNumber != null) {
+        k1 = wholeNumber.toDouble();
+      } else {
+        k1 = null;
+      }
+    }
+  }
+  void parseFractionk2() {
+    if (k2String!.contains('/')) {
+      var parts = k2String!.split('/');
+      if (parts.length == 2) {
+        int? numerator = int.tryParse(parts[0].trim());
+        int? denominator = int.tryParse(parts[1].trim());
+
+        if (numerator != null && denominator != null && denominator != 0) {
+          k2 = numerator / denominator;
+        } else {
+          k2 = null;
+        }
+      }
+    } else {
+      double? wholeNumber = double.tryParse(k2String!);
+      if (wholeNumber != null) {
+        k2 = wholeNumber.toDouble();
+      } else {
+        k2 = null;
+      }
+    }
+  }
+  void showSnackBarIncorrect(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Please provide input for all parameters."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    setState(() {
+      widget.state.showResults = false;
+    });
+  }
+  double roundToFourDecimalPlaces(double value) {
+    return (value * 10000).round() / 10000;
+  }
+
   void solve() {
 
     if (widget.state.resultantPa == false && widget.state.passiveSoil == false && widget.state.slopedSoil == false) {
@@ -296,6 +383,8 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     activeGamma = double.tryParse(inputActiveGamma.text);
     activeTheta = double.tryParse(inputActiveSoilFrictionAngle.text);
     KaString = inputActiveEarthPressure.text.trim();
+    k1String = inputk1.text.trim();
+    k2String = inputk2.text.trim();
     activeC = double.tryParse(inputActiveCohesion.text);
     a = double.tryParse(input_a.text);
     b = double.tryParse(input_b.text);
@@ -320,9 +409,21 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     k2 = double.tryParse(inputk2.text);
 
     if (KaString != null) {
-      parseFraction();
+      parseFractionKa();
     } else {
-      KaString = null;
+      activeK = null;
+    }
+
+    if (k1String != null) {
+      parseFractionk1();
+    } else {
+      k1 = null;
+    }
+
+    if (k2String != null) {
+      parseFractionk2();
+    } else {
+      k2 = null;
     }
 
     if (!widget.state.passiveSoil) {
@@ -371,48 +472,76 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
 
         if (H != null) {
           Pa = 0.5 * activeK! * activeGamma! * H! * H!;
+          roundedPa = roundToFourDecimalPlaces(Pa!);
         } else {
           Pa = null;
+          roundedPa = null;
         }
 
         if (Pa != null) {
           if (widget.state.resultantPa) {
             if (incline != null) {
-              PhFinal = Pa! * cos(incline! * pi/180);
+              Ph = Pa! * cos(incline! * pi/180);
+              roundedPh = roundToFourDecimalPlaces(Ph!);
+              PhFinal = Ph!;
               Pv = Pa! * sin(incline! * pi/180);
+              roundedPv = roundToFourDecimalPlaces(Pv!);
             } else {
+              Ph = null;
+              roundedPh = null;
               PhFinal = null;
               Pv = null;
+              roundedPv = null;
             }
           } else {
+            Ph = null;
+            roundedPh = null;
             PhFinal = Pa!;
             Pv = 0;
+            roundedPv = null;
           }
         } else {
+          Ph = null;
+          roundedPh = null;
           PhFinal = null;
           Pv = null;
+          roundedPv = null;
         }
 
         if (PhFinal != null && H != null) {
           OM = (PhFinal! * H!)/3;
+          roundedOM = roundToFourDecimalPlaces(OM!);
         } else {
           OM = null;
+          roundedOM = null;
         }
 
         if (widget.state.passiveSoil) {
           if (passiveTheta != null && passiveC != null && passiveK != null && D != null && passiveGamma != null) {
             passiveK = tan((45 + passiveTheta!/2) * pi/180) * tan((45 + passiveTheta!/2) * pi/180);
+            roundedKp = roundToFourDecimalPlaces(passiveK!);
             Pp = 0.5 * passiveK! * passiveGamma! * D! * D! + 2 * passiveC! * sqrt(passiveK!) * D!;
+            roundedPp = roundToFourDecimalPlaces(Pp!);
             MPp = Pp! * D!/3;
+            roundedMPp = roundToFourDecimalPlaces(MPp!);
           } else {
-            passiveK = 2;
-            Pp = 2;
-            MPp = 2;
+            passiveK = null;
+            roundedKp = null;
+            Pp = null;
+            roundedPp = null;
+            MPp = null;
+            roundedMPp = null;
+            roundedKp = null;
+            roundedPp = null;
+            roundedMPp = null;
           }
         } else {
           passiveK = 0;
           Pp = 0;
           MPp = 0;
+          roundedKp = null;
+          roundedPp = null;
+          roundedMPp = null;
         }
 
         // moment 1
@@ -439,50 +568,92 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
         if (W1 != null && W2 != null && W3 != null && W4 != null && W5 != null && x1 != null
         && x2 != null && x3 != null && x4 != null && x5 != null && Pv != null && MPp != null) {
           sumW = W1! + W2! + W3! + W4! + W5! + Pv!;
+          roundedSumW = roundToFourDecimalPlaces(sumW!);
           RM = (W1! * x1!) + (W2! * x2!) + (W3! * x3!) + (W4! * x4!) + (W5! * x5!) + MPp!;
+          roundedRM = roundToFourDecimalPlaces(RM!);
         } else {
           sumW = null;
+          roundedSumW = null;
           RM = null;
-          answer = null;
+          roundedRM = null;
         }
         
-        if (RM != null && OM != null) {
+        if (RM != null && OM != null && sumW != null) {
           FSo = RM! / OM!;
+          widget.state.FSo = roundToFourDecimalPlaces(FSo!);
+          xbar = (RM! - OM!) / sumW!;
+          roundedXbar = roundToFourDecimalPlaces(xbar!);
         } else {
           FSo = null;
+          widget.state.FSo = null;
+          xbar = null;
+          roundedXbar = null;
         }
 
         if (sumW != null && PhFinal != null) {
           if (widget.state.passiveSoil) {
             if (k1 != null && passiveTheta != null && k2 != null && passiveC != null && Pp != null) {
               FSs = ((sumW! * tan(k1! * passiveTheta! * pi/180)) + (a! * k2! * passiveC!) + Pp!) / PhFinal!;
+              widget.state.FSs = roundToFourDecimalPlaces(FSs!);
             } else {
               FSs = null;
+              widget.state.FSs = null;
             }
           } else {
             FSs = (muFinal! * sumW!) / PhFinal!;
+            widget.state.FSs = roundToFourDecimalPlaces(FSs!);
           }
         } else {
           FSs = null;
+          widget.state.FSs = null;
         }
 
-      if (operation == 1 || operation == 2) {
+        if (xbar != null) {
+          eccentricity = (a! / 2) - xbar!;
+          widget.state.eccentricity = roundToFourDecimalPlaces(eccentricity!);
+        } else {
+          eccentricity = null;
+          widget.state.eccentricity = null;
+        }
 
-      } else if (operation == 3) {
+        Bover6 = a! / 6;
+        widget.state.Bover6 = roundToFourDecimalPlaces(Bover6!);
 
-      } else if (operation == 4) {
-        
-      } else if (operation == 5) {
-        
-      } else if (operation == 6) {
-        
-      } else if (operation == 7) {
-        
-      } else if (operation == 8) {
-        
-      } else {
-        answer = null;
-      }
+        if (eccentricity != null && Bover6 != null) {
+          if (eccentricity! < Bover6!) {
+            adequacy = true;
+          } else {
+            adequacy = false;
+          }
+        } else {
+          adequacy = null;
+        }
+
+        if (adequacy != null) {
+          if (adequacy == true) {
+            if (sumW != null && eccentricity != null) {
+              qmin = (sumW! / (a! * stripLengthFinal!)) * (1 - (6 * eccentricity!) / a!);
+              qmax = (sumW! / (a! * stripLengthFinal!)) * (1 + (6 * eccentricity!) / a!);
+              widget.state.qmin = roundToFourDecimalPlaces(qmin!);
+              widget.state.qmax = roundToFourDecimalPlaces(qmax!);
+            } else {
+              qmin = null;
+              qmax = null;
+              widget.state.qmin = null;
+              widget.state.qmax = null;
+            }
+          } else if (adequacy == false) {
+            qmin = null;
+            qmax = null;
+            widget.state.qmin = null;
+            widget.state.qmax = null;
+          }
+        } else {
+          qmin = null;
+          qmax = null;
+          widget.state.qmin = null;
+          widget.state.qmax = null;
+        }
     } else {
       H = null;
       Pa = null;
@@ -505,11 +676,35 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       Pp = null;
       RM = null;
       FSo = null;
+      widget.state.FSo = null;
       FSs = null;
-      answer = null;
+      widget.state.FSs = null;
+      xbar = null;
+      eccentricity = null;
+      widget.state.eccentricity = null;
+      Bover6 = null;
+      widget.state.Bover6 = null;
+      adequacy = null;
+      qmin = null;
+      qmax = null;
+      widget.state.qmin = null;
+      widget.state.qmax = null;
     }
 
-    print("FSs = $FSs, FSo = $FSo || mu = $muFinal, strip length = $stripLengthFinal, H = $H, Pa = $Pa, Ph = $PhFinal, Pv = $Pv, RM = $RM, OM = $OM, Ry = $sumW, Rx = $PhFinal, W1 = $W1, W2 = $W2, W3 = $W3, W4 = $W4, W5 = $W5, Pp = $Pp, Kp = $passiveK, passivetheta = $passiveTheta, passiveC = $passiveC, passiveGamma = $passiveGamma, D = $D, k1 = $k1, k2 = $k2"); // or display it using a Text widget
+    if (FSs != null && FSo != null && adequacy != null) {
+      setState(() {
+        widget.state.showResults = true;
+      });
+    } else {
+      showSnackBarIncorrect(context);
+      setState(() {
+        widget.state.showResults = false;
+        widget.state.showSolution = false;
+        widget.state.solutionToggle = true;
+      });
+    }
+
+    print("FSs = $FSs, FSo = $FSo || Ry = $sumW, Kp = $passiveK, Pp = $Pp, Pa = $Pa, Ph = $PhFinal, Pv = $Pv || x̄ = $xbar, eccentricity = $eccentricity, B/6 = $Bover6, adequacy = $adequacy, qmin = $qmin, qmax = $qmax, Ry = $sumW, k1 = $k1, k2 = $k2");
   }
 
   Widget build(BuildContext context) {   
@@ -642,7 +837,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
 
                       SizedBox(height: 10),
                       buttonSubmit(),
-                      /*
+                      
                       if (widget.state.showResults)
                         SizedBox(height: 10),
                       if (widget.state.showResults)
@@ -660,7 +855,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                       
                       SizedBox(height: 10),
                       clearButton(),
-                      */        
+  
                     ],
                   ),
                 ),
@@ -1239,9 +1434,9 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                   height: 40,
                   child: TextField(
                     controller: inputk1,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    keyboardType: TextInputType.visiblePassword,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                      SingleDotSlashInputFormatter(),
                     ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
@@ -1305,9 +1500,9 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                   height: 40,
                   child: TextField(
                     controller: inputk2,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    keyboardType: TextInputType.visiblePassword,
                     inputFormatters: [
-                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                      SingleDotSlashInputFormatter(),
                     ],
                     style: TextStyle(color: Colors.white),
                     decoration: InputDecoration(
@@ -1573,7 +1768,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                   height: 40,
                   child: TextField(
                     controller: inputActiveEarthPressure,
-                    keyboardType: TextInputType.numberWithOptions(decimal: true),
+                    keyboardType: TextInputType.visiblePassword,
                     inputFormatters: [
                       SingleDotSlashInputFormatter(),
                     ],
@@ -2366,6 +2561,272 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     );
   }
   // for FAB to scroll to top
+
+  Widget resultText() {
+    return Flexible(
+      child: Container(
+        width: 445,
+        child: Column(
+          children: [
+            Text(
+              "FSꜱ = ${widget.state.FSo}",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "FSᴏ = ${widget.state.FSs}",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "e = ${widget.state.eccentricity}",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            Text(
+              "B/6 = ${widget.state.Bover6}",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (adequacy == true)
+            Text(
+              "e < B/6, ∴ no uplift occurs",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (adequacy == false)
+            Text(
+              "e ≥ B/6, ∴ uplift occurs",
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            if (adequacy == true)
+              Text(
+                "qmin = ${widget.state.qmin}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            if (adequacy == true)
+              Text(
+                "qmax = ${widget.state.qmax}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+          ],
+        )
+      )
+    );
+  }
+  
+  void toggleSolution() {
+    if (widget.state.solutionToggle) {
+      widget.state.showSolution = true;
+    } else {
+      widget.state.showSolution = false;
+    }
+    setState(() {
+      widget.state.solutionToggle = !widget.state.solutionToggle; // Toggle between functions
+    });
+  }
+  Widget solutionButton() {
+    return ElevatedButton(
+      onPressed: toggleSolution,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text(solutionButtonLabel),
+    );
+  }
+  Widget containerSolution() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 450),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(25),
+          color: const Color(0xFF1F538D),
+        ),
+        alignment: Alignment.center,
+        child: Padding(
+          padding: const EdgeInsets.all(20.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Pa = $roundedPa kN',
+                style: TextStyle(color: Colors.white),
+              ),
+
+              if (widget.state.resultantPa)
+                Text(
+                  'Ph = $roundedPh kN',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (widget.state.resultantPa)
+                Text(
+                  'Pv = $roundedPv kN',
+                  style: TextStyle(color: Colors.white),
+                ),
+              
+              Text(
+                'Overturning moment, OM = $roundedOM kN-m',
+                style: TextStyle(color: Colors.white),
+              ),
+
+              if (widget.state.passiveSoil)
+                Text(
+                  'Passive earth pressure coefficient, Kₚ = $roundedKp',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (widget.state.passiveSoil)
+                Text(
+                  'Pₚ = $roundedPp kN',
+                  style: TextStyle(color: Colors.white),
+                ),
+              if (widget.state.passiveSoil)
+                Text(
+                  'Moment caused by Pₚ, MPₚ = $roundedPp kN-m',
+                  style: TextStyle(color: Colors.white),
+                ),
+
+              Text(
+                'Ry = $roundedSumW kN',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                'Righting moment, RM = $roundedRM kN-m',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "FSꜱ = ${widget.state.FSo}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "FSᴏ = ${widget.state.FSs}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                'x̄ = $roundedXbar m',
+                style: TextStyle(color: Colors.white),
+              ),
+              Text(
+                "e = ${widget.state.eccentricity}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              Text(
+                "B/6 = ${widget.state.Bover6}",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (adequacy == true)
+              Text(
+                "e < B/6, ∴ no uplift occurs",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (adequacy == false)
+              Text(
+                "e ≥ B/6, ∴ uplift occurs",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (adequacy == true)
+                Text(
+                  "qmin = ${widget.state.qmin}",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              if (adequacy == true)
+                Text(
+                  "qmax = ${widget.state.qmax}",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget clearButton() {
+    return ElevatedButton(
+      onPressed: () { 
+        inputIncline.clear();
+        input_g.clear();
+        input_yPassive.clear();
+        inputBaseFriction.clear();
+        inputPassiveSoilFrictionAngle.clear();
+        inputPassiveEarthPressure.clear();
+        inputPassiveCohesion.clear();
+        inputActiveGamma.clear();
+        inputActiveSoilFrictionAngle.clear();
+        inputActiveEarthPressure.clear();
+        inputActiveCohesion.clear();
+        input_D.clear();
+        input_H.clear();
+        input_a.clear();
+        input_b.clear();
+        input_c.clear();
+        input_d.clear();
+        input_e.clear();
+        input_f.clear();
+        inputYc.clear();
+        inputStripLength.clear();
+        inputk1.clear();
+        inputk2.clear();
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.solutionToggle = true;
+          widget.state.showSolution = false;
+        });
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Color(0xFF1F538D),
+        foregroundColor: Colors.white,
+      ),
+      child: Text("Clear all values"),
+    );
+  }
+  
+
   @override
   void didUpdateWidget(RetainingPage oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -2384,7 +2845,6 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       widget.onStateChanged(widget.state);
     }
   }
-
 
 }
 

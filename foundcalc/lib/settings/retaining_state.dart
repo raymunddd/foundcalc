@@ -32,11 +32,14 @@ class RetainingState {
   String inputStripLength = '';
 
     // final answer
-    /*
-    double? fs;
-    double? qnetu;
-    double? qneta;
-    */
+    
+    double? FSs;
+    double? FSo;
+    double? eccentricity;
+    double? Bover6;
+    double? qmin;
+    double? qmax;
+    
 
   /*
   // int
@@ -56,9 +59,9 @@ class RetainingState {
   // bool isGammaMoistEnabled = false;
   // bool isGammaSatEnabled = false;
 
-  // bool showResults = false;
-  // bool showSolution = false;
-  // bool solutionToggle = true;
+  bool showResults = false;
+  bool showSolution = false;
+  bool solutionToggle = true;
 
   final String title;
   RetainingState({required this.title});

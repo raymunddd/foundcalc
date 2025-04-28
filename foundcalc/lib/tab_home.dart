@@ -959,7 +959,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                       child: Icon(Icons.arrow_upward, color: Colors.white),
                       onPressed: () {
                         if (title.startsWith('RetWall')) {
-                          deepStates[title]!.scrollToTop = true;
+                          retainingStates[title]!.scrollToTop = true;
                           setState(() {}); // Trigger rebuild to pass the message
                         }
                       },
