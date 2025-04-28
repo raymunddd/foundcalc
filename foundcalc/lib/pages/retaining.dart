@@ -517,7 +517,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
         }
 
         if (widget.state.passiveSoil) {
-          if (passiveTheta != null && passiveC != null && passiveK != null && D != null && passiveGamma != null) {
+          if (passiveTheta != null && passiveC != null && D != null && passiveGamma != null) {
             passiveK = tan((45 + passiveTheta!/2) * pi/180) * tan((45 + passiveTheta!/2) * pi/180);
             roundedKp = roundToFourDecimalPlaces(passiveK!);
             Pp = 0.5 * passiveK! * passiveGamma! * D! * D! + 2 * passiveC! * sqrt(passiveK!) * D!;
@@ -572,7 +572,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
           RM = (W1! * x1!) + (W2! * x2!) + (W3! * x3!) + (W4! * x4!) + (W5! * x5!) + MPp!;
           roundedRM = roundToFourDecimalPlaces(RM!);
         } else {
-          sumW = null;
+          sumW = 5;
           roundedSumW = null;
           RM = null;
           roundedRM = null;

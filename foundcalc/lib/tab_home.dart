@@ -781,7 +781,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: _addRetainingItem,
-                              child: Text("Retaining Wall 🚧"),
+                              child: Text("Retaining Wall"),
                             ),
                           ],
                         ),
