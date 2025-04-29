@@ -63,6 +63,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
   late TextEditingController inputYw;
   late TextEditingController inputYc;
+  late TextEditingController inputFactorShear;
 
   late TextEditingController inputOtherUnitWeight;
   late TextEditingController inputColBase;
@@ -109,6 +110,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? dtopFinal;
   double? dbot;
   double? dbotFinal;
+  double? phi;
+  double? phiFinal;
   double? depth;
   double? vuOWS;
   double? vucOWS;
@@ -205,6 +208,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputOtherUnitWeight = TextEditingController(text: widget.state.inputOtherUnitWeight);
     inputColBase = TextEditingController(text: widget.state.inputColBase);
     inputCc = TextEditingController(text: widget.state.inputCc);
+    inputFactorShear = TextEditingController(text: widget.state.inputFactorShear);
 
     // for dropdowns
 
@@ -242,6 +246,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputOtherUnitWeight.addListener(_updateState);
     inputColBase.addListener(_updateState);
     inputCc.addListener(_updateState);
+    inputFactorShear.addListener(_updateState);
   }
 
   void _updateState() {
@@ -270,6 +275,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       widget.state.inputOtherUnitWeight = inputOtherUnitWeight.text;
       widget.state.inputColBase = inputColBase.text;
       widget.state.inputCc = inputCc.text;
+      widget.state.inputFactorShear = inputFactorShear.text;
 
       df = double.tryParse(inputDf.text);
       dw = double.tryParse(inputDw.text);
@@ -336,6 +342,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     inputOtherUnitWeight.dispose();
     inputColBase.dispose();
     inputCc.dispose();
+    inputFactorShear.dispose();
   }
 
   // string getters
@@ -442,6 +449,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     dtop = double.tryParse(inputTop.text);
     dbot = double.tryParse(inputBot.text);
+    phi = double.tryParse(inputFactorShear.text);
 
       // Default values
     fs = double.tryParse(inputFS.text) ?? 3; // Default to 3 if null
@@ -494,6 +502,16 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       }
     } else {
       ywFinal = 9.81;
+    }
+
+    if (widget.state.factorShearToggle) {
+      if (phi != null) {
+        phiFinal = phi;
+      } else {
+        phiFinal = null;
+      }
+    } else {
+      phiFinal = 0.75;
     }
 
     if (widget.state.modFactor == "Normal-lightweight") {
@@ -705,8 +723,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       roundedVuows = null;
     }
 
-    if (fc != null && b != null && depth != null && lambda != null) {
-      vucOWS = 0.1275*lambda!*sqrt(fc!)*b!*depth!;
+    if (phiFinal != null && fc != null && b != null && depth != null && lambda != null) {
+      vucOWS = phiFinal!*0.17*lambda!*sqrt(fc!)*b!*depth!;
       roundedVucows = roundToFourDecimalPlaces(vucOWS!);
     } else {
       vucOWS = null;
@@ -717,8 +735,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       if (colClass == 'Interior') {
         if (vuOWS! > vucOWS!) {
           safetyOWS = 1; // OWS unsafe
-          if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
-            newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.1275*lambda!*sqrt(fc!)));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null) { // && lambda != null
+            newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + phiFinal!*0.17 *lambda!*sqrt(fc!)));
           } else {
             newDepthOWS = null;
             widget.state.finalAnswerD = null;
@@ -732,8 +750,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       } else if (colClass == 'Edge') {
         if (vuOWS! > vucOWS!) {
           safetyOWS = 1; // OWS unsafe
-          if (qnu != null && b != null && C != null && fc != null && lambda != null) {
-            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.1275*lambda!*sqrt(fc!)+0.001*qnu!));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) {
+            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(phiFinal!*0.17*lambda!*sqrt(fc!)+0.001*qnu!));
           } else {
             newDepthOWS = null;
             widget.state.finalAnswerD = null;
@@ -747,8 +765,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       } else if (colClass == 'Corner') {
         if (vuOWS! > vucOWS!) {
           safetyOWS = 1; // OWS unsafe
-          if (qnu != null && b != null && C != null && fc != null && lambda != null) {
-            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.1275*lambda!*sqrt(fc!)+0.001*qnu!));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) {
+            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(phiFinal!*0.17*lambda!*sqrt(fc!)+0.001*qnu!));
           } else {
             newDepthOWS = null;
             widget.state.finalAnswerD = null;
@@ -766,11 +784,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         safetyOWS = null; // OWS safe
       }
     } else {
-      newDepthOWS = 2;
+      newDepthOWS = null;
     }
 
-    if (newDepthOWS != null && dbotFinal != null && dtopFinal != null) {
-      newtOWS = newDepthOWS! + cc! + dbotFinal! + 0.5*dtopFinal!;
+    if (newDepthOWS != null && ccFinal != null && dbotFinal != null && dtopFinal != null) {
+      newtOWS = newDepthOWS! + ccFinal! + dbotFinal! + 0.5*dtopFinal!;
     } else {
       newtOWS = null;
     }
@@ -805,8 +823,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         widget.state.finalAnswerVuows = null;
       }
 
-      if (fc != null && b != null && newDepthOWS != null && lambda != null) {
-        new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
+      if (phiFinal != null && fc != null && b != null && newDepthOWS != null && lambda != null) {
+        new_vucOWS = phiFinal!*0.17*lambda!*sqrt(fc!)* b!*newDepthOWS!;
         widget.state.finalAnswerVucows = roundToFourDecimalPlaces(new_vucOWS!);
       } else {
         new_vucOWS = null;
@@ -816,7 +834,6 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       new_vuOWS = null;
       new_vucOWS = null;
     }
-
 
     // tws solution
 
@@ -857,9 +874,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       roundedVutws = null;
     }
 
-    if (fc != null && bo != null && newDepthOWS != null && lambda != null) {
-      fcbod = 0.75*lambda!*sqrt(fc!)*bo!*newDepthOWS!;
-      vc1 = 0.75*0.33*lambda!*sqrt(fc!)*bo!*newDepthOWS!;
+    if (phiFinal != null && fc != null && bo != null && newDepthOWS != null && lambda != null) {
+      fcbod = phiFinal!*lambda!*sqrt(fc!)*bo!*newDepthOWS!;
+      vc1 = phiFinal!*0.33*lambda!*sqrt(fc!)*bo!*newDepthOWS!;
       roundedVc1 = roundToFourDecimalPlaces(vc1!);
     } else {
       fcbod = null;
@@ -903,18 +920,18 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       roundedVuctws = null;
     }
 
-    if (vuTWS != null && vucTWS != null) {
+    if (vuTWS != null && vucTWS != null) { 
       if (colClass == 'Interior') {
         if (vuTWS! > vucTWS!) {
           safetyTWS = 1; // TWS unsafe
-          if (qnu != null && b != null && C != null && fc != null && lambda != null) { // && lambda != null
-            a_quad = 990*sqrt(fc!)*lambda! + qnu!;
-            b_quad = 990000*sqrt(fc!)*C!*lambda!+2000*qnu!*C!;
-            c_quad = -1000000*qnu!*(b!*b!-C!*C!);
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) {
+            a_quad = -(qnu!/1000000) - 0.00068 * phiFinal! * lambda! * sqrt(fc!);
+            b_quad = -((2 * qnu! * C!)/1000) - 0.68 * phiFinal! * lambda! * sqrt(fc!) * C!;
+            c_quad = qnu! * ((b! * b!) - (C! * C!));
             // quadratic formula
-            newDepthTWS = roundUpToNearest25((-(b_quad!)+sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+            newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
           } else {
-            newDepthTWS = 1;
+            newDepthTWS = null;
           }
         } else { // vuTWS ≤ vuCTWS
           newDepthTWS = newDepthOWS;
@@ -922,17 +939,17 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
           safetyTWS = 2; // TWS safe
         }  
-      } else if (colClass == 'Edge') {
+      } else if (colClass == 'Edge') { 
         if (vuTWS! > vucTWS!) {
           safetyTWS = 1; // TWS unsafe
-          if (qnu != null && b != null && C != null && fc != null && lambda != null) { // && lambda != null
-            a_quad = -(qnu!/2000) - (0.495*lambda!*sqrt(fc!));
-            b_quad = (-(3*qnu!*C!)/2) - (742.5*lambda!*sqrt(fc!)*C!);
-            c_quad = 1000*qnu!*((b!*b!)-(C!*C!));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) { // && lambda != null
+            a_quad = -qnu! - 68000 * phiFinal! * lambda! * sqrt(fc!);
+            b_quad = -((3000 * qnu! * C!) + (1020000 * C! * phiFinal! * lambda! * sqrt(fc!)));
+            c_quad = 2000000*qnu!*((b!*b!)-(C!*C!));
             // quadratic formula
             newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
           } else {
-            newDepthTWS = 2;
+            newDepthTWS = null;
           }
         } else { // vuTWS ≤ vuCTWS
           newDepthTWS = depth;
@@ -943,14 +960,14 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       } else if (colClass == 'Corner') {
         if (vuTWS! > vucTWS!) {
           safetyTWS = 1; // TWS unsafe
-          if (qnu != null && b != null && C != null && fc != null && lambda != null) { // && lambda != null
-            a_quad = -(qnu! + 990*lambda!*sqrt(fc!));
-            b_quad = -(4000*qnu!*C! + 1980000*lambda!*sqrt(fc!)*C!);
-            c_quad = 4000000*qnu!*((b!*b!)-(C!*C!));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) { // && lambda != null
+            a_quad = -(qnu!/4000000 - (0.00017*phiFinal!*lambda!*sqrt(fc!)));
+            b_quad = -((qnu!*C!)/1000) - 0.34 * phiFinal! * lambda! * sqrt(fc!) * C!;
+            c_quad = qnu!*((b!*b!)-(C!*C!));
             // quadratic formula
-            newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+            newDepthTWS = roundUpToNearest25((-(b_quad!) + sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
           } else {
-            newDepthTWS = 2;
+            newDepthTWS = null;
           }
         } else { // vuTWS ≤ vuCTWS
           newDepthTWS = depth;
@@ -965,7 +982,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         safetyTWS = null;
       }  
     } else {
-      newDepthTWS = 2;
+      newDepthTWS = null;
     }
     
     if (newDepthTWS != null && ccFinal != null && dbotFinal != null && dtopFinal != null) {
@@ -1028,9 +1045,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         bo2 = null;
       }
 
-      if (fc != null && bo2 != null && depth != null) {
-        fcbod2 = 0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
-        vc1_new = 0.33*0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+      if (phiFinal != null && fc != null && bo2 != null && depth != null) {
+        fcbod2 = phiFinal!*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+        vc1_new = 0.33*phiFinal!*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
         roundedNewVc1 = roundToFourDecimalPlaces(vc1_new!);
       } else {
         fcbod2 = null;
@@ -1414,9 +1431,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       roundedVutws= null;
     }
 
-    if (fc != null && bo != null && depth != null && lambda != null) {
-      fcbod = 0.75*lambda!*sqrt(fc!)*bo!*depth!;
-      vc1 = 0.75*0.33*lambda!*sqrt(fc!)*bo!*depth!;
+    if (phiFinal != null && fc != null && bo != null && depth != null && lambda != null) {
+      fcbod = phiFinal!*lambda!*sqrt(fc!)*bo!*depth!;
+      vc1 = phiFinal!*0.33*lambda!*sqrt(fc!)*bo!*depth!;
       roundedVc1 = roundToFourDecimalPlaces(vc1!);
     } else {
       fcbod = null;
@@ -1461,16 +1478,16 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     }
 
     // TWS newDepthTWS
-    if (vuTWS != null && vucTWS != null) {
+    if (vuTWS != null && vucTWS != null) { 
       if (colClass == 'Interior') {
         if (vuTWS! > vucTWS!) {
           safetyTWS = 1; // TWS unsafe
-          if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
-            a_quad = 990*sqrt(fc!) + qnu!;
-            b_quad = 990000*sqrt(fc!)*C!+2000*qnu!*C!;
-            c_quad = -1000000*qnu!*(b!*b!-C!*C!);
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) {
+            a_quad = -(qnu!/1000000) - 0.00068 * phiFinal! * lambda! * sqrt(fc!);
+            b_quad = -((2 * qnu! * C!)/1000) - 0.68 * phiFinal! * lambda! * sqrt(fc!) * C!;
+            c_quad = qnu! * ((b! * b!) - (C! * C!));
             // quadratic formula
-            newDepthTWS = roundUpToNearest25((-(b_quad!)+sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+            newDepthTWS = roundUpToNearest25((-(b_quad!)-sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
           } else {
             newDepthTWS = null;
           }
@@ -1480,13 +1497,13 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
           safetyTWS = 2; // TWS safe
         }
-      } else if (colClass == 'Edge') {
+      } else if (colClass == 'Edge') { 
         if (vuTWS! > vucTWS!) {
           safetyTWS = 1; // TWS unsafe
-          if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
-            a_quad = -(qnu!/2000) - (0.495*lambda!*sqrt(fc!));
-            b_quad = (-(3*qnu!*C!)/2) - (742.5*lambda!*sqrt(fc!)*C!);
-            c_quad = 1000*qnu!*((b!*b!)-(C!*C!));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) {
+            a_quad = -qnu! - 68000 * phiFinal! * lambda! * sqrt(fc!);
+            b_quad = -((3000 * qnu! * C!) + (1020000 * C! * phiFinal! * lambda! * sqrt(fc!)));
+            c_quad = 2000000*qnu!*((b!*b!)-(C!*C!));
             // quadratic formula
             newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
           } else {
@@ -1498,15 +1515,15 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           widget.state.finalAnswerVuctws = roundToFourDecimalPlaces(vucTWS!);
           safetyTWS = 2; // TWS safe
         }
-      } else if (colClass == 'Corner') {
+      } else if (colClass == 'Corner') { //qqq
         if (vuTWS! > vucTWS!) {
           safetyTWS = 1; // TWS unsafe
-          if (qnu != null && b != null && C != null && fc != null) { // && lambda != null
-            a_quad = -(qnu! + 990*lambda!*sqrt(fc!));
-            b_quad = -(4000*qnu!*C! + 1980000*lambda!*sqrt(fc!)*C!);
-            c_quad = 4000000*qnu!*((b!*b!)-(C!*C!));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) {
+            a_quad = -(qnu!/4000000 - (0.00017*phiFinal!*lambda!*sqrt(fc!)));
+            b_quad = -((qnu!*C!)/1000) - 0.34 * phiFinal! * lambda! * sqrt(fc!) * C!;
+            c_quad = qnu!*((b!*b!)-(C!*C!));
             // quadratic formula
-            newDepthTWS = roundUpToNearest25((-(b_quad!) - sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
+            newDepthTWS = roundUpToNearest25((-(b_quad!) + sqrt((b_quad!*b_quad!)-(4*a_quad!*c_quad!)))/(2*a_quad!));
           } else {
             newDepthTWS = null;
           }
@@ -1582,9 +1599,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         bo2 = 0.04;
       }
 
-      if (fc != null && bo2 != null && depth != null) {
-        fcbod2 = 0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
-        vc1_new = 0.33*0.75*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+      if (phiFinal != null && fc != null && bo2 != null && depth != null) {
+        fcbod2 = phiFinal!*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
+        vc1_new = 0.33*phiFinal!*lambda!*sqrt(fc!)*bo2!*newDepthTWS!;
       } else {
         fcbod2 = null;
         vc1_new = null;
@@ -1654,8 +1671,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       roundedVuows = null;
     }
 
-    if (fc != null && b != null && newDepthTWS != null && lambda != null) {
-      vucOWS = 0.1275*lambda!*sqrt(fc!)*b!*newDepthTWS!;
+    if (phiFinal != null && fc != null && b != null && newDepthTWS != null && lambda != null) {
+      vucOWS = 0.17*phiFinal!*lambda!*sqrt(fc!)*b!*newDepthTWS!;
       roundedVucows = roundToFourDecimalPlaces(vucOWS!);
     } else {
       vucOWS = null;
@@ -1667,10 +1684,10 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       if (vuOWS != null && vucOWS != null) {
         if (vuOWS! > vucOWS!) {
           safetyOWS = 1; // OWS unsafe
-          if (qnu != null && b != null && C != null && fc != null && lambda != null) { // 
-            newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.1275*lambda!*sqrt(fc!)));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) { // 
+            newDepthOWS = roundUpToNearest25((0.5*qnu!*(b! - C!))/((0.001*qnu!) + 0.17*phiFinal!*lambda!*sqrt(fc!)));
           } else {
-            newDepthOWS = 1;
+            newDepthOWS = null;
           }
         } else { // vuOWS ≤ vuCOWS
           newDepthOWS = newDepthTWS;
@@ -1679,16 +1696,16 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           safetyOWS = 2; // OWS safe
         }
       } else {
-        newDepthOWS = 2;
+        newDepthOWS = null;
       }  
     } else if (colClass == "Edge") {
       if (vuOWS != null && vucOWS != null) {
         if (vuOWS! > vucOWS!) {
           safetyOWS = 1; // OWS unsafe
-          if (qnu != null && b != null && C != null && fc != null && lambda != null) {
-            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.1275*lambda!*sqrt(fc!)+0.001*qnu!));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) {
+            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.17*phiFinal!*lambda!*sqrt(fc!)+0.001*qnu!));
           } else {
-            newDepthOWS = 3;
+            newDepthOWS = null;
           }
         } else { // vuOWS ≤ vuCOWS
           newDepthOWS = newDepthTWS;
@@ -1697,16 +1714,16 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           safetyOWS = 2; // OWS safe
         }
       } else {
-        newDepthOWS = 4;
+        newDepthOWS = null;
       }  
     } else if (colClass == "Corner") {
       if (vuOWS != null && vucOWS != null) {
         if (vuOWS! > vucOWS!) {
           safetyOWS = 1; // OWS unsafe
-          if (qnu != null && b != null && C != null && fc != null && lambda != null) {
-            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.1275*lambda!*sqrt(fc!)+0.001*qnu!));
+          if (phiFinal != null && qnu != null && b != null && C != null && fc != null && lambda != null) {
+            newDepthOWS = roundUpToNearest25((qnu!*(b! - C!))/(0.17*phiFinal!*lambda!*sqrt(fc!)+0.001*qnu!));
           } else {
-            newDepthOWS = 5;
+            newDepthOWS = null;
           }
         } else { // vuOWS ≤ vuCOWS
           newDepthOWS = newDepthTWS;
@@ -1715,13 +1732,13 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           safetyOWS = 2; // OWS safe
         }
       } else {
-        newDepthOWS = 6;
+        newDepthOWS = null;
       } 
     }
     
 
-    if (newDepthOWS != null && dbotFinal != null && dtopFinal != null) {
-      newtOWS = newDepthOWS! + cc! + 0.75*dbotFinal! + 0.25*dtopFinal!;
+    if (newDepthOWS != null && ccFinal != null && dbotFinal != null && dtopFinal != null) {
+      newtOWS = newDepthOWS! + ccFinal! + 0.75*dbotFinal! + 0.25*dtopFinal!;
     } else {
       newtOWS = null;
     }
@@ -1757,8 +1774,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         widget.state.finalAnswerVuows = null;
       }
       
-      if (fc != null && b != null && newDepthOWS != null && lambda != null) {
-        new_vucOWS = 0.1275*lambda!*sqrt(fc!)* b!*newDepthOWS!;
+      if (phiFinal != null && fc != null && b != null && newDepthOWS != null && lambda != null) {
+        new_vucOWS = 0.17*phiFinal!*lambda!*sqrt(fc!)* b!*newDepthOWS!;
         widget.state.finalAnswerVucows = roundToFourDecimalPlaces(new_vucOWS!);
       } else {
         new_vucOWS = null;
@@ -1883,6 +1900,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                         rowWaterDet(),
                       if (widget.state.soilProp)
                         containerWaterOn(),
+
+                      switchFactorShear(),
+                      containerFactorShear(),
 
                       buttonOWSFirst(),
                       SizedBox(height: 10),
@@ -4358,6 +4378,146 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       ),
     );
   }
+
+  Widget switchFactorShear() {
+    return Padding(
+      padding: EdgeInsets.only(top: 20),
+      child: Container(
+        width: MediaQuery.of(context).size.width * 0.9,
+        constraints: BoxConstraints(maxWidth: 500),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+          children: [
+            Flexible(
+              child: Container(
+                width: 150,
+                child: Text(
+                  'Shear (assumed as 0.75 if not given)',
+                  style: TextStyle(color: Colors.white),
+                ),
+              )
+            ),
+            Container(
+              width: 179,
+              child: TextSelectionTheme(
+                data: TextSelectionThemeData(
+                  cursorColor: Colors.white,
+                ),
+                child: SizedBox(
+                  height: 40, // Adjust height as needed
+                  child: Switch(
+                    value: widget.state.factorShearToggle,
+                    onChanged: (bool newValue) {
+                      setState(() {
+                        widget.state.factorShearToggle = newValue;
+                        widget.onStateChanged(widget.state);
+                      });
+                    },
+                    activeTrackColor: const Color.fromARGB(255, 10, 131, 14),
+                    inactiveThumbColor: Colors.white,
+                    inactiveTrackColor: const Color.fromARGB(255, 201, 40, 29),
+                  )
+                )
+              )
+            ),
+          ],
+        ),
+      ),
+    );
+  } // switchFactorShear
+  Widget containerFactorShear() {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      child: Visibility(
+        visible: widget.state.factorShearToggle,
+        child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
+          constraints: BoxConstraints(maxWidth: 500),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(25),
+            color: const Color.fromARGB(255, 10, 131, 14),
+          ),
+          alignment: Alignment.center,
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                subFactorShear(),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  } // containerFactorShear
+  Widget subFactorShear() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween, // Centers row children horizontally
+        children: [
+          Flexible(
+            child: Container(
+              width: 120,
+              child: Text(
+                'Shear factor, Φ:',
+                style: TextStyle(color: Colors.white),
+              ),
+            )
+          ),
+          Container(
+            width: 179,
+            child: TextSelectionTheme(
+              data: TextSelectionThemeData(
+                cursorColor: Colors.white,
+              ),
+              child: SizedBox(
+                height: 40, // Adjust height as needed
+                child: TextField(
+                  controller: inputFactorShear,
+                  keyboardType: TextInputType.numberWithOptions(decimal: true), // Allows decimal numbers
+                    inputFormatters: [
+                      FilteringTextInputFormatter.allow(RegExp(r'^\d*\.?\d*$')), // Allows only numbers and one decimal point
+                    ],
+                  style: TextStyle(color: Colors.white),
+                  decoration: InputDecoration(
+                    hintText: "Input required",
+                    hintStyle: TextStyle(color: Colors.white54, fontSize: 14),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Color.fromARGB(255, 51, 149, 53)),
+                    ),
+                    filled: true,
+                    fillColor: Color.fromARGB(255, 51, 149, 53),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(25),
+                      borderSide: BorderSide(color: Colors.white),
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        Icons.clear, 
+                        color: Colors.white54,
+                      ),
+                      iconSize: 17,
+                      onPressed: () {
+                        // Clear the text field
+                        inputFactorShear.clear();
+                      },
+                    ),
+                  ),
+                ),
+              )
+            )
+          ),
+        ],
+      ),
+    );
+  } // subFactorShear
 
   Widget buttonOWSFirst() {
     return ElevatedButton(

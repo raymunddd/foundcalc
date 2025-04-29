@@ -30,6 +30,7 @@ class DesignState {
   String inputOtherUnitWeight = '';
   String inputColBase = '';
   String inputCc = '';
+  String inputFactorShear = '';
   final String title;
 
   bool scrollToTop = false;
@@ -44,6 +45,7 @@ class DesignState {
   bool waterDet = false;
   bool otherMat = false;
   bool concreteCover = false;
+  bool factorShearToggle = false;
 
   bool isGammaSatEnabled = true;
   bool isGammaDryEnabled = true;
