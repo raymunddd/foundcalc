@@ -118,14 +118,20 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
   double? yMatInput;
 
   double? yc;
+  double? ycFinal;
   double? yw;
+  double? ywFinal;
 
   double? lambda;
   double? fc;
   double? dtop;
+  double? dtopFinal;
   double? dbot;
+  double? dbotFinal;
   double? cc;
+  double? ccFinal;
   double? phi;
+  double? phiFinal;
 
   // solvar (solution variables)
   double? dcc;
@@ -604,17 +610,39 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     fLoad = double.tryParse(inputFloorLoading.text);
     fThick = double.tryParse(inputFloorThickness.text);
 
-      // Default values
-    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
-    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
-    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
-    
+    cc = double.tryParse(inputCc.text);
+    yw = double.tryParse(inputYw.text);
+    yc = double.tryParse(inputYc.text);
+
+    dbot = double.tryParse(inputBot.text);
+    dtop = double.tryParse(inputTop.text);
+
+    if (widget.state.concreteDet) {
+      if (yc != null) {
+        ycFinal = yc;
+      } else {
+        ycFinal = null;
+      }
+    } else {
+      ycFinal = 24;
+    }
+
+    if (widget.state.waterDet) {
+      if (yw != null) {
+        ywFinal = yw;
+      } else {
+        ywFinal = null;
+      }
+    } else {
+      ywFinal = 9.81;
+    }
+
     // moment arm of P
     if (colClass == 'Interior') {
       if (ete != null && l != null && c2 != null) {
         dcc = 0.5*l!-ete!-0.5*c2!;
       } else {
-        dcc = 0.0001;
+        dcc =  null;
       }
     } else if (colClass == 'Edge') {
       if (edge == 'Longitudinal dimension, L') {
@@ -622,16 +650,16 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       } else if (edge == 'Transverse dimension, B') {
         dcc = 0.5*l!-0.5*c2!;
       } else {
-        dcc = 0.002;
+        dcc = null;
       }
     } else if (colClass == 'Corner') {
       if (l != null && c2 != null) {
         dcc = 0.5*l!-0.5*c2!;
       } else {
-        dcc = 0.0003;
+        dcc = null;
       }
     } else { // null
-      dcc = 0.0004;
+      dcc = null;
     }
     
     if (loadingCase == 'Axial vertical load (P) only') {
@@ -811,12 +839,17 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     }
 
     if (widget.state.soilProp) { // Soil Prop is ON
-      if (gs != null && e != null && w != null) {
-        y = ((gs!*yw!)*(1+w!))/(1+e!);
-        ySat = (yw! * (gs! + e!)) / (1 + e!);
-      } else if (gs != null && e != null) {
-        y = (gs!*yw!)/(1+e!);
-        ySat = (yw! * (gs! + e!)) / (1 + e!);
+      if (ywFinal != null) {
+        if (gs != null && e != null && w != null) {
+          y = ((gs!*ywFinal!)*(1+w!))/(1+e!);
+          ySat = (ywFinal! * (gs! + e!)) / (1 + e!);
+        } else if (gs != null && e != null) {
+          y = (gs!*ywFinal!)/(1+e!);
+          ySat = (ywFinal! * (gs! + e!)) / (1 + e!);
+        } else {
+          y = null;
+          ySat = null;
+        }
       } else {
         y = null;
         ySat = null;
@@ -849,19 +882,19 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     }
 
     // pressure due to soil
-    if (df != null && t != null && y != null) {
+    if (df != null && t != null && y != null && ycFinal != null) {
       if (dw != null) {
         if (dw! < df!) {
           if (ySat != null) {
-            qy = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+            qy = ycFinal!*t!+y!*dw!+ySat!*(df!-dw!-t!);
           } else {
             qy = null;
           }
         } else {
-          qy = yc!*t!+y!*(df!-t!);
+          qy = ycFinal!*t!+y!*(df!-t!);
         }
       } else {
-        qy = yc!*t!+y!*(df!-t!);
+        qy = ycFinal!*t!+y!*(df!-t!);
       }
     } else {
       qy = null;
@@ -870,7 +903,11 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     // qo
     if (widget.state.weightPressures) { // pressure due to other weight pressures
       if (widget.state.material == 'Concrete') {
-        yMat = yc!;
+        if (ycFinal != null) {
+          yMat = ycFinal!;
+        } else {
+          yMat = null;
+        }
       } else { // others
         if (yMatInput != null) {
           yMat = yMatInput!;
@@ -987,10 +1024,29 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     fLoad = double.tryParse(inputFloorLoading.text);
     fThick = double.tryParse(inputFloorThickness.text);
 
-      // Default values
-    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
-    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
-    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
+    fc = double.tryParse(inputFc.text);
+    cc = double.tryParse(inputCc.text);
+    phi = double.tryParse(inputFactorShear.text);
+
+    if (widget.state.concreteCover) {
+      if (cc != null) {
+        ccFinal = cc;
+      } else {
+        ccFinal = 5;
+      }
+    } else {
+      ccFinal = 75;
+    }
+
+    if (widget.state.factorShearToggle) {
+      if (phi != null) {
+        phiFinal = phi;
+      } else {
+        phiFinal = null;
+      }
+    } else {
+      phiFinal = 0.75;
+    }
     
     // moment arm of P
     if (colClass == 'Interior') {
@@ -1196,22 +1252,30 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     // design parttt
 
     if (widget.state.topToggle) {
-      dtop = dtop;
+      if (dtop != null) {
+        dtopFinal = dtop;
+      } else {
+        dtopFinal = null;
+      }
     } else {
-      dtop = 20;
+      dtopFinal = 20;
     }
 
     if (widget.state.botToggle) {
-      dbot = dbot;
+      if (dbot != null) {
+        dbotFinal = dbot;
+      } else {
+        dbotFinal = null;
+      }
     } else {
-      dbot = 20;
+      dbotFinal = 20;
     }
 
     // wide-beam shear strength procedure (wbssp)
 
-    if (t != null) {
-      depth1 = (t!*1000) - cc! - 0.5*dbot!;
-      depth2 = (t!*1000) - cc! - dbot! - 0.5*dtop!;
+    if (t != null && ccFinal != null && dbotFinal != null && dtopFinal != null) {
+      depth1 = (t!*1000) - ccFinal! - 0.5*dbotFinal!;
+      depth2 = (t!*1000) - ccFinal! - dbotFinal! - 0.5*dtopFinal!;
       dp = (depth1! + depth2!)/2;
     } else {
       depth1 = null;
@@ -1256,9 +1320,9 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     } else {
       lambda = null;
     }
-
-    if (phi != null && lambda != null && fc != null && b != null && depth1 != null) {
-      phiVc = phi!*0.17*lambda!*sqrt(fc!)*b!*depth1!;
+    
+    if (phiFinal != null && lambda != null && fc != null && b != null && depth1 != null) { //elelel
+      phiVc = phiFinal!*0.17*lambda!*sqrt(fc!)*b!*depth1!;
       widget.state.finalVcWide = roundToFourDecimalPlaces(phiVc!);
     } else {
       phiVc = null;
@@ -1419,7 +1483,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       roundedVcPunch = null;
     }
 
-    if (vcPunch != null) {
+    if (phiFinal != null && vcPunch != null && dp != null && bo != null) {
       phiVcPunch = 0.75*vcPunch!*bo!*dp!;
       widget.state.finalVcPunch = roundToFourDecimalPlaces(phiVcPunch!);
     } else {
@@ -1457,7 +1521,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         widget.state.showResultsDesign = false;
       });
     }
-
+ //ololol
     print('''
       dcc = $dcc,
       P = $p,
@@ -1469,12 +1533,19 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
       uplift = $uplift,
       qmin = $qmin,
       qmax = $qmax,
+      cc = $ccFinal,
+      dtop = $dtopFinal,
+      dbot = $dbotFinal,
       d1 = $depth1,
       d2 = $depth2,
       dp = $dp,
       x3 = $x3,
       q3 = $q3,
       wide Vu = $vu,
+      phi = $phiFinal,
+      fc = $fc,
+      b = $b,
+      lambda = $lambda,
       wide Vc = $phiVc,
       xc = $xc,
       x4 = $x4,
@@ -1639,9 +1710,9 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                       if (!widget.state.design)
                         containerConcreteOn(),
 
-                      if (widget.state.soilProp)
+                      if (widget.state.soilProp && !widget.state.design)
                         switchWaterDet(),
-                      if (widget.state.soilProp)
+                      if (widget.state.soilProp && !widget.state.design)
                         containerWaterOn(),
 
                       if (!widget.state.design)

@@ -532,8 +532,6 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
             MPp = null;
             roundedMPp = null;
             roundedKp = null;
-            roundedPp = null;
-            roundedMPp = null;
           }
         } else {
           passiveK = 0;
@@ -657,6 +655,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     } else {
       H = null;
       Pa = null;
+      Ph = null;
       Pv = null;
       PhFinal = null;
       OM = null;
@@ -689,6 +688,16 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       qmax = null;
       widget.state.qmin = null;
       widget.state.qmax = null;
+      roundedPa = null;
+      roundedPh = null;
+      roundedPv = null;
+      roundedOM = null;
+      roundedKp = null;
+      roundedPp = null;
+      roundedMPp = null;
+      roundedSumW = null;
+      roundedRM = null;
+      roundedXbar = null;
     }
 
     if (FSs != null && FSo != null && adequacy != null) {

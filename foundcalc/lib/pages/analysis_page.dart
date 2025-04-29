@@ -73,8 +73,10 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
   late TextEditingController inputUnitWeightWater;
   late TextEditingController inputUnitWeightConcrete;
 // Result
-  double? yw; // Declare yw
-  double? yc; // Declare yc
+  double? yw;
+  double? ywFinal;
+  double? yc;
+  double? ycFinal;
 
   double? df; 
   double? dw;
@@ -504,64 +506,99 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
     nq = double.tryParse(inputFactOverburden.text);
     ny = double.tryParse(inputFactUnitWeight.text);
 
+    yc = double.tryParse(inputUnitWeightConcrete.text);
+    yw = double.tryParse(inputUnitWeightWater.text);
+
       // Default values
-    yw = double.tryParse(inputUnitWeightWater.text) ?? 9.81; // Default to 9.81 if null
-    yc = double.tryParse(inputUnitWeightConcrete.text) ?? 24; // Default to 24 if null
     fs = double.tryParse(inputFactorSafety.text) ?? 3; // Default to 3 if null
+
+    if (widget.state.concreteDet) {
+      if (yc != null) {
+        ycFinal = yc;
+      } else {
+        ycFinal = null;
+      }
+    } else {
+      ycFinal = 24;
+    }
+
+    if (widget.state.waterDet) {
+      if (yw != null) {
+        ywFinal = yw;
+      } else {
+        ywFinal = null;
+      }
+    } else {
+      ywFinal = 9.81;
+    }
 
       if (df != null && fDim != null && c != null) {
         if (widget.state.soilProp == true) { //if soilProp is on
           if (dw != null) {
-            hw = df! - dw!;
-            uD = hw! * yw!;
             if (dw! >= df!) {
-              if (gs != null && e!= null && w != null) {
-                y = (gs!*yw!*(1+(0.01*w!)))/(1+e!); // final y = y
-                yDry = null;
-                ySat = null;
-                yFinal = y;
-              } else if (gs != null && e != null) {
-                y = null;
-                yDry = (gs!*yw!)/(1+e!); // final y = yDry
-                ySat = null;
-                yFinal = yDry; 
-              } else {
+              if (ywFinal != null) {
+                if (gs != null && e!= null && w != null) {
+                  y = (gs!*ywFinal!*(1+(0.01*w!)))/(1+e!); // final y = y
+                  yDry = null;
+                  ySat = null;
+                  yFinal = y;
+                } else if (gs != null && e != null) {
+                  y = null;
+                  yDry = (gs!*ywFinal!)/(1+e!); // final y = yDry
+                  ySat = null;
+                  yFinal = yDry; 
+                } else {
+                  y = null;
+                  yDry = null;
+                  ySat = null;
+                  yFinal = null; // any other option
+                }
+              } else { // no yw
                 y = null;
                 yDry = null;
                 ySat = null;
                 yFinal = null; // any other option
               }
             } else { // Dw < Df
-              if (gs != null) {
-                if (e != null) {
-                  if (w != null) { // Gs, e, w
-                    y = (gs!*yw!)/(1+e!);
-                    yDry = null; 
-                    ySat = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
+              if (ywFinal != null) {
+                hw = df! - dw!;
+                uD = hw!*ywFinal!;
+                if (gs != null) {
+                  if (e != null) {
+                    if (w != null) { // Gs, e, w
+                      y = (gs!*ywFinal!)/(1+e!);
+                      yDry = null; 
+                      ySat = (ywFinal!*(gs!+e!))/(1 + e!); // final y = ysat
+                      yFinal = ySat;
+                    } else { // Gs, e
+                      y = (gs!*ywFinal!)/(1+e!);
+                      yDry = null; 
+                      ySat = (ywFinal!*(gs!+e!))/(1 + e!); // final y = ysat
+                      yFinal = ySat;
+                    }
+                  } else if (w != null) { // Gs, w
+                    y = null;
+                    yDry = null;
+                    ySat = (gs!*ywFinal!*(1+0.01*w!))/(1+(0.01*w!*gs!)); // final y = ysat
                     yFinal = ySat;
-                  } else { // Gs, e
-                    y = (gs!*yw!)/(1+e!);
-                    yDry = null; 
-                    ySat = (yw!*(gs!+e!))/(1 + e!); // final y = ysat
-                    yFinal = ySat;
+                  } else { // Gs
+                    y = null;
+                    yDry = null;
+                    ySat = null;
+                    yFinal = null;
                   }
-                } else if (w != null) { // Gs, w
+                } else if (e != null && w != null) { // e, w
                   y = null;
                   yDry = null;
-                  ySat = (gs!*yw!*(1+0.01*w!))/(1+(0.01*w!*gs!)); // final y = ysat
+                  ySat = ((ywFinal!*e!)/w!)/((1+(0.01*w!))/(1+e!));  // final y = ysat
                   yFinal = ySat;
-                } else { // Gs
+                } else { // none
                   y = null;
                   yDry = null;
                   ySat = null;
                   yFinal = null;
                 }
-              } else if (e != null && w != null) { // e, w
-                y = null;
-                yDry = null;
-                ySat = ((yw!*e!)/w!)/((1+(0.01*w!))/(1+e!));  // final y = ysat
-                yFinal = ySat;
-              } else { // none
+              } else { // no yw
                 y = null;
                 yDry = null;
                 ySat = null;
@@ -569,20 +606,24 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               }
             }
           } else {
-            if (gs != null && e!= null && w != null) {
-              yFinal = (gs!*yw!*(1+(0.01*w!)))/(1+e!); // final y = y
-            } else if (gs != null && e != null) {
-              yFinal = (gs!*yw!)/(1+e!);
+            if (ywFinal != null) {
+              if (gs != null && e!= null && w != null) {
+                yFinal = (gs!*ywFinal!*(1+(0.01*w!)))/(1+e!); // final y = y
+              } else if (gs != null && e != null) {
+                yFinal = (gs!*ywFinal!)/(1+e!);
+              } else {
+                yFinal = null; // any other option
+              }
             } else {
-              yFinal = null; // any other option
+              yFinal = null;
             }
           }
         } else { // if soilProp is off
           if (dw != null) {
-            hw = df! - dw!;
-            uD = hw!*yw!;
             if (dw! != 0) {
               if (dw! >= df!) {
+                hw = 0;
+                uD = 0;
                 if (yDry != null && y != null) {
                   yFinal = null;
                 } else if (yDry != null) {
@@ -593,6 +634,12 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
                   yFinal = null;
                 }
               } else { // Dw < Df (at least 2)
+                hw = df! - dw!;
+                if (ywFinal != null) {
+                  uD = hw!*ywFinal!;
+                } else {
+                  uD = null;
+                }
                 if (yDry != null && ySat != null) { // yDry, ySat
                   yFinal = ySat!; // final y = ySat
                 } else if (y != null && ySat != null) { // y, ySat
@@ -602,6 +649,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
                 }
               }
             } else {
+              hw = 0;
               if (ySat != null) {
                 yFinal = ySat!;
               } else {
@@ -609,6 +657,8 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
               }
             }
           } else { // Dw is null
+            hw = 0;
+            uD = 0;
             if (yDry != null && y != null) {
               yFinal = null;
             } else if (yDry != null) {
@@ -629,16 +679,21 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
 
         dfPlusB = df! + fDim!;
 
-        if (yFinal != null && yw != null && df != null && fDim != null) {
+        if (yFinal != null && ywFinal != null && df != null && fDim != null) {
           if (dw != null) { // Dw is given
             if (dw! <= df!) { // Case 1 for y' and q
-              yPrime = yFinal! - yw!;
-              q = yFinal!*df! + yPrime!*hw!;
+              if (hw != null) {
+                yPrime = yFinal! - ywFinal!;
+                q = yFinal!*df! + yPrime!*hw!;
+              } else {
+                yPrime = null;
+                q = null;
+              }
             } else if (dw! >= dfPlusB!) { // Case 3 for y' and q
               yPrime = yFinal!;
               q = yFinal!*df!;
             } else { // Case 2 for y' and q
-              yPrime = yFinal! - yw!*(1 - ((dw! - df!)/fDim!));
+              yPrime = yFinal! - ywFinal!*(1 - ((dw! - df!)/fDim!));
               q = yFinal!*df!; 
             }
           } else { // no Dw
@@ -776,12 +831,12 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
         }
 
         if (q != null && qAll != null) {
-          if (t != null && hw != null) {
+          if (t != null && hw != null && ywFinal != null && ycFinal != null) {
             a = df! - hw!;
             b = df! - t! - a!;
             if (af != null) { // square/circular
               sol = 1; // with t, square/circular
-              pf = yc!*af!*t!;
+              pf = ycFinal!*af!*t!;
               if (y != null && yDry == null) {
                 if (dw! < df!) {
                   if (ySat != null) {
@@ -803,7 +858,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
                   ps = af!*(yDry!*df!);
                 }
               }
-              p = (af!*(qAll!+yw!*hw!)) - pf! - ps!;              
+              p = (af!*(qAll!+ywFinal!*hw!)) - pf! - ps!;              
               p = roundToFourDecimalPlaces(p!);
               udl = 0;
               widget.state.finalAnswerP = p;
@@ -814,7 +869,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
             } else { // strip
               sol = 2; // with t, strip
 
-              pf = yc!*fDim!*t!;
+              pf = ycFinal!*fDim!*t!;
 
               if (y != null && yDry == null) {
                 if (dw! < df!) {
@@ -830,7 +885,7 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
                 }
               }
               p = 0;
-              udl = (fDim!*(qUlt!+yw!*hw!)) - pf! - ps!;
+              udl = (fDim!*(qUlt!+ywFinal!*hw!)) - pf! - ps!;
               udl = roundToFourDecimalPlaces(udl!);
               widget.state.finalAnswerP = p;
               widget.state.finalAnswerUdl = udl;

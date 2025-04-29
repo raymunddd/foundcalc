@@ -81,7 +81,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? yDry;
   double? ySat;
   double? yw;
+  double? ywFinal;
   double? yc;
+  double? ycFinal;
   double? fs;
   double? t;
   double? qa;
@@ -102,8 +104,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
   double? C;
   double? x;
   double? cc;
+  double? ccFinal;
   double? dtop;
+  double? dtopFinal;
   double? dbot;
+  double? dbotFinal;
   double? depth;
   double? vuOWS;
   double? vucOWS;
@@ -432,26 +437,63 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     C = double.tryParse(inputColBase.text);
     cc = double.tryParse(inputCc.text);
+    yc = double.tryParse(inputYc.text);
+    yw = double.tryParse(inputYw.text);
 
     dtop = double.tryParse(inputTop.text);
     dbot = double.tryParse(inputBot.text);
 
       // Default values
-    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
-    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
     fs = double.tryParse(inputFS.text) ?? 3; // Default to 3 if null
-    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
 
     if (widget.state.topToggle) {
-      dtop = dtop;
+      if (dtop != null) {
+        dtopFinal = dtop;
+      } else {
+        dtopFinal = null;
+      }
     } else {
-      dtop = 20;
+      dtopFinal = 20;
     }
 
     if (widget.state.botToggle) {
-      dbot = dbot;
+      if (dbot != null) {
+        dbotFinal = dbot;
+      } else {
+        dbotFinal = null;
+      }
     } else {
-      dbot = 20;
+      dbotFinal = 20;
+    }
+
+    if (widget.state.concreteCover) {
+      if (cc != null) {
+        ccFinal = cc;
+      } else {
+        ccFinal = null;
+      }
+    } else {
+      ccFinal = 75;
+    }
+
+    if (widget.state.concreteDet) {
+      if (yc != null) {
+        ycFinal = yc;
+      } else {
+        ycFinal = null;
+      }
+    } else {
+      ycFinal = 24;
+    }
+
+    if (widget.state.waterDet) {
+      if (yw != null) {
+        ywFinal = yw;
+      } else {
+        ywFinal = null;
+      }
+    } else {
+      ywFinal = 9.81;
     }
 
     if (widget.state.modFactor == "Normal-lightweight") {
@@ -495,12 +537,17 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     } 
     
     if (widget.state.soilProp) {
-      if (gs != null && e != null && w != null) {
-        y = ((gs!*yw!)*(1+w!))/(1+e!);
-        ySat = (yw! * (gs! + e!)) / (1 + e!);
-      } else if (gs != null && e != null) {
-        y = (gs!*yw!)/(1+e!);
-        ySat = (yw! * (gs! + e!)) / (1 + e!);
+      if (ywFinal != null) {
+        if (gs != null && e != null && w != null) {
+          y = ((gs!*ywFinal!)*(1+w!))/(1+e!);
+          ySat = (ywFinal! * (gs! + e!)) / (1 + e!);
+        } else if (gs != null && e != null) {
+          y = (gs!*ywFinal!)/(1+e!);
+          ySat = (ywFinal! * (gs! + e!)) / (1 + e!);
+        } else {
+          y = null;
+          ySat = null;
+        }
       } else {
         y = null;
         ySat = null;
@@ -533,19 +580,19 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     }
       
 
-    if (df != null && t != null && y != null) {
+    if (df != null && t != null && y != null && ycFinal != null) {
       if (dw != null) {
         if (dw! < df!) {
           if (ySat != null) {
-            qo = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+            qo = ycFinal!*t!+y!*dw!+ySat!*(df!-dw!-t!);
           } else {
             qo = null;
           }
         } else {
-          qo = yc!*t!+y!*(df!-t!);
+          qo = ycFinal!*t!+y!*(df!-t!);
         }
       } else {
-        qo = yc!*t!+y!*(df!-t!);
+        qo = ycFinal!*t!+y!*(df!-t!);
       }
     } else {
       qo = null;
@@ -554,7 +601,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     if (widget.state.weightPressures) {
       if (widget.state.material == 'Concrete') {
-        yMat = yc!;
+        if (ycFinal != null) {
+          yMat = ycFinal!;
+        } else {
+          yMat = null;
+        }
       } else { //others
         if (yMatInput != null) {
           yMat = yMatInput!;
@@ -618,8 +669,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       roundedQnu = null;
     }
 
-    if (t != null) {
-      depth = (t!*1000) - cc! - dbot! - 0.5*dtop!;
+    if (t != null && ccFinal != null && dbotFinal != null && dtopFinal != null) {
+      depth = (t!*1000) - ccFinal! - dbotFinal! - 0.5*dtopFinal!;
     } else {
       depth = null;
     }
@@ -718,8 +769,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       newDepthOWS = 2;
     }
 
-    if (newDepthOWS != null) {
-      newtOWS = newDepthOWS! + cc! + dbot! + 0.5*dtop!;
+    if (newDepthOWS != null && dbotFinal != null && dtopFinal != null) {
+      newtOWS = newDepthOWS! + cc! + dbotFinal! + 0.5*dtopFinal!;
     } else {
       newtOWS = null;
     }
@@ -774,28 +825,28 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         bo = 4*(C!+(newDepthOWS!/1000));
         ao = (C!+(newDepthOWS!/1000))*(C!+(newDepthOWS!/1000));
       } else {
-        bo = 0.01;
-        ao = 0.01;
+        bo = null;
+        ao = null;
       }
     } else if (colClass == "Edge") {
       if (C != null && newDepthOWS != null) {
         bo = (3*C!+2*(newDepthOWS!/1000));
         ao = (C!+(newDepthOWS!/1000))*(C!+(newDepthOWS!/2000));
       } else {
-        bo = 0.02;
-        ao = 0.02;
+        bo = null;
+        ao = null;
       }
     } else if (colClass == "Corner") {
       if (C != null && newDepthOWS != null) {
         bo = (2*C!+(newDepthOWS!/1000));
         ao = (C!+(newDepthOWS!/2000))*(C!+(newDepthOWS!/2000));
       } else {
-        bo = 0.03;
-        ao = 0.03;
+        bo = null;
+        ao = null;
       }
     } else {
-      bo = 0.04;
-      ao = 0.04;
+      bo = null;
+      ao = null;
     }
 
     if (qnu != null && b != null && ao != null) {
@@ -917,8 +968,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       newDepthTWS = 2;
     }
     
-    if (newDepthTWS != null) {
-      newtTWS = newDepthTWS! + cc! + dbot! + 0.5*dtop!;
+    if (newDepthTWS != null && ccFinal != null && dbotFinal != null && dtopFinal != null) {
+      newtTWS = newDepthTWS! + ccFinal! + dbotFinal! + 0.5*dtopFinal!;
     } else {
       newtTWS = null;
     }
@@ -950,7 +1001,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           widget.state.finalAnswerVutws = null;
         } 
       } else {
-        new_vuTWS = 1;
+        new_vuTWS = null;
         widget.state.finalAnswerVutws = null;  
       }
       
@@ -959,22 +1010,22 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         if (C != null && depth != null) {
           bo2 = 4*(C!+(newDepthTWS!/1000));
         } else {
-          bo2 = 0.01;
+          bo2 = null;
         }
       } else if (colClass == "Edge") {
         if (C != null && depth != null) {
           bo2 = (3*C!+2*(newDepthTWS!/1000));
         } else {
-          bo2 = 0.02;
+          bo2 = null;
         }
       } else if (colClass == 'Corner') { // Corner
         if (C != null && depth != null) {
           bo2 = (2*C!+(newDepthTWS!/1000));
         } else {
-          bo2 = 0.03;
+          bo2 = null;
         }
       } else {
-        bo2 = 0.04;
+        bo2 = null;
       }
 
       if (fc != null && bo2 != null && depth != null) {
@@ -1090,21 +1141,56 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     dbot = double.tryParse(inputBot.text);
 
       // Default values
-    yw = double.tryParse(inputYw.text) ?? 9.81; // Default to 9.81 if null
-    yc = double.tryParse(inputYc.text) ?? 24; // Default to 24 if null
     fs = double.tryParse(inputFS.text) ?? 3; // Default to 3 if null
-    cc = double.tryParse(inputCc.text) ?? 75; // Default to 3 if null
 
     if (widget.state.topToggle) {
-      dtop = dtop;
+      if (dtop != null) {
+        dtopFinal = dtop;
+      } else {
+        dtopFinal = null;
+      }
     } else {
-      dtop = 20;
+      dtopFinal = 20;
     }
 
     if (widget.state.botToggle) {
-      dbot = dbot;
+      if (dbot != null) {
+        dbotFinal = dbot;
+      } else {
+        dbotFinal = null;
+      }
     } else {
-      dbot = 20;
+      dbotFinal = 20;
+    }
+
+    if (widget.state.concreteCover) {
+      if (cc != null) {
+        ccFinal = cc;
+      } else {
+        ccFinal = null;
+      }
+    } else {
+      ccFinal = 75;
+    }
+
+    if (widget.state.concreteDet) {
+      if (yc != null) {
+        ycFinal = yc;
+      } else {
+        ycFinal = null;
+      }
+    } else {
+      ycFinal = 24;
+    }
+
+    if (widget.state.waterDet) {
+      if (yw != null) {
+        ywFinal = yw;
+      } else {
+        ywFinal = null;
+      }
+    } else {
+      ywFinal = 9.81;
     }
 
     if (widget.state.modFactor == "Normal-lightweight") {
@@ -1148,12 +1234,17 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     }  
     
     if (widget.state.soilProp) {
-      if (gs != null && e != null && w != null) {
-        y = ((gs!*yw!)*(1+w!))/(1+e!);
-        ySat = (yw! * (gs! + e!)) / (1 + e!);
-      } else if (gs != null && e != null) {
-        y = (gs!*yw!)/(1+e!);
-        ySat = (yw! * (gs! + e!)) / (1 + e!);
+      if (ywFinal != null) {
+        if (gs != null && e != null && w != null) {
+          y = ((gs!*ywFinal!)*(1+w!))/(1+e!);
+          ySat = (ywFinal! * (gs! + e!)) / (1 + e!);
+        } else if (gs != null && e != null) {
+          y = (gs!*ywFinal!)/(1+e!);
+          ySat = (ywFinal! * (gs! + e!)) / (1 + e!);
+        } else {
+          y = null;
+          ySat = null;
+        }
       } else {
         y = null;
         ySat = null;
@@ -1185,19 +1276,19 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       return;
     }
     
-    if (df != null && t != null && y != null) {
+    if (df != null && t != null && y != null && ycFinal != null) {
       if (dw != null) {
         if (dw! < df!) {
           if (ySat != null) {
-            qo = yc!*t!+y!*dw!+ySat!*(df!-dw!-t!);
+            qo = ycFinal!*t!+y!*dw!+ySat!*(df!-dw!-t!);
           } else {
             qo = null;
           }
         } else {
-          qo = yc!*t!+y!*(df!-t!);
+          qo = ycFinal!*t!+y!*(df!-t!);
         }
       } else {
-        qo = yc!*t!+y!*(df!-t!);
+        qo = ycFinal!*t!+y!*(df!-t!);
       }
     } else {
       qo = null;
@@ -1206,7 +1297,11 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     if (widget.state.weightPressures) {
       if (widget.state.material == 'Concrete') {
-        yMat = yc!;
+        if (ycFinal != null) {
+          yMat = ycFinal!;
+        } else {
+          yMat = null;
+        }
       } else { //others
         if (yMatInput != null) {
           yMat = yMatInput!;
@@ -1271,9 +1366,9 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       roundedQnu = null;
     }
 
-    if (t != null) {
-      depth1 = (t!*1000) - cc! - 0.5*dbot!;
-      depth2 = (t!*1000) - cc! - dbot! - 0.5*dtop!;
+    if (t != null && ccFinal != null && dtopFinal != null && dbotFinal != null) {
+      depth1 = (t!*1000) - ccFinal! - 0.5*dbotFinal!;
+      depth2 = (t!*1000) - ccFinal! - dbotFinal! - 0.5*dtopFinal!;
       depth = (depth1! + depth2!)/2;
     } else {
       depth1 = null;
@@ -1287,28 +1382,28 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         bo = 4*(C!+(depth!/1000));
         ao = (C!+(depth!/1000))*(C!+(depth!/1000));
       } else {
-        bo = 0.01;
-        ao = 0.01;
+        bo = null;
+        ao = null;
       }
     } else if (colClass == "Edge") {
       if (C != null && depth != null) {
         bo = (3*C!+2*(depth!/1000));
         ao = (C!+(depth!/1000))*(C!+(depth!/2000));
       } else {
-        bo = 0.02;
-        ao = 0.02;
+        bo = null;
+        ao = null;
       }
     } else if (colClass == "Corner") {
       if (C != null && depth != null) {
         bo = (2*C!+(depth!/1000));
         ao = (C!+(depth!/2000))*(C!+(depth!/2000));
       } else {
-        bo = 0.03;
-        ao = 0.03;
+        bo = null;
+        ao = null;
       }
     } else {
-      bo = 0.04;
-      ao = 0.04;
+      bo = null;
+      ao = null;
     }
 
     if (qnu != null && b != null && ao != null) {
@@ -1426,8 +1521,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       newDepthTWS = 2;
     }
     
-    if (newDepthTWS != null) {
-      newtTWS = newDepthTWS! + cc! + 0.75*dbot! + 0.25*dtop!;
+    if (newDepthTWS != null && ccFinal != null && dbotFinal != null && dtopFinal != null) {
+      newtTWS = newDepthTWS! + ccFinal! + 0.75*dbotFinal! + 0.25*dtopFinal!;
     } else {
       newtTWS = null;
     }
@@ -1533,22 +1628,22 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
       if (b != null && C != null && newDepthTWS != null) {
         x = (b!/2) - (C!/2) - (newDepthTWS!/1000);
       } else {
-        x = 0.01;
+        x = null;
       }
     } else if (colClass == "Edge") {
       if (b != null && C != null && newDepthTWS != null) {
         x = b! - C! - (newDepthTWS!/1000);
       } else {
-        x = 0.02;
+        x = null;
       }
     } else if (colClass == "Corner") { // Corner
       if (b != null && C != null && depth != null) {
         x = b! - C! - (newDepthTWS!/1000);
       } else {
-        x = 0.03;
+        x = null;
       }
     } else {
-      x = 0.04;
+      x = null;
     }
 
     if (qnu != null && b != null && x != null) {
@@ -1625,8 +1720,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
     }
     
 
-    if (newDepthOWS != null) {
-      newtOWS = newDepthOWS! + cc! + 0.75*dbot! + 0.25*dtop!;
+    if (newDepthOWS != null && dbotFinal != null && dtopFinal != null) {
+      newtOWS = newDepthOWS! + cc! + 0.75*dbotFinal! + 0.25*dtopFinal!;
     } else {
       newtOWS = null;
     }
