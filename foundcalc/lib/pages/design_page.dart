@@ -212,7 +212,8 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
     // for dropdowns
 
-    colClass = widget.state.colClass;
+    colClass = "Interior"; // Set default value here
+    widget.state.colClass = colClass;
 
     modFactor = "Normal-lightweight"; // Set default value here
     widget.state.modFactor = modFactor; // Update the state
@@ -1857,8 +1858,27 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                     mainAxisSize: MainAxisSize.min, // Ensures it takes only necessary height
                     // row managerrrr
                     children: [
-                      rowModFactor(),
+                      if (colClass == 'Interior')
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/design/design1.png"),
+                        ),
+                      if (colClass == 'Edge')
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/design/design2.png"),
+                        ),
+                      if (colClass == 'Corner')
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/design/design3.png"),
+                        ),
+                      
                       rowColClass(),
+                      rowModFactor(),
                       rowColBase(),
                       rowPdead(),
                       rowPlive(),
@@ -2686,7 +2706,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  'Base of column (in m):',
+                  'Base of column, C (in m):',
                   style: TextStyle(color: Colors.white),
                 ),
               )

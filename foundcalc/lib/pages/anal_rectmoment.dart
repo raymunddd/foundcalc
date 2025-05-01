@@ -382,14 +382,23 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
     
     widget.state.material = material;
 
-    loadingCase = widget.state.loadingCase;
-    colClass = widget.state.colClass;
-    edge = widget.state.edge;
-    mDirection = widget.state.mDirection;
-    hDirection = widget.state.hDirection;
+    edge = "Longitudinal dimension, L"; // Set default value here
+    widget.state.edge = edge;
+
+    colClass = "Interior"; // Set default value here
+    widget.state.colClass = colClass;
 
     modFactor = "Normal-lightweight"; // Set default value here
     widget.state.modFactor = modFactor;
+
+    loadingCase = 'Axial vertical load (P) only'; // Set default value here
+    widget.state.loadingCase = loadingCase;
+
+    hDirection = 'To the right'; // Set default value here
+    widget.state.hDirection = hDirection;
+
+    mDirection = 'Clockwise'; // Set default value here
+    widget.state.mDirection = mDirection;
 
     // listeners
 
@@ -1521,7 +1530,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
         widget.state.showResultsDesign = false;
       });
     }
- //ololol
+ 
     print('''
       dcc = $dcc,
       P = $p,
@@ -1624,12 +1633,107 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                     children: [
                       radioDesign(),
                       header(),
-                      dropdownColClass(),
 
+                      if (colClass == 'Interior')
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentTopView/rectTopView1-1.png"),
+                        ), 
+                      if (colClass == 'Edge' && edge == "Longitudinal dimension, L")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentTopView/rectTopView2-1.png"),
+                        ),
+                      if (colClass == 'Edge' && edge == "Transverse dimension, B")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentTopView/rectTopView4-1.png"),
+                        ),
+                      if (colClass == 'Corner')
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentTopView/rectTopView3-1.png"),
+                        ),
+
+                      dropdownColClass(),
                       if (colClass == 'Edge')
                         dropdownEdge(),
 
+                      if (((colClass == 'Interior') || (colClass == 'Edge' && edge == 'Longitudinal dimension, L')) && loadingCase == "Axial vertical load (P) only")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment1-1.png"),
+                        ),
+
+                      if (((colClass == 'Interior') || (colClass == 'Edge' && edge == 'Longitudinal dimension, L')) && loadingCase == "Axial vertical load (P) and lateral force (H)" && widget.state.hDirection == "To the right")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment3-1.png"),
+                        ),
+                      if (((colClass == 'Interior') || (colClass == 'Edge' && edge == 'Longitudinal dimension, L')) && loadingCase == "Axial vertical load (P) and lateral force (H)" && widget.state.hDirection == "To the left")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment2-1.png"),
+                        ),
+
+                      if (((colClass == 'Interior') || (colClass == 'Edge' && edge == 'Longitudinal dimension, L')) && loadingCase == "Axial vertical load (P) and moment (M)" && widget.state.mDirection == "Clockwise")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment5-1.png"),
+                        ),
+                      if (((colClass == 'Interior') || (colClass == 'Edge' && edge == 'Longitudinal dimension, L')) && loadingCase == "Axial vertical load (P) and moment (M)" && widget.state.mDirection == "Counterclockwise")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment4-1.png"),
+                        ),
+                      ///////////////////////////////////////////////////////////////////////////
+                      if (((colClass == 'Corner') || (colClass == 'Edge' && edge == 'Transverse dimension, B')) && loadingCase == "Axial vertical load (P) only")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment6-1.png"),
+                        ),
+
+                      if (((colClass == 'Corner') || (colClass == 'Edge' && edge == 'Transverse dimension, B')) && loadingCase == "Axial vertical load (P) and lateral force (H)" && widget.state.hDirection == "To the right")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment8-1.png"),
+                        ),
+                      if (((colClass == 'Corner') || (colClass == 'Edge' && edge == 'Transverse dimension, B')) && loadingCase == "Axial vertical load (P) and lateral force (H)" && widget.state.hDirection == "To the left")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment7-1.png"),
+                        ),
+
+                      if (((colClass == 'Corner') || (colClass == 'Edge' && edge == 'Transverse dimension, B')) && loadingCase == "Axial vertical load (P) and moment (M)" && widget.state.mDirection == "Clockwise")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment10-1.png"),
+                        ),
+                      if (((colClass == 'Corner') || (colClass == 'Edge' && edge == 'Transverse dimension, B')) && loadingCase == "Axial vertical load (P) and moment (M)" && widget.state.mDirection == "Counterclockwise")
+                        Container(
+                          width: 380,
+                          height: 365,
+                          child: Image.asset("assets/images/rectMomentLoading/rectMoment9-1.png"),
+                        ),
+
                       dropdownLoadingCase(),
+                      if (loadingCase == 'Axial vertical load (P) and lateral force (H)')
+                        subdropdownH(),
+                      if (loadingCase == 'Axial vertical load (P) and moment (M)')
+                        subdropdownM(),
 
                       if (widget.state.design)
                         dropdownModFactor(),
@@ -1668,8 +1772,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
                       if (loadingCase == 'Axial vertical load (P) and moment (M)')
                         switchM(), // subdropdownM(),
                       if (loadingCase == 'Axial vertical load (P) and moment (M)')
-                        subdropdownM(),
-                      if (loadingCase == 'Axial vertical load (P) and moment (M)')
                         Stack(
                           children: [
                             containerMOn(),
@@ -1679,8 +1781,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
                       if (loadingCase == 'Axial vertical load (P) and lateral force (H)')
                         switchH(),
-                      if (loadingCase == 'Axial vertical load (P) and lateral force (H)')
-                        subdropdownH(),  
+
                       if (loadingCase == 'Axial vertical load (P) and lateral force (H)')
                         Stack(
                           children: [
@@ -1916,7 +2017,7 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  'Shortest distance between the edge of column and the shorter side of footing (in m):',
+                  'Shortest distance between the edge of column and the shorter side of footing, f (in m):',
                   style: TextStyle(color: Colors.white),
                 ),
               )
