@@ -2239,7 +2239,7 @@ with AutomaticKeepAliveClientMixin<CombinedPage> {
               child: Container(
                 width: 150,
                 child: Text(
-                  'Design of steel reinforcements',
+                  'Design of steel reinforcement',
                   style: TextStyle(color: Colors.white),
                 ),
               )
@@ -2279,7 +2279,7 @@ with AutomaticKeepAliveClientMixin<CombinedPage> {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 20),
       child: Text(
-        "For design of steel reinforcements",
+        "For design of steel reinforcement",
         style: TextStyle(
           color: Colors.white,
           fontSize: 20,

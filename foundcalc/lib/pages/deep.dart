@@ -267,7 +267,7 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
   String get pileDimLabel {
     switch (xsection) {
       case 'Square':
-        return 'Base of pile, B (in m):';
+        return 'Base of pile, x (in m):';
       case 'Circular':
         return 'Diameter of pile, D (in m):';
       default:
@@ -331,7 +331,8 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
 
     // for dropdowns
 
-    xsection = widget.state.xsection;
+    xsection = "Circular"; // Set default value here
+    widget.state.xsection = xsection;
 
     /*
     calculation = "Factor of safety"; // Set default value here
@@ -1536,6 +1537,35 @@ with AutomaticKeepAliveClientMixin<DeepPage>{
                         headerBehavior(),
                       if (singular == 2)
                         radioBehavior(),
+
+                      SizedBox(height: 18),
+  
+                      if (((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) && xsection == "Circular")
+                        Container(
+                          width: 279,
+                          height: 200,
+                          child: Image.asset('assets/images/deep/indivCircle.png'),
+                        ),
+                      if (((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
+                      || singular == 2) && xsection == "Square")
+                        Container(
+                          width: 279,
+                          height: 200,
+                          child: Image.asset('assets/images/deep/indivSquare.png'),
+                        ),
+                      if (singular == 2 && xsection == "Circular")
+                        Container(
+                          width: 279,
+                          height: 200,
+                          child: Image.asset('assets/images/deep/groupCircle.png'),
+                        ),
+                      if (singular == 2 && xsection == "Square")
+                        Container(
+                          width: 279,
+                          height: 200,
+                          child: Image.asset('assets/images/deep/groupSquare.png'),
+                        ),
 
                       if ((singular == 1 && soil == 1) || (singular == 1 && soil == 2 && (method == 1 || method == 2 || method == 3))
                       || singular == 2) // all included

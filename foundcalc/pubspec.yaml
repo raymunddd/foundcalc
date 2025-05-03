@@ -52,3 +52,7 @@ flutter:
     - assets/images/design/design1.png
     - assets/images/design/design2.png
     - assets/images/design/design3.png
+    - assets/images/deep/groupCircle.png
+    - assets/images/deep/groupSquare.png
+    - assets/images/deep/indivCircle.png
+    - assets/images/deep/indivSquare.png
