@@ -4,7 +4,7 @@ import 'pages/about_page.dart';    // Import AboutPage
 import 'pages/analysis_page.dart'; // Import AnalysisPage
 import 'pages/design_page.dart' as design;   // Import DesignPage with alias
 import 'pages/anal_rectmoment.dart'; // Import AnalRectMomentPage
-import 'pages/combined_footing.dart' as combined; // Import combined footing with alias
+import 'pages/combined_footing.dart'; // Import combined footing with alias
 import 'pages/mat_foundation.dart'; // Import MatFoundationPage
 import 'pages/deep.dart'; // Import DeepPage
 
@@ -754,7 +754,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                                 foregroundColor: Colors.white,
                               ),
                               onPressed: _addCombinedFootingItem,
-                              child: Text("Combined Footing 🚧"),
+                              child: Text("Combined Footing"),
                             ),
                             SizedBox(height: 10),
                             ElevatedButton(
@@ -859,7 +859,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
             else if (title.startsWith('Combined')) {
               return Stack(
                 children: [
-                  combined.DesignPage(
+                  CombinedPage(
                     title: title,
                     state: combinedFootingStates[title]!,
                     onStateChanged: (newState) {

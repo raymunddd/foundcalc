@@ -4,13 +4,13 @@ import '../settings/combined_footing_state.dart';
 import 'dart:math';
 import 'dart:io';
 
-class DesignPage extends StatefulWidget {
+class CombinedPage extends StatefulWidget {
   final String title;
   final CombinedFootingState state;
   final Function(CombinedFootingState) onStateChanged;
 
 
-  DesignPage({
+  CombinedPage({
     required this.title,
     required this.state,
     required this.onStateChanged,
@@ -18,19 +18,19 @@ class DesignPage extends StatefulWidget {
 
 
   @override
-  _DesignPageState createState() => _DesignPageState();
+  _CombinedPageState createState() => _CombinedPageState();
 }
 
-class _DesignPageState extends State<DesignPage> 
-with AutomaticKeepAliveClientMixin<DesignPage> {
+class _CombinedPageState extends State<CombinedPage> 
+with AutomaticKeepAliveClientMixin<CombinedPage> {
   // You can add state variables and methods here
 
 @override
   bool get wantKeepAlive => true; // 2. Override wantKeepAlive and return true
   String get displayTitle {
-  if (widget.title.startsWith('Design')) {
+  if (widget.title.startsWith('Combined')) {
         int index = int.tryParse(widget.title.split(' ').last) ?? 0;
-        return "Design of Footings $index"; // Shorter for tab
+        return "Combined Footing $index"; // Shorter for tab
       }
 
       return widget.title; 
@@ -1148,10 +1148,14 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                       if (widget.state.steelToggle && widget.state.showSolutionSteel)
                         containerSolutionSteel(),
                       
-                        if (widget.state.steelToggle)
-                      SizedBox(height: 10),
-                        if (widget.state.steelToggle)
-                      buttonClearSteel(),
+                      if (widget.state.steelToggle)
+                        SizedBox(height: 10),
+                      if (widget.state.steelToggle)
+                        buttonClearSteel(),
+                      if (widget.state.steelToggle)
+                        SizedBox(height: 30),
+                      if (widget.state.steelToggle)
+                        buttonClearAll(),
                     ],
                   ),
                 ),
@@ -2211,6 +2215,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           widget.state.factorShearToggle = false;
           widget.state.showResultsPunchWide = false;
           widget.state.showSolutionPunchWide = false;
+          widget.state.solutionTogglePunchWide = true;
         });
       },
       style: ElevatedButton.styleFrom(
@@ -2747,7 +2752,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
         child: Column(
           children: [
             Text(
-              'Number of bars. n = ${widget.state.roundedn}',
+              'Number of bars, n = ${widget.state.roundedn}',
               style: TextStyle(color: Colors.white),
             ),
           ],
@@ -2800,7 +2805,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
                 style: TextStyle(color: Colors.white),
               ),
               Text(
-                'Required flexural strength, Mᵤ = $roundedMu kN-m',
+                'Flexural strength, Mᵤ = $roundedMu kN-m',
                 style: TextStyle(color: Colors.white),
               ),
               Text(
@@ -2863,6 +2868,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           widget.state.factorMomentToggle = false;
           widget.state.showResultsSteel = false;
           widget.state.showSolutionSteel = false;
+          widget.state.solutionToggleSteel = true;
         });
       },
       style: ElevatedButton.styleFrom(
@@ -2897,8 +2903,10 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
           widget.state.factorMomentToggle = false;
           widget.state.showResultsPunchWide = false;
           widget.state.showSolutionPunchWide = false;
+          widget.state.solutionTogglePunchWide = true;
           widget.state.showResultsSteel = false;
           widget.state.showSolutionSteel = false;
+          widget.state.solutionToggleSteel = true;
         });
       },
       style: ElevatedButton.styleFrom(
@@ -2911,7 +2919,7 @@ with AutomaticKeepAliveClientMixin<DesignPage> {
 
 // for FAB to scroll to top
   @override
-  void didUpdateWidget(DesignPage oldWidget) {
+  void didUpdateWidget(CombinedPage oldWidget) {
     super.didUpdateWidget(oldWidget);
 
     if (widget.state.scrollToTop) {

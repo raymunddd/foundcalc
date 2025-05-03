@@ -379,7 +379,6 @@ with AutomaticKeepAliveClientMixin<AnalRectMomentPage> {
 
     // for dropdowns
 
-    
     widget.state.material = material;
 
     edge = "Longitudinal dimension, L"; // Set default value here
