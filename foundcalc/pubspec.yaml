@@ -24,6 +24,9 @@ flutter:
     - assets/generalShear.xlsx
     - assets/localShear.xlsx
     - assets/images/combinedFooting.png
+    - assets/images/combined.png
+    - assets/images/combined/reinforcementLeft.png
+    - assets/images/combined/reinforcementRight.png
     - assets/images/retWall1-1.png
     - assets/images/retWall2-1.png
     - assets/images/retWall3-1.png

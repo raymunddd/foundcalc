@@ -2683,7 +2683,6 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
                 'Pa = $roundedPa kN',
                 style: TextStyle(color: Colors.white),
               ),
-
               if (widget.state.resultantPa)
                 Text(
                   'Ph = $roundedPh kN',

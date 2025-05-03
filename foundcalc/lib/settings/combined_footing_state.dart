@@ -32,19 +32,25 @@ class CombinedFootingState {
  
   bool factorShearToggle = false;
   bool factorMomentToggle = false;
+  bool steelToggle = false;
 
-  bool showResults = false;
-  bool solutionToggle = true;
-  bool showSolution = false;
+  bool showResultsPunchWide = false;
+  bool solutionTogglePunchWide = true;
+  bool showSolutionPunchWide = false;
+
+  bool showResultsSteel = false;
+  bool solutionToggleSteel = true;
+  bool showSolutionSteel = false;
 
   // Final answer, No erasures
-    double? finalAnswerB;
-    double? finalAnswerT;
-    double? finalAnswerD;
-    double? finalAnswerVuows;
-    double? finalAnswerVucows;
-    double? finalAnswerVutws;
-    double? finalAnswerVuctws;
+    double? VPA;
+    double? VPB;
+    double? Vp;
+    double? VWA;
+    double? VWB;
+    double? Vw;
+    double? n;
+    double? roundedn;
 
   CombinedFootingState({required this.title});
 }
