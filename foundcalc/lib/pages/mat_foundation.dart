@@ -283,84 +283,106 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
     if (selectedCalc == 1) { // F.S. calculation
       if (cu != null && b != null && l != null && df != null && 
       theta != null && Q != null && y != null) {
-        if (theta! > 0 && theta! <= 50) {
-          var shearData = localShear.firstWhere(
-            (element) => element['theta'] == theta,
-            orElse: () => {"nc": null, "nq": null, "ny": null}, // Default values if not found
-          );
-          setState(() {
-            nc = shearData['nc'];
-            nq = shearData['nq'];
-            ny = shearData['ny'];  
-          });
-        } else if (theta == 0) {
-          setState(() {
-            nc = 5.14;
-            nq = 1;
-            ny = 0;
-          });
-        } else {
-          showSnackBarTheta(context);
-          setState(() {
-              widget.state.showResults = false;
-              widget.state.showSolution = false;
-              widget.state.solutionToggle = true;
-          });
-          nc = nq = ny = null; // or set to some default values
-        }
+        if (cu != 0 && b != 0 && l != 0 && df != 0 && Q != 0 && y != 0) {
 
-        if (nc != null && nq != null && ny != null) {
-          if (l! < b!) {
-            qnetu = null;
-            widget.state.qnetu = null;
-            showSnackBarDimension(context);
+          if (theta! > 0 && theta! <= 50) {
+            var shearData = localShear.firstWhere(
+              (element) => element['theta'] == theta,
+              orElse: () => {"nc": null, "nq": null, "ny": null}, // Default values if not found
+            );
+            setState(() {
+              nc = shearData['nc'];
+              nq = shearData['nq'];
+              ny = shearData['ny'];  
+            });
+          } else if (theta == 0) {
+            setState(() {
+              nc = 5.14;
+              nq = 1;
+              ny = 0;
+            });
+          } else {
+            showSnackBarTheta(context);
+            setState(() {
+                widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
+            });
+            nc = nq = ny = null; // or set to some default values
+            return;
+          }
+
+          if (nc != null && nq != null && ny != null) {
+            if (l! < b!) {
+              qnetu = null;
+              widget.state.qnetu = null;
+              showSnackBarDimension(context);
+              setState(() {
+                widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
+              });
+              fs = null;
+              return;
+            } else { // L ≥ B
+              fcs = (1 + (b! * nq!) / (l! * nc!));
+              fcd = 1 + (0.4 * df!) / b!;
+              qnetu = cu! * nc! * fcs! * fcd!;
+
+              roundedFcs = roundToFourDecimalPlaces(fcs!);
+              roundedFcd = roundToFourDecimalPlaces(fcd!);
+              widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
+            }
+          } else {
+            showSnackBarIncorrect(context);
             setState(() {
               widget.state.showResults = false;
               widget.state.showSolution = false;
               widget.state.solutionToggle = true;
             });
-            fs = 0.01;
-            return;
-          } else { // L ≥ B
-            fcs = (1 + (b! * nq!) / (l! * nc!));
-            fcd = 1 + (0.4 * df!) / b!;
-            qnetu = cu! * nc! * fcs! * fcd!;
-
-            roundedFcs = roundToFourDecimalPlaces(fcs!);
-            roundedFcd = roundToFourDecimalPlaces(fcd!);
-            widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
+            fs = null;
           }
-        } else {
-          showSnackBarIncorrect(context);
+
+          if (qnetu != null) {
+            q = (Q! / (b! * l!)) - y! * df!;
+            fs = qnetu! / ((Q! / (b! * l!)) - y! * df!);
+
+            roundedQ = roundToFourDecimalPlaces(q!);
+            widget.state.fs = roundToFourDecimalPlaces(fs!);
+            setState(() {
+              widget.state.showResults = true;
+            });
+          } else {
+            q = null;
+
+            roundedQ = null;
+            widget.state.fs = null;
+            showSnackBarIncorrect(context);
+            setState(() {
+              widget.state.showResults = false;
+              widget.state.showSolution = false;
+              widget.state.solutionToggle = true;
+            });
+            fs = null;
+          }
+
+        } else { // all inputs are zero
+          showSnackBarZero(context);
           setState(() {
             widget.state.showResults = false;
             widget.state.showSolution = false;
             widget.state.solutionToggle = true;
           });
-          fs = 0.02;
-        }
+          fcs = null;
+          fcd = null;
+          qnetu = null;
 
-        if (qnetu != null) {
-          q = (Q! / (b! * l!)) - y! * df!;
-          fs = qnetu! / ((Q! / (b! * l!)) - y! * df!);
+          roundedFcs = null;
+          roundedFcd = null;
+          widget.state.qnetu = null;
 
-          roundedQ = roundToFourDecimalPlaces(q!);
-          widget.state.fs = roundToFourDecimalPlaces(fs!);
-          setState(() {
-            widget.state.showResults = true;
-          });
-        } else {
-          q = null;
-
-          roundedQ = null;
-          widget.state.fs = null;
-          showSnackBarIncorrect(context);
-          setState(() {
-            widget.state.showResults = false;
-            widget.state.showSolution = false;
-            widget.state.solutionToggle = true;
-          });
-          fs = 0.03;
+          fs = null;
+          return;
         }
       } else { // all inputs are null
         showSnackBarIncorrect(context);
@@ -377,69 +399,91 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
         roundedFcd = null;
         widget.state.qnetu = null;
 
-        fs = 0.04;
+        fs = null;
+        return;
       }
     } else if (selectedCalc == 2) { // qnet(u) calculation
       if (cu != null && b != null && l != null && df != null && 
       theta != null) {
-        if (theta! > 0 && theta! <= 50) {
-          var shearData = localShear.firstWhere(
-            (element) => element['theta'] == theta,
-            orElse: () => {"nc": null, "nq": null, "ny": null}, // Default values if not found
-          );
-          setState(() {
-            nc = shearData['nc'];
-            nq = shearData['nq'];
-            ny = shearData['ny'];  
-          });
-        } else if (theta == 0) {
-          setState(() {
-            nc = 5.14;
-            nq = 1;
-            ny = 0;
-          });
-        } else {
-          showSnackBarTheta(context);
-          setState(() {
-              widget.state.showResults = false;
-              widget.state.showSolution = false;
-              widget.state.solutionToggle = true;
-          });
-          nc = nq = ny = null; // or set to some default values
-        }
+        if (cu != 0 && b != 0 && l != 0 && df != 0) {
+          if (theta! > 0 && theta! <= 50) {
+            var shearData = localShear.firstWhere(
+              (element) => element['theta'] == theta,
+              orElse: () => {"nc": null, "nq": null, "ny": null}, // Default values if not found
+            );
+            setState(() {
+              nc = shearData['nc'];
+              nq = shearData['nq'];
+              ny = shearData['ny'];  
+            });
+          } else if (theta == 0) {
+            setState(() {
+              nc = 5.14;
+              nq = 1;
+              ny = 0;
+            });
+          } else {
+            showSnackBarTheta(context);
+            setState(() {
+                widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
+            });
+            nc = nq = ny = null; // or set to some default values
+            return;
+          }
 
-        if (nc != null && nq != null && ny != null) {
-          if (l! < b!) {
-            qnetu = null;
-            widget.state.qnetu = null;
-            showSnackBarDimension(context);
+          if (nc != null && nq != null && ny != null) {
+            if (l! < b!) {
+              qnetu = null;
+              widget.state.qnetu = null;
+              showSnackBarDimension(context);
+              setState(() {
+                widget.state.showResults = false;
+                widget.state.showSolution = false;
+                widget.state.solutionToggle = true;
+              });
+              fs = null;
+              return;
+            } else { // L ≥ B
+              fcs = (1 + (b! * nq!) / (l! * nc!));
+              fcd = 1 + (0.4 * df!) / b!;
+              qnetu = cu! * nc! * fcs! * fcd!;
+
+              roundedFcs = roundToFourDecimalPlaces(fcs!);
+              roundedFcd = roundToFourDecimalPlaces(fcd!);
+              widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
+              setState(() {
+                widget.state.showResults = true;
+              });
+            }
+          } else {
+            showSnackBarIncorrect(context);
             setState(() {
               widget.state.showResults = false;
               widget.state.showSolution = false;
               widget.state.solutionToggle = true;
             });
-            fs = 0.01;
+            fs = null;
             return;
-          } else { // L ≥ B
-            fcs = (1 + (b! * nq!) / (l! * nc!));
-            fcd = 1 + (0.4 * df!) / b!;
-            qnetu = cu! * nc! * fcs! * fcd!;
-
-            roundedFcs = roundToFourDecimalPlaces(fcs!);
-            roundedFcd = roundToFourDecimalPlaces(fcd!);
-            widget.state.qnetu = roundToFourDecimalPlaces(qnetu!);
-            setState(() {
-            widget.state.showResults = true;
-          });
           }
-        } else {
-          showSnackBarIncorrect(context);
+        } else { // all inputs are zero
+          showSnackBarZero(context);
           setState(() {
             widget.state.showResults = false;
             widget.state.showSolution = false;
             widget.state.solutionToggle = true;
           });
-          fs = 0.02;
+          fcs = null;
+          fcd = null;
+          qnetu = null;
+
+          roundedFcs = null;
+          roundedFcd = null;
+          widget.state.qnetu = null;
+
+          fs = null;
+          return;
         }
       } else { // all inputs are null
         showSnackBarIncorrect(context);
@@ -456,36 +500,50 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
         roundedFcd = null;
         widget.state.qnetu = null;
 
-        fs = 0.04;
+        fs = null;
+        return;
       }
     } else { // qnet(a) calculation
       if (df != null && b != null && n60 != null && se != null) {
-        fd = 1 + (0.33 * df!) / b!;
+        if (df != 0 && b != 0 && n60 != 0 && se != 0) {
+          fd = 1 + (0.33 * df!) / b!;
 
-        if (fd != null) {
-          if (fd! <= 1.33) {
-            fdFinal = fd;
-            roundedFdFinal = roundToTwoDecimalPlaces(fdFinal!);
-          } else { // Fd > 1.33
-            fdFinal = 1.33;
-            roundedFdFinal = roundToTwoDecimalPlaces(fdFinal!);
+          if (fd != null) {
+            if (fd! <= 1.33) {
+              fdFinal = fd;
+              roundedFdFinal = roundToTwoDecimalPlaces(fdFinal!);
+            } else { // Fd > 1.33
+              fdFinal = 1.33;
+              roundedFdFinal = roundToTwoDecimalPlaces(fdFinal!);
+            }
+          } else {
+            fdFinal = null;
+            roundedFdFinal = null;
+          }
+
+          if (fdFinal != null) {
+            qneta = (n60! * fdFinal! * se!) / (0.08 * 25);
+            widget.state.qneta = roundToFourDecimalPlaces(qneta!);
+            setState(() {
+              widget.state.showResults = true;
+            });
+          } else {
+            qneta = null;
+            widget.state.qneta = null;
           }
         } else {
+          fd = null;
           fdFinal = null;
-          roundedFdFinal = null;
-        }
-
-        if (fdFinal != null) {
-          qneta = (n60! * fdFinal! * se!) / (0.08 * 25);
-          widget.state.qneta = roundToFourDecimalPlaces(qneta!);
-          setState(() {
-            widget.state.showResults = true;
-          });
-        } else {
           qneta = null;
           widget.state.qneta = null;
+          showSnackBarZero(context);
+          setState(() {
+            widget.state.showResults = false;
+            widget.state.showSolution = false;
+            widget.state.solutionToggle = true;
+          });
+          return;
         }
-
       } else {
         fd = null;
         fdFinal = null;
@@ -497,6 +555,7 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
           widget.state.showSolution = false;
           widget.state.solutionToggle = true;
         });
+        return;
       }
     }
 
@@ -539,7 +598,15 @@ with AutomaticKeepAliveClientMixin<MatFoundationPage>{
       widget.state.showResults = false;
     });
   }
-
+  void showSnackBarZero(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Please provide an input other than zero."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
   @override   
   Widget build(BuildContext context) {   
     super.build(context); // Call super.build   
