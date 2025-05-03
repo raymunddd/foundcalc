@@ -82,7 +82,6 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
   double? stripLength;
   double? stripLengthFinal;
 
-  int? operation;
 // solvar
   double? Pa;
   double? OM;
@@ -111,7 +110,6 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
   double? passiveK;
   double? Pp;
   double? MPp;
-  // if operation == 2
   double? W5;
   double? x5;
   // rounded
@@ -217,7 +215,6 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     }
   void _updateState() {
     setState(() {
-      // solve();
 
       widget.state.inputIncline = inputIncline.text;
       widget.state.input_g = input_g.text;
@@ -354,31 +351,21 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       widget.state.showResults = false;
     });
   }
+  void showSnackBarZero(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Please provide an input other than zero."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
+
   double roundToFourDecimalPlaces(double value) {
     return (value * 10000).round() / 10000;
   }
 
   void solve() {
-
-    if (widget.state.resultantPa == false && widget.state.passiveSoil == false && widget.state.slopedSoil == false) {
-      operation = 1;
-    } else if (widget.state.resultantPa == true && widget.state.passiveSoil == false && widget.state.slopedSoil == false) {
-      operation = 2;
-    } else if (widget.state.resultantPa == true && widget.state.passiveSoil == false && widget.state.slopedSoil == true) {
-      operation = 3;
-    } else if (widget.state.resultantPa == false && widget.state.passiveSoil == false && widget.state.slopedSoil == true) {
-      operation = 4;
-    } else if (widget.state.resultantPa == true && widget.state.passiveSoil == true && widget.state.slopedSoil == false) {
-      operation = 5;
-    } else if (widget.state.resultantPa == false && widget.state.passiveSoil == true && widget.state.slopedSoil == false) {
-      operation = 6;
-    } else if (widget.state.resultantPa == true && widget.state.passiveSoil == true && widget.state.slopedSoil == true) {
-      operation = 7;
-    } else if (widget.state.resultantPa == false && widget.state.passiveSoil == true && widget.state.slopedSoil == true) {
-      operation = 8;
-    } else {
-      operation = null;
-    }
 
     activeGamma = double.tryParse(inputActiveGamma.text);
     activeTheta = double.tryParse(inputActiveSoilFrictionAngle.text);
@@ -460,6 +447,10 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
     a != null && b != null && c != null && d != null && e != null && f != null && ycFinal != null
     && muFinal != null && stripLengthFinal != null) {
       
+      if (activeGamma != 0 && activeK != 0 && a != 0 && b != 0 &&
+      c != 0 && d != 0 && e != 0 && f != 0 && ycFinal != 0
+      && muFinal != 0 && stripLengthFinal != 0) {
+
         if (widget.state.slopedSoil) {
           if (g != null) {
             H = d! + e! + g!;
@@ -652,7 +643,68 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
           widget.state.qmin = null;
           widget.state.qmax = null;
         }
+
+      } else {
+        showSnackBarZero(context);
+        setState(() {
+          widget.state.showResults = false;
+          widget.state.showSolution = false;
+          widget.state.solutionToggle = true;
+        });
+        H = null;
+        Pa = null;
+        Ph = null;
+        Pv = null;
+        PhFinal = null;
+        OM = null;
+        W1 = null;
+        W2 = null;
+        W3 = null;
+        W4 = null;
+        W5 = null;
+        x1 = null;
+        x2 = null;
+        x3 = null;
+        x4 = null;
+        x5 = null;
+        sumW = null;
+        passiveK = null;
+        MPp = null;
+        Pp = null;
+        RM = null;
+        FSo = null;
+        widget.state.FSo = null;
+        FSs = null;
+        widget.state.FSs = null;
+        xbar = null;
+        eccentricity = null;
+        widget.state.eccentricity = null;
+        Bover6 = null;
+        widget.state.Bover6 = null;
+        adequacy = null;
+        qmin = null;
+        qmax = null;
+        widget.state.qmin = null;
+        widget.state.qmax = null;
+        roundedPa = null;
+        roundedPh = null;
+        roundedPv = null;
+        roundedOM = null;
+        roundedKp = null;
+        roundedPp = null;
+        roundedMPp = null;
+        roundedSumW = null;
+        roundedRM = null;
+        roundedXbar = null;
+        return;
+      }
     } else {
+      showSnackBarIncorrect(context);
+      setState(() {
+        widget.state.showResults = false;
+        widget.state.showSolution = false;
+        widget.state.solutionToggle = true;
+      });
       H = null;
       Pa = null;
       Ph = null;
@@ -698,6 +750,7 @@ with AutomaticKeepAliveClientMixin<RetainingPage>{
       roundedSumW = null;
       roundedRM = null;
       roundedXbar = null;
+      return;
     }
 
     if (FSs != null && FSo != null && adequacy != null) {

@@ -484,7 +484,39 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
     // If no matching theta is found, you can set default values or handle it as needed
     nc = nq = ny = null; // or some default values
   }
-
+  void showSnackBarIncorrect(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Please provide input for all parameters."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    setState(() {
+      widget.state.showResults = false;
+    });
+  }
+  void showSnackBarGamma(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("γsat must be greater than γ/γdry."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+    setState(() {
+      widget.state.showResults = false;
+    });
+  }
+  void showSnackBarZero(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Please provide an input other than zero."),
+        backgroundColor: const Color.fromARGB(255, 201, 40, 29),
+        duration: Duration(seconds: 3),
+      ),
+    );
+  }
   Future<void> calculateP() async {
     // Parse the input values
       // Non-nullable
@@ -1102,7 +1134,6 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
     print('isGammaDryEnabled = ${widget.state.isGammaDryEnabled}, isGammaMoistEnabled = ${widget.state.isGammaMoistEnabled}');
     print('af = $af, P = ${widget.state.finalAnswerP}, w = ${widget.state.finalAnswerUdl}, qAll = $qAll, sol = $sol');
     }
-
 
 @override
   Widget build(BuildContext context) {
