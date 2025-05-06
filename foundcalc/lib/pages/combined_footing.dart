@@ -817,8 +817,8 @@ with AutomaticKeepAliveClientMixin<CombinedPage> {
           roundedqu = null;
         }
 
-        if (qu != null && s != null) {
-          Mu = 2 * qu! * s! * s!;
+        if (qu != null && s != null && length_H != null) {
+          Mu = qu! * length_H! * 0.5 * s! * s!;
           if (Mu != null) {
             roundedMu = roundToFourDecimalPlaces(Mu!);
           } else {

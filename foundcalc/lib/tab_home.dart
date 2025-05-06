@@ -470,6 +470,31 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     },
                   ),
               ],
+              if (designItems.isNotEmpty) ...[
+                ListTile(
+                  tileColor: Color(0xFF414141),
+                  title: Text(
+                    'Design of Footings',
+                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                ),
+                for (int i = 0; i < designItems.length; i++)
+                  ListTile(
+                    tileColor: Color(0xFF414141),
+                    title: Text(
+                      designItems[i],
+                      style: TextStyle(color: Colors.white),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(Icons.delete, color: Colors.white),
+                      onPressed: () => _removeDesignItem(analysisItems.length + i + 1), //+1 because home is index 0
+                    ),
+                    onTap: () {
+                      _tabController.animateTo(analysisItems.length + i + 1); //+1 because home is index 0
+                      Navigator.of(context).pop(); // Close the drawer
+                    },
+                  ),
+              ],
               if (analRectMomentItems.isNotEmpty) ...[
                 ListTile(
                   tileColor: Color(0xFF414141),
@@ -491,31 +516,6 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     ),
                     onTap: () {
                       _tabController.animateTo(analysisItems.length + designItems.length + i + 1);
-                      Navigator.of(context).pop(); // Close the drawer
-                    },
-                  ),
-              ],
-              if (designItems.isNotEmpty) ...[
-                ListTile(
-                  tileColor: Color(0xFF414141),
-                  title: Text(
-                    'Design of Footings',
-                    style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
-                  ),
-                ),
-                for (int i = 0; i < designItems.length; i++)
-                  ListTile(
-                    tileColor: Color(0xFF414141),
-                    title: Text(
-                      designItems[i],
-                      style: TextStyle(color: Colors.white),
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(Icons.delete, color: Colors.white),
-                      onPressed: () => _removeDesignItem(i+1), //+1 because home is index 0
-                    ),
-                    onTap: () {
-                      _tabController.animateTo(analysisItems.length + i + 1); //+1 because home is index 0
                       Navigator.of(context).pop(); // Close the drawer
                     },
                   ),
@@ -647,7 +647,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                     },
                   ),
               ],*/
-
+              /*
               ListTile(
                 tileColor: Color(0xFF414141),
                 title: Text(
@@ -663,6 +663,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                   );
                 },
               ),
+              */
             ],
           ),
         ),

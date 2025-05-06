@@ -564,6 +564,11 @@ with AutomaticKeepAliveClientMixin<AnalysisPage>{
       ywFinal = 9.81;
     }
 
+    if (df == 0 || fDim == 0 || c == 0 || ycFinal == 0 || ywFinal == 0) {
+      showSnackBarZero(context);
+      return; // Exit the method if any input is zero
+    }
+
       if (df != null && fDim != null && c != null) {
         if (widget.state.soilProp == true) { //if soilProp is on
           if (dw != null) {
