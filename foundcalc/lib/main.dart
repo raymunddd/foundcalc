@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Foundation Calculator', // Add a title for your app
+      title: 'FoundCalc', // Add a title for your app
       theme: ThemeData(
         primarySwatch: Colors.blue, // You can customize your theme further
         appBarTheme: AppBarTheme(

@@ -376,7 +376,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
       //bg color of scaffold    
       backgroundColor: Color(0xFF363434),
       appBar: AppBar(
-        title: Text('Foundation Calculator Tabs',
+        title: Text('FoundCalc',
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: Color(0xFF292828),
@@ -695,7 +695,7 @@ class _TabbedHomePageState extends State<TabbedHomePage>
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              "Welcome to Block B’s Footing Calculator!",
+                              "Welcome to FoundCalc, Block B’s Footing Calculator!",
                               style: TextStyle(
                                 fontSize: 24,
                                 color: Colors.white,
